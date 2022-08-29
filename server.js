@@ -35,6 +35,4 @@ app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));
 });
 
-app.listen(port, function () {
-  console.log(`Server started listening on port ${port}!`);
-});
+app.listen(process.env.PORT || port);
