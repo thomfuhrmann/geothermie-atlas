@@ -10,7 +10,7 @@ const app = express();
 const port = 5000;
 
 app.use(cors());
-app.use(express.static(path.join(__dirname, "./client/build")));
+app.use(express.static(path.join(__dirname, "client/build")));
 
 app.get("/api", function ({ query }, res) {
   let options = {
@@ -32,7 +32,7 @@ app.get("/api", function ({ query }, res) {
 });
 
 app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));
+  res.sendFile(path.resolve(__dirname, "client/build/index.html"));
 });
 
 app.listen(process.env.PORT || port);
