@@ -44,7 +44,7 @@ export const config = {
         de: "Bodentemperatur",
         en: "Surface temperature",
       },
-      url: "http://srv-ags02i/arcgis/rest/services/Test/wien_LST_dec_tif/ImageServer",
+      url: "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/wien_LST_dec_tif/ImageServer",
       id: "layer-4",
       type: "imagery",
       des: {
@@ -57,7 +57,7 @@ export const config = {
         de: "Betriebsstunden",
         en: "Operational time",
       },
-      url: "http://srv-ags02i/arcgis/rest/services/Test/OG_BETRIEBSSTD_Wien/MapServer",
+      url: "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BETRIEBSSTD_Wien/MapServer",
       id: "layer-5",
       type: "map-image",
       des: {
