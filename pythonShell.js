@@ -6,6 +6,7 @@ const runPythonShell = (res, options) => {
   PythonShell.run(scriptFile, options, function (err, results) {
     if (err) console.log(err);
     let resultString = results[results.length - 1];
+    console.log(resultString);
     let resultList = resultString
       .substring(1, resultString.length - 1)
       .split(",");

@@ -195,7 +195,7 @@ export default function InfoPanel(props) {
                 </TableRow>
                 <TableRow>
                   <TableHeading>Sondenanzahl</TableHeading>
-                  <TableData>{computationResults[12]}</TableData>
+                  <TableData>{parseInt(computationResults[12])}</TableData>
                 </TableRow>
                 <TableRow>
                   <TableHeading>benötigte Fläche</TableHeading>

@@ -230,14 +230,20 @@ view.on("click", async ({ mapPoint }) => {
   if (view.scale <= 20000) {
     setCalculating(true);
     const cadastralData = await queryCadastralWMS(mapPoint);
-    let params = {
-      EZ: cadastralData.EZ,
-      BT: queryResult["layer-4"],
-      GT: queryResult["layer-3"],
-      WLF: queryResult["layer-2"],
-      FF: cadastralData.flaeche,
-    };
-    pythonScriptHandler(params);
+    if (
+      queryResult["layer-2"] &&
+      queryResult["layer-3"] &&
+      queryResult["layer-4"]
+    ) {
+      let params = {
+        EZ: cadastralData.EZ,
+        BT: queryResult["layer-4"],
+        GT: queryResult["layer-3"],
+        WLF: queryResult["layer-2"],
+        FF: cadastralData.flaeche,
+      };
+      pythonScriptHandler(params);
+    }
   }
 });
 

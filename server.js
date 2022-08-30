@@ -28,6 +28,7 @@ app.get("/api", function ({ query }, res) {
       query.FF,
     ],
   };
+  console.log(options);
   runPythonShell(res, options);
 });
 
