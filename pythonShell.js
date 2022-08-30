@@ -9,7 +9,7 @@ const runPythonShell = (res, options) => {
     if (results && results.length > 0) {
       let resultString = results[results.length - 1];
       resultList = resultString
-        .substring(1, resultString.length - 1)
+        .replace(/[\[\]]/g, "")
         .split(",")
         .map((entry) => entry.trim().replaceAll("'", ""));
     }
