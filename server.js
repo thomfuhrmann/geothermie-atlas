@@ -19,16 +19,15 @@ app.get("/api", function ({ query }, res) {
       query.BT,
       query.GT,
       query.WLF,
-      1900,
-      720,
-      1900,
-      720,
-      9,
-      3,
+      "1900",
+      "720",
+      "1900",
+      "720",
+      "9",
+      "3",
       query.FF,
     ],
   };
-  console.log(options);
   runPythonShell(res, options);
 });
 

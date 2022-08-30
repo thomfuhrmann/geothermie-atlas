@@ -99,7 +99,7 @@ export default function InfoPanel(props) {
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        setComputationResults(data.map((entry) => entry.replaceAll("'", "")));
+        setComputationResults(data);
         setIsCalculating(false);
       })
       .catch((err) => {
