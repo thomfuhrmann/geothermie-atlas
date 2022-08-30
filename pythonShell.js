@@ -13,7 +13,7 @@ const runPythonShell = (res, options) => {
         .split(",")
         .map((entry) => entry.trim().replaceAll("'", ""));
     }
-    res.json("Hallo");
+    res.json(results);
   });
 };
 
