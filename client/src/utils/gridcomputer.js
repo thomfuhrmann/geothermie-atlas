@@ -5,7 +5,7 @@ import Circle from "@arcgis/core/geometry/Circle";
 import Polyline from "@arcgis/core/geometry/Polyline";
 import Polygon from "@arcgis/core/geometry/Polygon";
 
-import { view, graphicsLayer, takeScreenshot, cadastre } from "./view";
+import { view, graphicsLayer, cadastre } from "./view";
 
 // grid points have to be at least 2 meters away from parcel boundary
 const distanceToBoundary = 2;
@@ -230,7 +230,7 @@ export const calculateGrid = async (event, gridSpacing = 10) => {
 
     // draw points and take screenshot
     selectedGridPoints.map((point) => drawPoint(point));
-    takeScreenshot(boundaryPolygon.centroid);
+    // takeScreenshot(boundaryPolygon.centroid);
   }
 };
 

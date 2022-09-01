@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import styled from "styled-components";
 
 import { initializeHandlers } from "../utils/view";
-import { PointQueryTable } from "./PointQueryTable";
+import { AmpelkarteTable } from "./AmpelkarteTable";
 import LoadingSpinner from "./LoadingSpinner";
 
 import { ToolTip } from "./CommonStyledElements";
@@ -190,9 +190,7 @@ export default function InfoPanel(props) {
         <Error className="scale-alert">{t("info_div.scale_alert")}</Error>
       )}
       {identifyAmpelkarte && (
-        <PointQueryTable
-          pointQueryResult={identifyAmpelkarte}
-        ></PointQueryTable>
+        <AmpelkarteTable results={identifyAmpelkarte}></AmpelkarteTable>
       )}
       {identifyEWS && (
         <>

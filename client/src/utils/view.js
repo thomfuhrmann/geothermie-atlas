@@ -2,17 +2,11 @@ import ArcGISMap from "@arcgis/core/Map";
 import Extent from "@arcgis/core/geometry/Extent";
 import MapView from "@arcgis/core/views/MapView";
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
-import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
-import ImageryLayer from "@arcgis/core/layers/ImageryLayer";
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
-import VectorTileLayer from "@arcgis/core/layers/VectorTileLayer";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference";
 import LayerList from "@arcgis/core/widgets/LayerList";
 import Search from "@arcgis/core/widgets/Search";
 import ScaleBar from "@arcgis/core/widgets/ScaleBar";
-import RasterStretchRenderer from "@arcgis/core/renderers/RasterStretchRenderer";
-import AlgorithmicColorRamp from "@arcgis/core/rest/support/AlgorithmicColorRamp";
-import Color from "@arcgis/core/Color";
 import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import * as intl from "@arcgis/core/intl";
@@ -20,76 +14,21 @@ import esriRequest from "@arcgis/core/request";
 import * as identify from "@arcgis/core/rest/identify";
 import IdentifyParameters from "@arcgis/core/rest/support/IdentifyParameters";
 
-import { config } from "../config";
-import { queryFeatures } from "./query";
 import { calculateGrid } from "./gridcomputer";
 
 import ui from "./ui.module.css";
 
-const colorRamp = new AlgorithmicColorRamp({
-  algorithm: "hsv",
-  fromColor: new Color("blue"),
-  toColor: new Color("red"),
-});
-
-const renderer = new RasterStretchRenderer({
-  colorRamp: colorRamp,
-  stretchType: "percent-clip",
-  minPercent: 0.5,
-  maxPercent: 0.5,
-  useGamma: true,
-  gamma: [1.0],
-});
-
-export const layers = config.layers.map((configItem) => {
-  let layer;
-  switch (configItem.type) {
-    case "feature":
-      layer = new FeatureLayer({
-        title: configItem.title.de,
-        url: configItem.url,
-        id: configItem.id,
-      });
-      break;
-    case "imagery":
-      layer = new ImageryLayer({
-        title: configItem.title.de,
-        url: configItem.url,
-        id: configItem.id,
-        renderer: renderer,
-      });
-      break;
-    case "wms":
-      layer = new WMSLayer({
-        title: configItem.title.de,
-        url: configItem.url,
-        id: configItem.id,
-      });
-      break;
-    case "map-image":
-      layer = new MapImageLayer({
-        title: configItem.title.de,
-        url: configItem.url,
-        id: configItem.id,
-      });
-      break;
-    case "vector-tile":
-      layer = new VectorTileLayer({
-        title: configItem.title.de,
-        url: configItem.url,
-        id: configItem.id,
-      });
-      break;
-    default:
-      break;
-  }
-  return layer;
-});
-
 export const graphicsLayer = new GraphicsLayer({
   title: "Planung Erdwärmesonden",
 });
-layers.push(graphicsLayer);
+
+const ampelkarte_url =
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/Ampelkarte/MapServer";
+const ampelkarte = new MapImageLayer({
+  url: ampelkarte_url,
+  title: "Ampelkarte",
+  visible: true,
+});
 
 const gwwp_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/GWWP/MapServer";
@@ -106,7 +45,7 @@ const ews = new MapImageLayer({
 });
 
 const betriebsstunden_url =
-  "http://srv-ags02i/arcgis/rest/services/Test/OG_BETRIEBSSTD_Wien/MapServer";
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BETRIEBSSTD_Wien/MapServer";
 const betriebsstunden = new MapImageLayer({
   title: "Betriebsstunden",
   url: betriebsstunden_url,
@@ -120,7 +59,7 @@ export const cadastre = new WMSLayer({
 
 export const arcgisMap = new ArcGISMap({
   basemap: "gray-vector",
-  layers: [betriebsstunden, gwwp, ews, cadastre, graphicsLayer],
+  layers: [betriebsstunden, gwwp, ews, ampelkarte, cadastre, graphicsLayer],
 });
 
 export const view = new MapView({
@@ -145,9 +84,17 @@ const search = new Search({
 
 search.on("search-complete", async function (event) {
   // results are stored in event Object[]
-  pointQueryHandler(
-    await queryFeatures(event.results[0].results[0].feature.geometry)
-  );
+  const params = new IdentifyParameters();
+  params.geometry = event.results[0].results[0].feature.geometry;
+  params.tolerance = 0;
+  params.layerOption = "all";
+  params.width = view.width;
+  params.height = view.height;
+  params.mapExtent = view.extent;
+
+  identify.identify(ampelkarte_url, params).then((res) => {
+    handleIdentifyAmpelkarte(res.results);
+  });
 });
 
 const scaleBar = new ScaleBar({
@@ -196,7 +143,7 @@ dropDown.appendChild(option2);
 dropDown.appendChild(option1);
 
 const label = document.createElement("label");
-label.innerText = "Abstand der Gitterpunkte ";
+label.innerText = "Abstand der Sonden ";
 label.for = "grid-spacing";
 
 const dropDownDiv = document.createElement("div");
@@ -233,7 +180,7 @@ view.on("mouse-wheel", (event) => {
 });
 
 // register event handlers for mouse clicks
-let pointQueryHandler,
+let handleIdentifyAmpelkarte,
   screenshotHandler,
   pythonScriptHandler,
   setCalculating,
@@ -242,9 +189,6 @@ let pointQueryHandler,
 view.on("click", async ({ mapPoint }) => {
   takeScreenshot(mapPoint);
 
-  const queryResult = await queryFeatures(mapPoint);
-  pointQueryHandler(queryResult);
-
   const params = new IdentifyParameters();
   params.geometry = mapPoint;
   params.tolerance = 0;
@@ -252,6 +196,10 @@ view.on("click", async ({ mapPoint }) => {
   params.width = view.width;
   params.height = view.height;
   params.mapExtent = view.extent;
+
+  identify.identify(ampelkarte_url, params).then((res) => {
+    handleIdentifyAmpelkarte(res.results);
+  });
 
   let BT, GT, WLF;
   identify.identify(ews_url, params).then((res) => {
@@ -384,7 +332,7 @@ export function initialize(container) {
 
 // initialize handlers
 export function initializeHandlers(
-  pointQueryCallback,
+  identifyAmpelkarteCallback,
   errorCallback,
   scaleCallback,
   screenShotCallback,
@@ -393,7 +341,7 @@ export function initializeHandlers(
   identifyGWWPCallback,
   identifyEWSCallback
 ) {
-  pointQueryHandler = pointQueryCallback;
+  handleIdentifyAmpelkarte = identifyAmpelkarteCallback;
   errorHandler = errorCallback;
   scaleHandler = scaleCallback;
   screenshotHandler = screenShotCallback;
@@ -404,7 +352,6 @@ export function initializeHandlers(
 }
 
 export const updateLocale = (titles, locale) => {
-  layers.map((layer, index) => (layer.title = titles[index]));
   intl.setLocale(locale);
   if (locale === "en") {
     for (const source of search.allSources)
