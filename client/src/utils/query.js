@@ -27,9 +27,6 @@ export function queryFeatures(geometry) {
             });
             break;
           case "imagery":
-            promise = layer.identify({ geometry: geometry }).then((result) => {
-              return { [layer.id]: result.value };
-            });
             break;
           case "map-image":
             break;

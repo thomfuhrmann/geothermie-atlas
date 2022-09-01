@@ -13,17 +13,18 @@ import ScaleBar from "@arcgis/core/widgets/ScaleBar";
 import RasterStretchRenderer from "@arcgis/core/renderers/RasterStretchRenderer";
 import AlgorithmicColorRamp from "@arcgis/core/rest/support/AlgorithmicColorRamp";
 import Color from "@arcgis/core/Color";
-import Bookmarks from "@arcgis/core/widgets/Bookmarks";
-import Bookmark from "@arcgis/core/webmap/Bookmark";
-import Collection from "@arcgis/core/core/Collection";
 import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import * as intl from "@arcgis/core/intl";
 import esriRequest from "@arcgis/core/request";
+import * as identify from "@arcgis/core/rest/identify";
+import IdentifyParameters from "@arcgis/core/rest/support/IdentifyParameters";
 
 import { config } from "../config";
 import { queryFeatures } from "./query";
 import { calculateGrid } from "./gridcomputer";
+
+import ui from "./ui.module.css";
 
 const colorRamp = new AlgorithmicColorRamp({
   algorithm: "hsv",
@@ -48,7 +49,6 @@ export const layers = config.layers.map((configItem) => {
         title: configItem.title.de,
         url: configItem.url,
         id: configItem.id,
-        legendEnabled: true,
       });
       break;
     case "imagery":
@@ -57,7 +57,6 @@ export const layers = config.layers.map((configItem) => {
         url: configItem.url,
         id: configItem.id,
         renderer: renderer,
-        legendEnabled: false,
       });
       break;
     case "wms":
@@ -65,8 +64,6 @@ export const layers = config.layers.map((configItem) => {
         title: configItem.title.de,
         url: configItem.url,
         id: configItem.id,
-        legendEnabled: true,
-        popupEnabled: true,
       });
       break;
     case "map-image":
@@ -90,17 +87,44 @@ export const layers = config.layers.map((configItem) => {
 });
 
 export const graphicsLayer = new GraphicsLayer({
-  title: "Geothermische Planung",
+  title: "Planung Erdwärmesonden",
 });
 layers.push(graphicsLayer);
 
-const map = new ArcGISMap({
+const gwwp_url =
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/GWWP/MapServer";
+export const gwwp = new MapImageLayer({
+  title: "Grundwasserwärmepumpen",
+  url: gwwp_url,
+});
+
+const ews_url =
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/EWS/MapServer";
+const ews = new MapImageLayer({
+  title: "Erdwärmesonden",
+  url: ews_url,
+});
+
+const betriebsstunden_url =
+  "http://srv-ags02i/arcgis/rest/services/Test/OG_BETRIEBSSTD_Wien/MapServer";
+const betriebsstunden = new MapImageLayer({
+  title: "Betriebsstunden",
+  url: betriebsstunden_url,
+});
+
+const cadastre_url = "https://data.bev.gv.at/geoserver/BEVdataKAT/wms";
+export const cadastre = new WMSLayer({
+  title: "Kataster",
+  url: cadastre_url,
+});
+
+export const arcgisMap = new ArcGISMap({
   basemap: "gray-vector",
-  layers,
+  layers: [betriebsstunden, gwwp, ews, cadastre, graphicsLayer],
 });
 
 export const view = new MapView({
-  map,
+  map: arcgisMap,
   extent: new Extent({
     xmin: 4775000,
     ymin: 2795000,
@@ -126,44 +150,6 @@ search.on("search-complete", async function (event) {
   );
 });
 
-const bookmarksCollection = new Collection();
-const wien = new Bookmark({
-  name: "Wien",
-  extent: new Extent({
-    xmin: 1747740,
-    ymin: 6095743,
-    xmax: 1903824,
-    ymax: 6189837,
-    spatialReference: new SpatialReference({ wkid: 102100 }),
-  }),
-});
-const salzburg = new Bookmark({
-  name: "Salzburg",
-  extent: new Extent({
-    xmin: 1337874,
-    ymin: 5955285,
-    xmax: 1554570,
-    ymax: 6107922,
-    spatialReference: new SpatialReference({ wkid: 102100 }),
-  }),
-});
-const steiermark = new Bookmark({
-  name: "Steiermark",
-  extent: new Extent({
-    xmin: 1680193,
-    ymin: 5931247,
-    xmax: 1818878,
-    ymax: 6028935,
-    spatialReference: new SpatialReference({ wkid: 102100 }),
-  }),
-});
-bookmarksCollection.addMany([wien, steiermark, salzburg]);
-
-const bookmarks = new Bookmarks({
-  view,
-  bookmarks: bookmarksCollection,
-});
-
 const scaleBar = new ScaleBar({
   view: view,
   unit: "metric",
@@ -178,8 +164,8 @@ const sketch = new Sketch({
   availableCreateTools: ["polyline"],
   visibleElements: {
     selectionTools: {
-      "lasso-selection": true,
-      "rectangle-selection": false,
+      "lasso-selection": false,
+      "rectangle-selection": true,
     },
     settingsMenu: false,
   },
@@ -189,7 +175,36 @@ const sketch = new Sketch({
   },
 });
 
-view.ui.add([bookmarks, layerList, search, sketch], "top-left");
+// create drop down menu for selection of grid spacing
+let gridSpacing = 10;
+const dropDown = document.createElement("select");
+dropDown.id = "grid-spacing";
+dropDown.className = `${ui.spacing_dropdown}`;
+dropDown.onchange = (event) => {
+  gridSpacing = parseInt(event.target.value);
+};
+
+const option1 = document.createElement("option");
+option1.value = 5;
+option1.innerText = "5 Meter";
+
+const option2 = document.createElement("option");
+option2.value = 10;
+option2.innerText = "10 Meter";
+
+dropDown.appendChild(option2);
+dropDown.appendChild(option1);
+
+const label = document.createElement("label");
+label.innerText = "Abstand der Gitterpunkte ";
+label.for = "grid-spacing";
+
+const dropDownDiv = document.createElement("div");
+dropDownDiv.className = `${ui.spacing_dropdown_box}`;
+dropDownDiv.appendChild(label);
+dropDownDiv.appendChild(dropDown);
+
+view.ui.add([layerList, search, sketch, dropDownDiv], "top-left");
 
 let errorHandler;
 sketch.viewModel.on(["create"], async function (event) {
@@ -205,7 +220,7 @@ sketch.viewModel.on(["create"], async function (event) {
       errorHandler(false);
     }
 
-    calculateGrid(event);
+    calculateGrid(event, gridSpacing);
   }
 });
 
@@ -217,29 +232,53 @@ view.on("mouse-wheel", (event) => {
   scaleHandler(view.scale);
 });
 
-// register an event handler for mouse clicks
-let pointQueryHandler;
-let screenshotHandler;
-let pythonScriptHandler;
-let setCalculating;
+// register event handlers for mouse clicks
+let pointQueryHandler,
+  screenshotHandler,
+  pythonScriptHandler,
+  setCalculating,
+  handleIdentifyGWWP,
+  handleIdentifyEWS;
 view.on("click", async ({ mapPoint }) => {
+  takeScreenshot(mapPoint);
+
   const queryResult = await queryFeatures(mapPoint);
   pointQueryHandler(queryResult);
-  takeScreenshot(mapPoint);
+
+  const params = new IdentifyParameters();
+  params.geometry = mapPoint;
+  params.tolerance = 0;
+  params.layerOption = "all";
+  params.width = view.width;
+  params.height = view.height;
+  params.mapExtent = view.extent;
+
+  let BT, GT, WLF;
+  identify.identify(ews_url, params).then((res) => {
+    BT = res.results.find((result) => result.layerId === 0)?.feature.attributes[
+      "Stretch.Pixel Value"
+    ];
+    GT = res.results.find((result) => result.layerId === 1)?.feature.attributes[
+      "Stretch.Pixel Value"
+    ];
+    WLF = res.results.find((result) => result.layerId === 2)?.feature
+      .attributes["Stretch.Pixel Value"];
+    handleIdentifyEWS(res.results);
+  });
+
+  identify.identify(gwwp_url, params).then((res) => {
+    handleIdentifyGWWP(res.results);
+  });
 
   if (view.scale <= 20000) {
     setCalculating(true);
-    const cadastralData = await queryCadastralWMS(mapPoint);
-    if (
-      queryResult["layer-2"] &&
-      queryResult["layer-3"] &&
-      queryResult["layer-4"]
-    ) {
+    const cadastralData = await queryCadastralData(mapPoint);
+    if (BT && GT && WLF && cadastralData) {
       let params = {
         EZ: cadastralData.EZ,
-        BT: queryResult["layer-4"],
-        GT: queryResult["layer-3"],
-        WLF: queryResult["layer-2"],
+        BT,
+        GT,
+        WLF,
         FF: cadastralData.flaeche,
       };
       pythonScriptHandler(params);
@@ -247,7 +286,7 @@ view.on("click", async ({ mapPoint }) => {
   }
 });
 
-const queryCadastralWMS = async (mapPoint) => {
+const queryCadastralData = async (mapPoint) => {
   const { x, y } = view.toScreen(mapPoint);
   let url =
     "https://data.bev.gv.at/geoserver/BEVdataKAT/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:3857&INFO_FORMAT=application/json";
@@ -350,7 +389,9 @@ export function initializeHandlers(
   scaleCallback,
   screenShotCallback,
   pythonScriptCallback,
-  setIsCalculatingCallback
+  setIsCalculatingCallback,
+  identifyGWWPCallback,
+  identifyEWSCallback
 ) {
   pointQueryHandler = pointQueryCallback;
   errorHandler = errorCallback;
@@ -358,6 +399,8 @@ export function initializeHandlers(
   screenshotHandler = screenShotCallback;
   pythonScriptHandler = pythonScriptCallback;
   setCalculating = setIsCalculatingCallback;
+  handleIdentifyGWWP = identifyGWWPCallback;
+  handleIdentifyEWS = identifyEWSCallback;
 }
 
 export const updateLocale = (titles, locale) => {
@@ -366,14 +409,10 @@ export const updateLocale = (titles, locale) => {
   if (locale === "en") {
     for (const source of search.allSources)
       source.placeholder = "Find address or place";
-    wien.name = "Vienna";
-    steiermark.name = "Styria";
     graphicsLayer.title = "Geothermal planning";
   } else {
     for (const source of search.allSources)
       source.placeholder = "Adresse oder Ort suchen";
-    wien.name = "Wien";
-    steiermark.name = "Steiermark";
     graphicsLayer.title = "Geothermische Planung";
   }
 };

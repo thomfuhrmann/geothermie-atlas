@@ -19,7 +19,7 @@ export const geothermie_de = {
     instruction_polyline_middle: "Polylinie zeichnen",
     instruction_polyline_last: ` um einen Bohrloch-Raster festzulegen. 
     Ziehen sie eine Polylinie um das gewünschte Grundstück. Die ersten beiden Abschnitte der Polylinie bestimmen die Anordnung der Rasterpunkte.
-    Die Rasterpunkte haben einen Abstand von 10 Metern zueinander, und einen Abstand von 2 Metern zur Grundstücksgrenze.`,
+    Die Gitterpunkte haben einen Abstand von 5 oder 10 Meter zueinander (je nach Einstellung), und einen Abstand von 2 Meter zur Grundstücksgrenze.`,
     title: "Standortbasierter Bericht",
     error:
       "Bitte geben Sie mindestens 3 Punkte ein, um einen Bohrloch-Raster zu definieren.",

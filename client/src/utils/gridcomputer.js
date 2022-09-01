@@ -5,7 +5,10 @@ import Circle from "@arcgis/core/geometry/Circle";
 import Polyline from "@arcgis/core/geometry/Polyline";
 import Polygon from "@arcgis/core/geometry/Polygon";
 
-import { view, graphicsLayer, layers, takeScreenshot } from "./view";
+import { view, graphicsLayer, takeScreenshot, cadastre } from "./view";
+
+// grid points have to be at least 2 meters away from parcel boundary
+const distanceToBoundary = 2;
 
 const drawPoint = (point) => {
   graphicsLayer.add(
@@ -85,8 +88,7 @@ const calculatePointsOnLine = (line, start, offset) => {
   const length = geometryEngine.planarLength(line, "meters");
   let radius = offset;
   const points = [];
-  // minimal distance to parcel boundary is 2 meters
-  while (radius < length - 2) {
+  while (radius < length - distanceToBoundary) {
     const circle = new Circle({
       center: start,
       radius: radius,
@@ -101,10 +103,9 @@ const calculatePointsOnLine = (line, start, offset) => {
 
 const offsetLine = (line, offset, length, gridUnit) => {
   let currentOffset = offset;
-  // 2 meters away from parcel boundary
   const lines = [];
   let currentStep = gridUnit;
-  while (currentStep < length - 2) {
+  while (currentStep < length - distanceToBoundary) {
     const offsetPolyline = geometryEngine.offset(line, currentOffset, "meters");
     lines.push(offsetPolyline);
     currentOffset += offset;
@@ -113,9 +114,7 @@ const offsetLine = (line, offset, length, gridUnit) => {
   return lines;
 };
 
-export const calculateGrid = async (event) => {
-  const distanceToBoundary = 2;
-  // first polygon lies 2 meters inside from parcel boundary
+export const calculateGrid = async (event, gridSpacing = 10) => {
   let points = orderPoints(event.graphic.geometry.paths[0]);
   let offsetPolyline = geometryEngine.offset(
     new Polyline({ paths: points, spatialReference: view.spatialReference }),
@@ -152,7 +151,7 @@ export const calculateGrid = async (event) => {
     });
     const circle = new Circle({
       center: point2,
-      radius: 10,
+      radius: gridSpacing,
       radiusUnit: "meters",
     });
 
@@ -174,13 +173,13 @@ export const calculateGrid = async (event) => {
     const length1 = geometryEngine.distance(point1, point2);
     const length2 = geometryEngine.distance(point2, point3);
 
-    const lines1 = offsetLine(line1, offset1, length2, 10);
-    const lines2 = offsetLine(line2, offset2, length1, 10);
+    const lines1 = offsetLine(line1, offset1, length2, gridSpacing);
+    const lines2 = offsetLine(line2, offset2, length1, gridSpacing);
 
     const gridPoints = [];
     gridPoints.push(point2);
-    gridPoints.push(...calculatePointsOnLine(line1, point2, 10));
-    gridPoints.push(...calculatePointsOnLine(line2, point2, 10));
+    gridPoints.push(...calculatePointsOnLine(line1, point2, gridSpacing));
+    gridPoints.push(...calculatePointsOnLine(line2, point2, gridSpacing));
 
     for (let line1 of lines1) {
       for (let line2 of lines2) {
@@ -207,6 +206,7 @@ export const calculateGrid = async (event) => {
       }
     }
 
+    // filter points that are inside the boundary polygon
     const filteredGridPoints = gridPoints.filter((point) => {
       let include = false;
       if (
@@ -219,12 +219,11 @@ export const calculateGrid = async (event) => {
       return include;
     });
 
-    // filter points
-    const cadastralLayer = layers.find((layer) => layer.title === "Kataster");
+    // filter points that are not on buildings
     let selectedGridPoints;
-    if (cadastralLayer) {
+    if (cadastre) {
       selectedGridPoints = await filterPointsByPixel(
-        cadastralLayer,
+        cadastre,
         filteredGridPoints
       );
     }

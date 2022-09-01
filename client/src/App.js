@@ -3,7 +3,6 @@ import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 
 import Header from "./components/Header";
-import LocaleButton from "./components/LocaleButton";
 import InfoPanel from "./components/InfoPanel";
 
 import { initialize } from "./utils/view";
@@ -27,9 +26,7 @@ function App() {
 
   return (
     <div>
-      <Header>
-        <LocaleButton></LocaleButton>
-      </Header>
+      <Header></Header>
       <StyledMapDiv ref={mapDiv}>
         <InfoPanel></InfoPanel>
       </StyledMapDiv>

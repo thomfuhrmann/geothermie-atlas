@@ -18,7 +18,7 @@ const TablePadding = `padding: 10px;`;
 export const TableBody = styled.tbody``;
 
 export const TableData = styled.td`
-  text-align: center;
+  text-align: ${(props) => props.textAlign || "left"};
   ${TablePadding}
 `;
 
@@ -54,6 +54,8 @@ const ToolTipComponent = ({ content }) => (
 export const ToolTip = styled(ToolTipComponent)``;
 
 export const Dot = styled.span`
+  /* position: relative;
+  top: 3px; */
   height: ${(props) => props.height || "20px"};
   width: ${(props) => props.width || "20px"};
   background-color: ${(props) => props.backgroundColor};

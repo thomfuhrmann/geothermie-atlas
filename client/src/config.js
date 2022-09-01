@@ -15,58 +15,6 @@ export const config = {
     },
     {
       title: {
-        de: "Wärmeleitfähigkeit",
-        en: "Thermal conductivity",
-      },
-      url: "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/WLF_test/ImageServer",
-      id: "layer-2",
-      type: "imagery",
-      des: {
-        de: `Mittlere konduktive Wärmeleitfähigkeit des Untergrunds für eine Tiefe von 0 bis 100 m`,
-        en: `Mean subsurface thermal conductivity from 0 to 100 m depth`,
-      },
-    },
-    {
-      title: {
-        de: "Untergrundtemperatur",
-        en: "Sub surface temperature",
-      },
-      url: "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/Untergrundtemperatur/ImageServer",
-      id: "layer-3",
-      type: "imagery",
-      des: {
-        de: `Mittlere Temperatur des Untergrunds für 0 bis 100 m Tiefe`,
-        en: `Mean subsurface temperature from 0 to 100m depth`,
-      },
-    },
-    {
-      title: {
-        de: "Bodentemperatur",
-        en: "Surface temperature",
-      },
-      url: "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/wien_LST_dec_tif/ImageServer",
-      id: "layer-4",
-      type: "imagery",
-      des: {
-        de: `Mittlere jährliche Bodentemperatur an der Geländeoberfläche basierend auf Satellitendaten (MODIS)`,
-        en: `Mean annual surface temperature based on satellite data (MODIS)`,
-      },
-    },
-    {
-      title: {
-        de: "Betriebsstunden",
-        en: "Operational time",
-      },
-      url: "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BETRIEBSSTD_Wien/MapServer",
-      id: "layer-5",
-      type: "map-image",
-      des: {
-        de: `Betriebsstunden - Heizen und Kühlen (Stunden/Jahr) `,
-        en: `Operational - Heating and cooling (hours/year)`,
-      },
-    },
-    {
-      title: {
         de: "Kataster",
         en: "Cadastral map",
       },

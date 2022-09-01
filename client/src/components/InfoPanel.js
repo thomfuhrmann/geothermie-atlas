@@ -5,8 +5,9 @@ import styled from "styled-components";
 
 import { initializeHandlers } from "../utils/view";
 import { PointQueryTable } from "./PointQueryTable";
-import { TableHeading } from "./CommonStyledElements";
 import LoadingSpinner from "./LoadingSpinner";
+
+import { ToolTip } from "./CommonStyledElements";
 
 import {
   Table,
@@ -56,11 +57,15 @@ const HeadingSmall = styled.h4``;
 
 const Screenshot = styled.img`
   width: 100%;
-  height: 10%;
+  height: 100%;
 `;
 
 const Error = styled.p`
   color: red;
+`;
+
+const Span = styled.span`
+  padding: 10px;
 `;
 
 const Underline = styled.u`
@@ -72,24 +77,28 @@ export default function InfoPanel(props) {
   const infoDivRef = useRef(null);
   const sketchToolColor = useRef(null);
 
-  const [pointQueryResult, setPointQueryResult] = useState(null);
   const [error, setError] = useState(false);
   const [scale, setScale] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
-  const [computationResults, setComputationResults] = useState(null);
+  const [identifyAmpelkarte, setIdentifyAmpelkarte] = useState(null);
+  const [identifyGWWP, setIdentifyGWWP] = useState(null);
+  const [identifyEWS, setIdentifyEWS] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [computationResults, setComputationResults] = useState(null);
 
   const { t } = useTranslation();
 
   // initialize query handlers
   useEffect(() => {
     initializeHandlers(
-      setPointQueryResult,
+      setIdentifyAmpelkarte,
       setError,
       setScale,
       setScreenshot,
       runPythonScript,
-      setIsCalculating
+      setIsCalculating,
+      setIdentifyGWWP,
+      setIdentifyEWS
     );
   }, []);
 
@@ -114,6 +123,8 @@ export default function InfoPanel(props) {
     infoDiv.style.height = "260mm";
     infoDiv.style.fontSize = "small";
     infoDiv.className = "info-div-print";
+
+    // remove elements not needed in pdf report
     const tooltipIcons = infoDiv.querySelectorAll('img[class*="tooltip-icon"]');
     tooltipIcons.forEach((tooltipIcon) => tooltipIcon.remove());
     infoDiv.querySelector('[class*="pdf-button-div"]').remove();
@@ -132,7 +143,7 @@ export default function InfoPanel(props) {
       },
       x: 10,
       y: 0,
-      margin: [20, 0, 20, 0],
+      margin: [15, 0, 20, 0],
       autoPaging: "text",
       html2canvas: {
         scale: 0.3,
@@ -153,7 +164,7 @@ export default function InfoPanel(props) {
 
   return (
     <StyledInfoPanel ref={infoDivRef}>
-      {!pointQueryResult ? (
+      {!identifyAmpelkarte ? (
         <div>
           <p>{t("info_div.instruction_click")}</p>
           <p>
@@ -178,8 +189,60 @@ export default function InfoPanel(props) {
       {(!scale || scale > 20000) && (
         <Error className="scale-alert">{t("info_div.scale_alert")}</Error>
       )}
-      {pointQueryResult && (
-        <PointQueryTable pointQueryResult={pointQueryResult}></PointQueryTable>
+      {identifyAmpelkarte && (
+        <PointQueryTable
+          pointQueryResult={identifyAmpelkarte}
+        ></PointQueryTable>
+      )}
+      {identifyEWS && (
+        <>
+          <HeadingSmall>Erdwärmesonden</HeadingSmall>
+          <Table className="ews-table">
+            <TableBody>
+              {identifyEWS.map((result) => {
+                return (
+                  <TableRow key={result.layerId}>
+                    <ToolTip className="tooltip" content={""}></ToolTip>
+                    <TableData>{result.layerName}</TableData>
+                    <TableData>
+                      {result.feature.attributes["Stretch.Pixel Value"] !==
+                      "NoData"
+                        ? parseFloat(
+                            result.feature.attributes["Stretch.Pixel Value"]
+                          ).toFixed(3)
+                        : t("info_div.no_data")}
+                    </TableData>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </>
+      )}
+      {identifyGWWP && (
+        <>
+          <HeadingSmall>Grundwasserwärmepumpen</HeadingSmall>
+          <Table className="gwwp-table">
+            <TableBody>
+              {identifyGWWP.map((result) => {
+                return (
+                  <TableRow key={result.layerId}>
+                    <ToolTip className="tooltip" content={""}></ToolTip>
+                    <TableData>{result.layerName}</TableData>
+                    <TableData>
+                      {result.feature.attributes["Stretch.Pixel Value"] !==
+                      "NoData"
+                        ? parseFloat(
+                            result.feature.attributes["Stretch.Pixel Value"]
+                          ).toFixed(3)
+                        : t("info_div.no_data")}
+                    </TableData>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </>
       )}
       {isCalculating ? (
         <LoadingSpinner></LoadingSpinner>
@@ -190,45 +253,53 @@ export default function InfoPanel(props) {
             <Table className="python-output-table">
               <TableBody>
                 <TableRow>
-                  <TableHeading>Einlagezahl</TableHeading>
-                  <TableData>{parseInt(computationResults[0])}</TableData>
+                  <TableData>Einlagezahl</TableData>
+                  <TableData textAlign="center">
+                    {parseInt(computationResults[0])}
+                  </TableData>
                 </TableRow>
                 <TableRow>
-                  <TableHeading>Sondenanzahl</TableHeading>
-                  <TableData>{parseInt(computationResults[12])}</TableData>
+                  <TableData>Sondenanzahl</TableData>
+                  <TableData textAlign="center">
+                    {parseInt(computationResults[12])}
+                  </TableData>
                 </TableRow>
                 <TableRow>
-                  <TableHeading>benötigte Fläche</TableHeading>
-                  <TableData>{parseInt(computationResults[14])}</TableData>
+                  <TableData>benötigte Fläche</TableData>
+                  <TableData textAlign="center">
+                    {parseInt(computationResults[14])}
+                  </TableData>
                 </TableRow>
                 <TableRow>
-                  <TableHeading>verfügbare Fläche</TableHeading>
-                  <TableData>{parseInt(computationResults[10])}</TableData>
+                  <TableData>verfügbare Fläche</TableData>
+                  <TableData textAlign="center">
+                    {parseInt(computationResults[10])}
+                  </TableData>
                 </TableRow>
               </TableBody>
             </Table>
           </>
         )
       )}
-      {pointQueryResult && (
+      {identifyAmpelkarte && (
         <>
           <HeadingSmall>Anmerkungen</HeadingSmall>
           <p>
-            <Dot backgroundColor="green" width="15px" height="15px"></Dot>{" "}
-            Nutzung generell möglich
+            <Dot backgroundColor="green" width="15px" height="15px"></Dot>
+            <Span>Nutzung generell möglich</Span>
             <br />
-            <Dot backgroundColor="yellow" width="15px" height="15px"></Dot>{" "}
-            Genauere Beurteilung notwendig
+            <Dot backgroundColor="yellow" width="15px" height="15px"></Dot>
+            <Span>Genauere Beurteilung notwendig</Span>
             <br />
-            <Dot backgroundColor="red" width="15px" height="15px"></Dot> Nutzung
-            generell nicht möglich
+            <Dot backgroundColor="red" width="15px" height="15px"></Dot>
+            <Span>Nutzung generell nicht möglich</Span>
             <br /> <br />
             EWS = Erdwärmesonde <br />
             GWWP = Grundwasserwärmepumpe <br />
           </p>
         </>
       )}
-      {pointQueryResult && (
+      {identifyAmpelkarte && (
         <div>
           <h4>{t("info_div.disclaimer_title")}</h4>
           <p>{t("info_div.disclaimer")}</p>
