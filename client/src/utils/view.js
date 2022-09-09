@@ -5,6 +5,7 @@ import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference";
 import LayerList from "@arcgis/core/widgets/LayerList";
+import Legend from "@arcgis/core/widgets/Legend";
 import Search from "@arcgis/core/widgets/Search";
 import ScaleBar from "@arcgis/core/widgets/ScaleBar";
 import Sketch from "@arcgis/core/widgets/Sketch";
@@ -13,15 +14,18 @@ import * as intl from "@arcgis/core/intl";
 import esriRequest from "@arcgis/core/request";
 import * as identify from "@arcgis/core/rest/identify";
 import IdentifyParameters from "@arcgis/core/rest/support/IdentifyParameters";
+import * as locator from "@arcgis/core/rest/locator";
+import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 
 import { calculateGrid } from "./gridcomputer";
 
-import ui from "./ui.module.css";
+import "./ui.css";
 
 export const graphicsLayer = new GraphicsLayer({
   title: "Planung Erdwärmesonden",
 });
 
+// instantiate layers
 const ampelkarte_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/Ampelkarte/MapServer";
 const ampelkarte = new MapImageLayer({
@@ -31,30 +35,34 @@ const ampelkarte = new MapImageLayer({
 });
 
 const gwwp_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/GWWP/MapServer";
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_thermischeGrundwassernutzung_GWP_Wien_TEST/MapServer";
 export const gwwp = new MapImageLayer({
   title: "Grundwasserwärmepumpen",
   url: gwwp_url,
 });
 
 const ews_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/EWS/MapServer";
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Erdwaermesonden_EWS_Wien_TEST/MapServer";
 const ews = new MapImageLayer({
   title: "Erdwärmesonden",
   url: ews_url,
 });
 
 const betriebsstunden_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BETRIEBSSTD_Wien/MapServer";
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BetriebsStd_Wien_TEST/MapServer";
 const betriebsstunden = new MapImageLayer({
   title: "Betriebsstunden",
   url: betriebsstunden_url,
 });
 
-const cadastre_url = "https://data.bev.gv.at/geoserver/BEVdataKAT/wms";
 export const cadastre = new WMSLayer({
   title: "Kataster",
-  url: cadastre_url,
+  url: "https://data.bev.gv.at/geoserver/BEVdataKAT/wms",
+});
+
+cadastre.when(() => {
+  cadastre.findSublayerByName("DKM_NFL").legendEnabled = false;
+  cadastre.findSublayerByName("DKM_GST").legendEnabled = false;
 });
 
 export const arcgisMap = new ArcGISMap({
@@ -75,26 +83,25 @@ export const view = new MapView({
 
 view.ui.components = [];
 
+// listen to scale changes
+let scaleHandler;
+reactiveUtils.watch(
+  () => view?.scale,
+  (scale) => {
+    scaleHandler(scale);
+  }
+);
+
 const layerList = new LayerList({ view });
+
+let legend = new Legend({
+  view: view,
+  hideLayersNotInCurrentView: true,
+});
 
 const search = new Search({
   view,
   popupEnabled: false,
-});
-
-search.on("search-complete", async function (event) {
-  // results are stored in event Object[]
-  const params = new IdentifyParameters();
-  params.geometry = event.results[0].results[0].feature.geometry;
-  params.tolerance = 0;
-  params.layerOption = "all";
-  params.width = view.width;
-  params.height = view.height;
-  params.mapExtent = view.extent;
-
-  identify.identify(ampelkarte_url, params).then((res) => {
-    handleIdentifyAmpelkarte(res.results);
-  });
 });
 
 const scaleBar = new ScaleBar({
@@ -108,7 +115,7 @@ const sketch = new Sketch({
   layer: graphicsLayer,
   view: view,
   // graphic will be selected as soon as it is created
-  availableCreateTools: ["polyline"],
+  availableCreateTools: ["point", "polyline"],
   visibleElements: {
     selectionTools: {
       "lasso-selection": false,
@@ -122,11 +129,33 @@ const sketch = new Sketch({
   },
 });
 
-// create drop down menu for selection of grid spacing
+let errorHandler;
 let gridSpacing = 10;
+sketch.viewModel.on(["create"], (event) => {
+  if (event.tool === "polyline" && event.state === "start") {
+    graphicsLayer.removeAll();
+    errorHandler(false);
+  }
+
+  if (event.tool === "polyline" && event.state === "complete") {
+    if (event.graphic.geometry.paths[0].length < 3) {
+      errorHandler(true);
+      return;
+    }
+    calculateGrid(event, gridSpacing);
+  }
+
+  if (event.tool === "point" && event.state === "complete") {
+    // do something here
+  }
+});
+
+sketch.viewModel.on(["delete"], () => {});
+
+// create drop down menu for selection of grid spacing
 const dropDown = document.createElement("select");
 dropDown.id = "grid-spacing";
-dropDown.className = `${ui.spacing_dropdown}`;
+dropDown.className = "spacing-dropdown";
 dropDown.onchange = (event) => {
   gridSpacing = parseInt(event.target.value);
 };
@@ -147,37 +176,29 @@ label.innerText = "Abstand der Sonden ";
 label.for = "grid-spacing";
 
 const dropDownDiv = document.createElement("div");
-dropDownDiv.className = `${ui.spacing_dropdown_box}`;
+dropDownDiv.className = "spacing-dropdown-container";
 dropDownDiv.appendChild(label);
 dropDownDiv.appendChild(dropDown);
 
-view.ui.add([layerList, search, sketch, dropDownDiv], "top-left");
+view.ui.add([layerList, legend, search, sketch, dropDownDiv], "top-left");
 
-let errorHandler;
-sketch.viewModel.on(["create"], async function (event) {
-  if (event.state === "start") {
-    graphicsLayer.removeAll();
-  }
-
-  if (event.state === "complete") {
-    if (event.graphic.geometry.paths[0].length < 3) {
-      errorHandler(true);
-      return;
-    } else {
-      errorHandler(false);
+let handleAddress;
+function getAddress(mapPoint) {
+  const serviceUrl =
+    "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+  const params = {
+    location: mapPoint,
+  };
+  locator.locationToAddress(serviceUrl, params).then(
+    function (response) {
+      // Show the address found
+      handleAddress(response.address.split(","));
+    },
+    function () {
+      handleAddress([]);
     }
-
-    calculateGrid(event, gridSpacing);
-  }
-});
-
-sketch.viewModel.on(["delete"], () => {});
-
-// listen to scale changes
-let scaleHandler;
-view.on("mouse-wheel", (event) => {
-  scaleHandler(view.scale);
-});
+  );
+}
 
 // register event handlers for mouse clicks
 let handleIdentifyAmpelkarte,
@@ -185,10 +206,16 @@ let handleIdentifyAmpelkarte,
   pythonScriptHandler,
   setCalculating,
   handleIdentifyGWWP,
-  handleIdentifyEWS;
-view.on("click", async ({ mapPoint }) => {
+  handleIdentifyEWS,
+  handleIdentifyBetriebsstunden;
+view.on("click", ({ mapPoint }) => {
   takeScreenshot(mapPoint);
+  getAddress(mapPoint);
+  identifyLayers(mapPoint);
+});
 
+let BT, GT, WLF, BS_KL_Norm, BS_HZ_Norm;
+export const identifyLayers = (mapPoint, drawnProbeheads = 0) => {
   const params = new IdentifyParameters();
   params.geometry = mapPoint;
   params.tolerance = 0;
@@ -197,44 +224,40 @@ view.on("click", async ({ mapPoint }) => {
   params.height = view.height;
   params.mapExtent = view.extent;
 
-  identify.identify(ampelkarte_url, params).then((res) => {
-    handleIdentifyAmpelkarte(res.results);
-  });
-
-  let BT, GT, WLF;
   identify.identify(ews_url, params).then((res) => {
-    BT = res.results.find((result) => result.layerId === 0)?.feature.attributes[
-      "Stretch.Pixel Value"
+    BT = res.results.find((result) => result.layerId === 4)?.feature.attributes[
+      "Pixel Value"
     ];
-    GT = res.results.find((result) => result.layerId === 1)?.feature.attributes[
-      "Stretch.Pixel Value"
+    GT = res.results.find((result) => result.layerId === 5)?.feature.attributes[
+      "Pixel Value"
     ];
-    WLF = res.results.find((result) => result.layerId === 2)?.feature
-      .attributes["Stretch.Pixel Value"];
+    WLF = res.results.find((result) => result.layerId === 6)?.feature
+      .attributes["Pixel Value"];
+
     handleIdentifyEWS(res.results);
+
+    identify.identify(betriebsstunden_url, params).then((res) => {
+      handleIdentifyBetriebsstunden(res.results);
+      BS_KL_Norm = res.results.find((result) => result.layerId === 0)?.feature
+        .attributes["Pixel Value"];
+      BS_HZ_Norm = res.results.find((result) => result.layerId === 1)?.feature
+        .attributes["Pixel Value"];
+      if (view.scale <= 20000 && BT && GT && WLF && BS_KL_Norm && BS_HZ_Norm) {
+        queryCadastralDataAndRunScript(mapPoint, drawnProbeheads);
+      }
+    });
   });
 
   identify.identify(gwwp_url, params).then((res) => {
     handleIdentifyGWWP(res.results);
   });
 
-  if (view.scale <= 20000) {
-    setCalculating(true);
-    const cadastralData = await queryCadastralData(mapPoint);
-    if (BT && GT && WLF && cadastralData) {
-      let params = {
-        EZ: cadastralData.EZ,
-        BT,
-        GT,
-        WLF,
-        FF: cadastralData.flaeche,
-      };
-      pythonScriptHandler(params);
-    }
-  }
-});
+  identify.identify(ampelkarte_url, params).then((res) => {
+    handleIdentifyAmpelkarte(res.results);
+  });
+};
 
-const queryCadastralData = async (mapPoint) => {
+const queryCadastralDataAndRunScript = (mapPoint, drawnProbeheads) => {
   const { x, y } = view.toScreen(mapPoint);
   let url =
     "https://data.bev.gv.at/geoserver/BEVdataKAT/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:3857&INFO_FORMAT=application/json";
@@ -259,70 +282,87 @@ const queryCadastralData = async (mapPoint) => {
     "&J=" +
     Math.round(y);
 
-  return await esriRequest(url, { responseType: "json" }).then(
-    async (response) => {
-      if (
-        response.data &&
-        response.data.features &&
-        response.data.features.length > 0
-      ) {
-        const feature = response.data.features[0];
-        const KG = feature.properties.KG;
-        const GNR = feature.properties.GNR;
-        url = "https://kataster.bev.gv.at/api/gst/" + KG + "/" + GNR;
-        return await esriRequest(url, { responseType: "json" }).then(
-          (cadastralResponse) => {
-            let flaeche = 0;
-            let EZ;
-            if (cadastralResponse.data) {
-              EZ = cadastralResponse.data.properties.ez;
-              const nutzungen = cadastralResponse.data.properties.nutzungen;
-              const garten = nutzungen.find(
-                (element) => element.nutzung === "Gärten"
-              );
-              if (garten) flaeche = garten.fl;
-            }
-            return { EZ, flaeche };
-          }
-        );
-      }
+  esriRequest(url, { responseType: "json" }).then((response) => {
+    if (
+      response.data &&
+      response.data.features &&
+      response.data.features.length > 0
+    ) {
+      const feature = response.data.features[0];
+      const KG = feature.properties.KG;
+      const GNR = feature.properties.GNR;
+      url = "https://kataster.bev.gv.at/api/gst/" + KG + "/" + GNR;
+
+      esriRequest(url, { responseType: "json" }).then((cadastralResponse) => {
+        let EZ;
+        let FF = 0;
+        if (cadastralResponse.data) {
+          EZ = cadastralResponse.data.properties.ez;
+          const garten = cadastralResponse.data.properties.nutzungen.find(
+            (element) => element.nutzung === "Gärten"
+          );
+          if (garten) FF = garten.fl;
+
+          setCalculating(true);
+          pythonScriptHandler({
+            KG,
+            GNR,
+            EZ,
+            FF,
+            BT,
+            GT,
+            WLF,
+            BS_HZ_Norm,
+            BS_KL_Norm,
+            drawnProbeheads,
+          });
+        }
+      });
     }
-  );
+  });
 };
 
 // take screenshot for info panel
-export const takeScreenshot = async (mapPoint) => {
+export const takeScreenshot = (mapPoint) => {
   const screenPoint = view.toScreen(mapPoint);
   const width = 1000;
   const height = 500;
-  const screenshot = await view.takeScreenshot({
-    area: {
-      x: screenPoint.x - width / 2,
-      y: screenPoint.y - height / 2,
-      width: width,
-      height: height,
-    },
-  });
 
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
+  view
+    .takeScreenshot({
+      area: {
+        x: screenPoint.x - width / 2,
+        y: screenPoint.y - height / 2,
+        width: width,
+        height: height,
+      },
+    })
+    .then((screenshot) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
 
-  const context = canvas.getContext("2d");
+      const context = canvas.getContext("2d");
 
-  const img = new Image();
-  img.width = width;
-  img.height = height;
-  img.src = screenshot.dataUrl;
+      const img = new Image();
+      img.width = width;
+      img.height = height;
+      img.src = screenshot.dataUrl;
 
-  img.onload = () => {
-    context.drawImage(img, 0, 0);
-    context.beginPath();
-    context.arc(width / 2, height / 2, 10, 0, 2 * Math.PI);
-    context.stroke();
+      img.onload = () => {
+        context.drawImage(img, 0, 0);
+        context.strokeStyle = "#4090D0";
+        context.lineWidth = 10;
+        context.beginPath();
+        context.moveTo(width / 2, height / 2);
+        context.lineTo(width / 2 + 10, height / 2 - 40);
+        context.lineTo(width / 2 - 10, height / 2 - 40);
+        context.closePath();
+        context.stroke();
 
-    screenshotHandler(canvas.toDataURL());
-  };
+        screenshotHandler(canvas.toDataURL());
+      };
+    });
 };
 
 // initialize the map view container
@@ -339,7 +379,9 @@ export function initializeHandlers(
   pythonScriptCallback,
   setIsCalculatingCallback,
   identifyGWWPCallback,
-  identifyEWSCallback
+  identifyEWSCallback,
+  identifyBetriebsstundenCallback,
+  addressCallback
 ) {
   handleIdentifyAmpelkarte = identifyAmpelkarteCallback;
   errorHandler = errorCallback;
@@ -349,9 +391,11 @@ export function initializeHandlers(
   setCalculating = setIsCalculatingCallback;
   handleIdentifyGWWP = identifyGWWPCallback;
   handleIdentifyEWS = identifyEWSCallback;
+  handleIdentifyBetriebsstunden = identifyBetriebsstundenCallback;
+  handleAddress = addressCallback;
 }
 
-export const updateLocale = (titles, locale) => {
+export const updateLocale = (locale) => {
   intl.setLocale(locale);
   if (locale === "en") {
     for (const source of search.allSources)

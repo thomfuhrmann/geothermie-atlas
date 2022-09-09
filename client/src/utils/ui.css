@@ -1,0 +1,19 @@
+.esri-component.esri-layer-list.esri-widget.esri-widget--panel{
+    max-height: 500px;
+}
+
+.esri-component.esri-legend.esri-widget.esri-widget--panel {
+    max-height: 300px;
+}
+
+.spacing-dropdown {
+    background-color: white;
+    border: 1px solid #afafaf;
+    border-radius: 0px;
+}
+
+.spacing-dropdown-container {
+    background-color: white;
+    padding: 10px;
+    margin: 0px;
+}

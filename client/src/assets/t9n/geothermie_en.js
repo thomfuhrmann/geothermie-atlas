@@ -1,14 +1,3 @@
-import { config } from "../../config";
-
-let layerMap = {};
-config.layers.map(
-  (layer) => (layerMap[layer.id] = { title: layer.title.en, des: layer.des.en })
-);
-
-// layerTitleMap = {
-//   ...config.layers.map((layer) => layer.title.en),
-// };
-
 export const geothermie_en = {
   header: {
     title: "Geothermal-energy-atlas 1.0",
@@ -41,5 +30,4 @@ export const geothermie_en = {
   point_query_table: {
     title: "Point query",
   },
-  layers: layerMap,
 };

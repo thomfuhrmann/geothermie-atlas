@@ -186,6 +186,7 @@ def main():
         Level2 = np.array([0, 0, 0, 0, 0, 0, 0])
 
     # calculate Values for Level 3: First calculate how many BHE can be placed on the given area FF
+    SA_FF = 0
 
     if Level2[0] > 0:
         BS_HZ_L3 = BS_HZ
@@ -223,9 +224,9 @@ def main():
     else:
         cover = 0
 
-    # line for description                                   P2,   Sondenanzahl, BM,   Area,   P_fin_bi,  cover
+    # returns input arguments and P2, Sondenanzahl, BM, Area, P_fin_bi,  cover
     line = sys.argv[1:] + list(map(str, [Level2[0], Level2[1],
-                                         Level2[2], Level2[3], Level3[1], cover]))
+                                         Level2[2], Level2[3], Level3[1], cover, SA_FF]))
 
     print(line)
 

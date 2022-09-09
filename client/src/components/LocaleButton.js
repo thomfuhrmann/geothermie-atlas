@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 
 import styled from "styled-components";
 
-import { config } from "../config";
 import { updateLocale } from "../utils/view";
 
 const StyledDiv = styled.div`

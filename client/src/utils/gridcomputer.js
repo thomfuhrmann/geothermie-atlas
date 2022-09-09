@@ -5,7 +5,13 @@ import Circle from "@arcgis/core/geometry/Circle";
 import Polyline from "@arcgis/core/geometry/Polyline";
 import Polygon from "@arcgis/core/geometry/Polygon";
 
-import { view, graphicsLayer, cadastre } from "./view";
+import {
+  view,
+  graphicsLayer,
+  cadastre as cadastralLayer,
+  identifyLayers,
+  takeScreenshot,
+} from "./view";
 
 // grid points have to be at least 2 meters away from parcel boundary
 const distanceToBoundary = 2;
@@ -220,23 +226,21 @@ export const calculateGrid = async (event, gridSpacing = 10) => {
     });
 
     // filter points that are not on buildings
-    let selectedGridPoints;
-    if (cadastre) {
-      selectedGridPoints = await filterPointsByPixel(
-        cadastre,
-        filteredGridPoints
-      );
-    }
-
-    // draw points and take screenshot
-    selectedGridPoints.map((point) => drawPoint(point));
-    // takeScreenshot(boundaryPolygon.centroid);
+    filterPointsByPixelAndDraw(
+      cadastralLayer,
+      filteredGridPoints,
+      boundaryPolygon.centroid
+    );
   }
 };
 
 // select points that are not on buildings
-const filterPointsByPixel = async (cadastralLayer, filteredGridPoints) => {
-  const points = await cadastralLayer
+const filterPointsByPixelAndDraw = (
+  cadastralLayer,
+  filteredGridPoints,
+  centroid
+) => {
+  cadastralLayer
     .fetchImage(view.extent, view.width, view.height)
     .then((image) => {
       const canvas = document.createElement("canvas");
@@ -265,8 +269,14 @@ const filterPointsByPixel = async (cadastralLayer, filteredGridPoints) => {
           m++;
         }
       }
-      return selectedGridPoints;
-    });
 
-  return points;
+      // query layer values and execute scipt
+      identifyLayers(centroid, selectedGridPoints.length);
+
+      // draw points
+      selectedGridPoints.map((point) => drawPoint(point));
+
+      // take screenshot at centroid of polygon
+      takeScreenshot(centroid);
+    });
 };

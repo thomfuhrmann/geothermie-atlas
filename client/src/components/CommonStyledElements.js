@@ -5,26 +5,21 @@ import "tippy.js/dist/tippy.css";
 
 import info from "../assets/icons/information-line.svg";
 
-export const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  letter-spacing: 1px;
-  font-family: sans-serif;
-  font-size: 0.8rem;
-`;
-
 const TablePadding = `padding: 10px;`;
 
-export const TableBody = styled.tbody``;
+export const Table = styled.table`
+  width: 100%;
+`;
 
 export const TableData = styled.td`
   text-align: ${(props) => props.textAlign || "left"};
   ${TablePadding}
 `;
 
-export const TableHeading = styled.th`
-  ${TablePadding}
-  vertical-align: top;
+export const TableHeader = styled.th`
+  padding-top: 20px;
+  padding-bottom: 5px;
+  font-size: medium;
   text-align: ${(props) => props.textAlign || "left"};
 `;
 
