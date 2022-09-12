@@ -20,6 +20,7 @@ import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import { calculateGrid } from "./gridcomputer";
 
 import "./ui.css";
+import Polygon from "@arcgis/core/geometry/Polygon";
 
 export const graphicsLayer = new GraphicsLayer({
   title: "Planung Erdwärmesonden",
@@ -131,18 +132,26 @@ const sketch = new Sketch({
 
 let errorHandler;
 let gridSpacing = 10;
-sketch.viewModel.on(["create"], (event) => {
+sketch.on(["create"], (event) => {
   if (event.tool === "polyline" && event.state === "start") {
     graphicsLayer.removeAll();
     errorHandler(false);
   }
 
   if (event.tool === "polyline" && event.state === "complete") {
-    if (event.graphic.geometry.paths[0].length < 3) {
+    const path = event.graphic.geometry.paths[0];
+    if (path.length < 3) {
       errorHandler(true);
       return;
     }
     calculateGrid(event, gridSpacing);
+
+    const polygon = new Polygon({
+      rings: path,
+      spatialReference: view.spatialReference,
+    });
+
+    setTimeout(() => takeScreenshot(polygon.centroid, false), 200);
   }
 
   if (event.tool === "point" && event.state === "complete") {
@@ -150,7 +159,7 @@ sketch.viewModel.on(["create"], (event) => {
   }
 });
 
-sketch.viewModel.on(["delete"], () => {});
+sketch.on(["delete"], () => {});
 
 // create drop down menu for selection of grid spacing
 const dropDown = document.createElement("select");
@@ -323,46 +332,61 @@ const queryCadastralDataAndRunScript = (mapPoint, drawnProbeheads) => {
 };
 
 // take screenshot for info panel
-export const takeScreenshot = (mapPoint) => {
+export const takeScreenshot = (mapPoint, withMarker = true) => {
   const screenPoint = view.toScreen(mapPoint);
   const width = 1000;
   const height = 500;
 
-  view
-    .takeScreenshot({
-      area: {
-        x: screenPoint.x - width / 2,
-        y: screenPoint.y - height / 2,
-        width: width,
-        height: height,
-      },
-    })
-    .then((screenshot) => {
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
+  if (withMarker) {
+    view
+      .takeScreenshot({
+        area: {
+          x: screenPoint.x - width / 2,
+          y: screenPoint.y - height / 2,
+          width: width,
+          height: height,
+        },
+      })
+      .then((screenshot) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
 
-      const context = canvas.getContext("2d");
+        const context = canvas.getContext("2d");
 
-      const img = new Image();
-      img.width = width;
-      img.height = height;
-      img.src = screenshot.dataUrl;
+        const img = new Image();
+        img.width = width;
+        img.height = height;
+        img.src = screenshot.dataUrl;
 
-      img.onload = () => {
-        context.drawImage(img, 0, 0);
-        context.strokeStyle = "#4090D0";
-        context.lineWidth = 10;
-        context.beginPath();
-        context.moveTo(width / 2, height / 2);
-        context.lineTo(width / 2 + 10, height / 2 - 40);
-        context.lineTo(width / 2 - 10, height / 2 - 40);
-        context.closePath();
-        context.stroke();
+        img.onload = () => {
+          context.drawImage(img, 0, 0);
+          context.strokeStyle = "#4090D0";
+          context.lineWidth = 10;
+          context.beginPath();
+          context.moveTo(width / 2, height / 2);
+          context.lineTo(width / 2 + 10, height / 2 - 40);
+          context.lineTo(width / 2 - 10, height / 2 - 40);
+          context.closePath();
+          context.stroke();
 
-        screenshotHandler(canvas.toDataURL());
-      };
-    });
+          screenshotHandler(canvas.toDataURL());
+        };
+      });
+  } else {
+    view
+      .takeScreenshot({
+        area: {
+          x: screenPoint.x - width / 2,
+          y: screenPoint.y - height / 2,
+          width: width,
+          height: height,
+        },
+      })
+      .then((screenshot) => {
+        screenshotHandler(screenshot.dataUrl);
+      });
+  }
 };
 
 // initialize the map view container

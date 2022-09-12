@@ -333,7 +333,7 @@ export default function InfoPanel(props) {
     hinweiseGWWP = hinweiseGWWPAdded;
   };
 
-  // calculate values for EWS
+  // calculate values for EWS, currently Bohrlochtiefe = 100
   let leistung = 0;
   if (computationResults) {
     if (probeheads > 0) {

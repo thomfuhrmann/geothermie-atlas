@@ -10,7 +10,6 @@ import {
   graphicsLayer,
   cadastre as cadastralLayer,
   identifyLayers,
-  takeScreenshot,
 } from "./view";
 
 // grid points have to be at least 2 meters away from parcel boundary
@@ -277,6 +276,6 @@ const filterPointsByPixelAndDraw = (
       selectedGridPoints.map((point) => drawPoint(point));
 
       // take screenshot at centroid of polygon
-      takeScreenshot(centroid);
+      // takeScreenshot(centroid);
     });
 };
