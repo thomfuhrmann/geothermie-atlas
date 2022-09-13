@@ -16,11 +16,11 @@ import * as identify from "@arcgis/core/rest/identify";
 import IdentifyParameters from "@arcgis/core/rest/support/IdentifyParameters";
 import * as locator from "@arcgis/core/rest/locator";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
+import Polygon from "@arcgis/core/geometry/Polygon";
 
 import { calculateGrid } from "./gridcomputer";
 
 import "./ui.css";
-import Polygon from "@arcgis/core/geometry/Polygon";
 
 export const graphicsLayer = new GraphicsLayer({
   title: "Planung Erdwärmesonden",
@@ -159,9 +159,13 @@ sketch.on(["create"], (event) => {
   }
 });
 
-sketch.on(["delete"], () => {});
-
 // create drop down menu for selection of grid spacing
+const userInputDiv = document.createElement("div");
+userInputDiv.className = "input-container";
+
+const dropDownDiv = document.createElement("div");
+dropDownDiv.className = "input-section";
+
 const dropDown = document.createElement("select");
 dropDown.id = "grid-spacing";
 dropDown.className = "spacing-dropdown";
@@ -180,16 +184,123 @@ option2.innerText = "10 Meter";
 dropDown.appendChild(option2);
 dropDown.appendChild(option1);
 
-const label = document.createElement("label");
-label.innerText = "Abstand der Sonden ";
-label.for = "grid-spacing";
+const spacingLabel = document.createElement("label");
+spacingLabel.innerText = "Abstand der Sonden";
+spacingLabel.for = "grid-spacing";
 
-const dropDownDiv = document.createElement("div");
-dropDownDiv.className = "spacing-dropdown-container";
-dropDownDiv.appendChild(label);
+dropDownDiv.appendChild(spacingLabel);
 dropDownDiv.appendChild(dropDown);
 
-view.ui.add([layerList, legend, search, sketch, dropDownDiv], "top-left");
+userInputDiv.appendChild(dropDownDiv);
+
+// Bohrtiefe
+let handleBohrtiefe;
+const bohrtiefeInput = document.createElement("input");
+bohrtiefeInput.id = "bohrtiefe-input";
+bohrtiefeInput.type = "number";
+bohrtiefeInput.min = 80;
+bohrtiefeInput.max = 300;
+bohrtiefeInput.value = 100;
+bohrtiefeInput.onchange = (event) => {
+  handleBohrtiefe(parseInt(event.target.value));
+};
+const bohrtiefeLabel = document.createElement("label");
+bohrtiefeLabel.for = "bohrtiefe-input";
+bohrtiefeLabel.innerText = "Bohrtiefe in Meter";
+
+const bohrtiefeInputDiv = document.createElement("div");
+bohrtiefeInputDiv.className = "input-section";
+
+bohrtiefeInputDiv.appendChild(bohrtiefeLabel);
+bohrtiefeInputDiv.appendChild(bohrtiefeInput);
+
+userInputDiv.appendChild(bohrtiefeInputDiv);
+
+// Betriebsstunden Heizen
+let BS_HZ = 0;
+const bsHZInput = document.createElement("input");
+bsHZInput.id = "bshz-input";
+bsHZInput.type = "number";
+bsHZInput.min = 0;
+bsHZInput.onchange = (event) => {
+  BS_HZ = parseInt(event.target.value);
+};
+const bsHZLabel = document.createElement("label");
+bsHZLabel.for = "bshz-input";
+bsHZLabel.innerText = "Betriebsstunden Heizen pro Jahr (optional)";
+
+const bsHZInputDiv = document.createElement("div");
+bsHZInputDiv.className = "input-section";
+
+bsHZInputDiv.appendChild(bsHZLabel);
+bsHZInputDiv.appendChild(bsHZInput);
+
+userInputDiv.appendChild(bsHZInputDiv);
+
+// Betriebsstunden Kühlen
+let BS_KL = 0;
+const bsKLInput = document.createElement("input");
+bsKLInput.id = "bskl-input";
+bsKLInput.type = "number";
+bsKLInput.min = 0;
+bsKLInput.onchange = (event) => {
+  BS_KL = parseInt(event.target.value);
+};
+const bsKLLabel = document.createElement("label");
+bsKLLabel.for = "bskl-input";
+bsKLLabel.innerText = "Betriebsstunden Kühlen pro Jahr (optional)";
+
+const bsKLInputDiv = document.createElement("div");
+bsKLInputDiv.className = "input-section";
+
+bsKLInputDiv.appendChild(bsKLLabel);
+bsKLInputDiv.appendChild(bsKLInput);
+
+userInputDiv.appendChild(bsKLInputDiv);
+
+// Leistung Heizen
+let P_HZ = 0;
+const pHZInput = document.createElement("input");
+pHZInput.id = "pHZ-input";
+pHZInput.type = "number";
+pHZInput.min = 0;
+pHZInput.onchange = (event) => {
+  P_HZ = parseInt(event.target.value);
+};
+const pHZLabel = document.createElement("label");
+pHZLabel.for = "pHZ-input";
+pHZLabel.innerText = "Heizleistung in kW (optional)";
+
+const pHZInputDiv = document.createElement("div");
+pHZInputDiv.className = "input-section";
+
+pHZInputDiv.appendChild(pHZLabel);
+pHZInputDiv.appendChild(pHZInput);
+
+userInputDiv.appendChild(pHZInputDiv);
+
+// Leistung
+let P_KL = 0;
+const pKLInput = document.createElement("input");
+pKLInput.id = "pKL-input";
+pKLInput.type = "number";
+pKLInput.min = 0;
+pKLInput.onchange = (event) => {
+  P_KL = parseInt(event.target.value);
+};
+const pKLLabel = document.createElement("label");
+pKLLabel.for = "pKL-input";
+pKLLabel.innerText = "Kühlleistung in kW (optional)";
+
+const pKLInputDiv = document.createElement("div");
+pKLInputDiv.className = "input-section";
+
+pKLInputDiv.appendChild(pKLLabel);
+pKLInputDiv.appendChild(pKLInput);
+
+userInputDiv.appendChild(pKLInputDiv);
+
+view.ui.add([layerList, legend, search, sketch, userInputDiv], "top-left");
 
 let handleAddress;
 function getAddress(mapPoint) {
@@ -251,8 +362,9 @@ export const identifyLayers = (mapPoint, drawnProbeheads = 0) => {
         .attributes["Pixel Value"];
       BS_HZ_Norm = res.results.find((result) => result.layerId === 1)?.feature
         .attributes["Pixel Value"];
+
       if (view.scale <= 20000 && BT && GT && WLF && BS_KL_Norm && BS_HZ_Norm) {
-        queryCadastralDataAndRunScript(mapPoint, drawnProbeheads);
+        queryCadastreAndRunScript(mapPoint, drawnProbeheads);
       }
     });
   });
@@ -266,7 +378,7 @@ export const identifyLayers = (mapPoint, drawnProbeheads = 0) => {
   });
 };
 
-const queryCadastralDataAndRunScript = (mapPoint, drawnProbeheads) => {
+const queryCadastreAndRunScript = (mapPoint, drawnProbeheads) => {
   const { x, y } = view.toScreen(mapPoint);
   let url =
     "https://data.bev.gv.at/geoserver/BEVdataKAT/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:3857&INFO_FORMAT=application/json";
@@ -323,6 +435,10 @@ const queryCadastralDataAndRunScript = (mapPoint, drawnProbeheads) => {
             WLF,
             BS_HZ_Norm,
             BS_KL_Norm,
+            BS_HZ,
+            BS_KL,
+            P_HZ,
+            P_KL,
             drawnProbeheads,
           });
         }
@@ -405,7 +521,8 @@ export function initializeHandlers(
   identifyGWWPCallback,
   identifyEWSCallback,
   identifyBetriebsstundenCallback,
-  addressCallback
+  addressCallback,
+  bohrtiefeCallback
 ) {
   handleIdentifyAmpelkarte = identifyAmpelkarteCallback;
   errorHandler = errorCallback;
@@ -417,6 +534,7 @@ export function initializeHandlers(
   handleIdentifyEWS = identifyEWSCallback;
   handleIdentifyBetriebsstunden = identifyBetriebsstundenCallback;
   handleAddress = addressCallback;
+  handleBohrtiefe = bohrtiefeCallback;
 }
 
 export const updateLocale = (locale) => {

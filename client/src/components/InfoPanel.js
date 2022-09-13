@@ -78,6 +78,7 @@ export default function InfoPanel(props) {
   const [address, setAddress] = useState(null);
   const [cadastralData, setCadastralData] = useState(null);
   const [probeheads, setProbeheads] = useState(null);
+  const [bohrtiefe, setBohrtiefe] = useState(100);
 
   const { t } = useTranslation();
 
@@ -101,7 +102,8 @@ export default function InfoPanel(props) {
       setIdentifyGWWP,
       setIdentifyEWS,
       setIdentifyBetriebsstunden,
-      setAddress
+      setAddress,
+      setBohrtiefe
     );
   }, []);
 
@@ -115,6 +117,10 @@ export default function InfoPanel(props) {
     WLF,
     BS_HZ_Norm,
     BS_KL_Norm,
+    BS_HZ,
+    BS_KL,
+    P_HZ,
+    P_KL,
     drawnProbeheads,
   }) => {
     setCadastralData({ KG, GNR, EZ });
@@ -129,11 +135,16 @@ export default function InfoPanel(props) {
         WLF,
         BS_HZ_Norm,
         BS_KL_Norm,
+        BS_HZ,
+        BS_KL,
+        P_HZ,
+        P_KL,
         FF,
       }).toString();
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
+        console.log(data);
         setComputationResults(data);
         setIsCalculating(false);
       })
@@ -333,17 +344,21 @@ export default function InfoPanel(props) {
     hinweiseGWWP = hinweiseGWWPAdded;
   };
 
-  // calculate values for EWS, currently Bohrlochtiefe = 100
+  // calculate values for EWS, current default value for bohrtiefe = 100
   let leistung = 0;
   if (computationResults) {
     if (probeheads > 0) {
       leistung = parseInt(
-        parseFloat(probeheads * 100 * parseFloat(computationResults[15])) / 1000
+        parseFloat(
+          probeheads * bohrtiefe * parseFloat(computationResults[15])
+        ) / 1000
       );
     } else {
       leistung = parseInt(
         parseFloat(
-          computationResults[17] * 100 * parseFloat(computationResults[15])
+          computationResults[17] *
+            bohrtiefe *
+            parseFloat(computationResults[15])
         ) / 1000
       );
     }
@@ -487,6 +502,9 @@ export default function InfoPanel(props) {
                 Sondenanzahl:{" "}
                 {probeheads > 0 ? probeheads : parseInt(computationResults[17])}
               </TableData>
+            </TableRow>
+            <TableRow>
+              <TableData>Sondentiefe: {bohrtiefe} m</TableData>
             </TableRow>
             <TableRow>
               <TableData>Leistung: {leistung} kW</TableData>

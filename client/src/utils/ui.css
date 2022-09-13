@@ -12,8 +12,24 @@
     border-radius: 0px;
 }
 
-.spacing-dropdown-container {
+.input-container {
+    box-sizing: border-box;
     background-color: white;
     padding: 10px;
     margin: 0px;
+    width: 300px;
 }
+
+.input-section {
+    padding-bottom: 10px;
+}
+
+input, select {
+    font-family: inherit;
+    font-size: 100%;
+    box-sizing: border-box;
+    width : 100%;
+    padding: 0;
+    margin: 0;
+  }
+  

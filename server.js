@@ -12,7 +12,7 @@ const port = 5000;
 app.use(cors());
 app.use(express.static(path.join(__dirname, "client/build")));
 
-app.get("/api", function ({ query }, res) {
+app.get("/api", ({ query }, res) => {
   let options = {
     args: [
       query.EZ,
@@ -21,17 +21,17 @@ app.get("/api", function ({ query }, res) {
       query.WLF,
       query.BS_HZ_Norm,
       query.BS_KL_Norm,
-      "0",
-      "0",
-      "0",
-      "0",
+      query.BS_HZ,
+      query.BS_KL,
+      query.P_HZ,
+      query.P_KL,
       query.FF,
     ],
   };
   runPythonShell(res, options);
 });
 
-app.get("*", (req, res) => {
+app.get("*", (_, res) => {
   res.sendFile(path.resolve(__dirname, "client/build/index.html"));
 });
 

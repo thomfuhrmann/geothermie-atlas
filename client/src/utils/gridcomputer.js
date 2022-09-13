@@ -274,8 +274,5 @@ const filterPointsByPixelAndDraw = (
 
       // draw points
       selectedGridPoints.map((point) => drawPoint(point));
-
-      // take screenshot at centroid of polygon
-      // takeScreenshot(centroid);
     });
 };

@@ -11,7 +11,7 @@ export const geothermie_de = {
     instruction_polyline_first: "Verwenden Sie das Werkzeug ",
     instruction_polyline_middle: "Polylinie zeichnen",
     instruction_polyline_last: ` um einen Erdwärmesonden-Raster zu zeichnen. 
-    Ziehen sie eine Polylinie um das gewünschte Grundstück und schließen Sie die Polylinie durch einen Doppelklick auf den Anfangspunkt. Die ersten beiden Abschnitte der Polylinie bestimmen die Anordnung der Rasterpunkte.
+    Ziehen sie eine Polylinie um das gewünschte Grundstück und schließen Sie die Polylinie mit der Enter-Taste oder durch einen Doppelklick auf den Anfangspunkt. Die ersten beiden Abschnitte der Polylinie bestimmen die Anordnung der Rasterpunkte.
     Die Rasterpunkte haben einen Abstand von 5 oder 10 Meter zueinander (je nach Einstellung), und einen Abstand von 2 Meter zur Grundstücksgrenze.`,
     title: "Standortbasierter Bericht",
     error:
