@@ -1,7 +1,6 @@
 import Graphic from "@arcgis/core/Graphic";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
 import Point from "@arcgis/core/geometry/Point";
-import Polyline from "@arcgis/core/geometry/Polyline";
 
 import {
   view,
@@ -62,10 +61,7 @@ const computeParallelLine = (line, offset) => {
   const nn = [il * n[0], il * n[1]];
   const p = [line[0][0] - offset * nn[0], line[0][1] - offset * nn[1]];
   const q = [p[0] + v[0], p[1] + v[1]];
-  return new Polyline({
-    paths: [p, q],
-    spatialReference: view.spatialReference,
-  });
+  return [p, q];
 };
 
 const computeParallelLines = (line, offset, maxOffset) => {
@@ -101,11 +97,11 @@ const computeGridLines = (point1, point2, points, gridSpacing) => {
     }
   }
 
-  const line = new Polyline({ paths: [point1, point2], spatialReference: view.spatialReference });
+  const line = [point1, point2];
 
   const linesRight = computeParallelLines([point1, point2], gridSpacing, longestDistanceRight);
   const linesLeft = computeParallelLines([point1, point2], -gridSpacing, longestDistanceLeft);
-  const lines = linesRight.concat(linesLeft, line);
+  const lines = linesRight.concat(linesLeft, [line]);
 
   return lines;
 };
@@ -141,14 +137,14 @@ export const calculateGrid = (polygon, gridSpacing = 10, setGridPoints) => {
     for (let line1 of lines) {
       for (let line2 of orthogonalLines) {
         const intersection = intersect(
-          line1.paths[0][0][0],
-          line1.paths[0][0][1],
-          line1.paths[0][1][0],
-          line1.paths[0][1][1],
-          line2.paths[0][0][0],
-          line2.paths[0][0][1],
-          line2.paths[0][1][0],
-          line2.paths[0][1][1]
+          line1[0][0],
+          line1[0][1],
+          line1[1][0],
+          line1[1][1],
+          line2[0][0],
+          line2[0][1],
+          line2[1][0],
+          line2[1][1]
         );
 
         const intersectionPoint =
@@ -186,7 +182,7 @@ export const calculateGrid = (polygon, gridSpacing = 10, setGridPoints) => {
 // select points that are not on buildings
 const filterPointsByPixelAndDraw = (
   cadastralLayer,
-  filteredGridPoints,
+  points,
   setGridPoints
 ) => {
   cadastralLayer
@@ -200,7 +196,7 @@ const filterPointsByPixelAndDraw = (
       context.drawImage(image, 0, 0);
 
       const selectedGridPoints = [];
-      for (const point of filteredGridPoints) {
+      for (const point of points) {
         const screenPoint = view.toScreen(point);
 
         const { data } = context.getImageData(
