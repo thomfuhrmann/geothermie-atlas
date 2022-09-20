@@ -139,7 +139,8 @@ def main():
     # Borehole buried depth (m)
     D = float("0")
     # Borehole length (m)
-    H = float("100")
+    # H = float("100")
+    H = float(sys.argv[12])
     # Borehole radius (m)
     r_b = float("0.075")
 
@@ -167,7 +168,7 @@ def main():
     BS_KL = float(sys.argv[8])
     P_HZ = float(sys.argv[9])
     P_KL = float(sys.argv[10])
-    FF = int(float(sys.argv[11]))
+    FF = int(sys.argv[11])
 
     print('\n')
     print(
@@ -225,8 +226,8 @@ def main():
         cover = 0
 
     # returns input arguments and P2, Sondenanzahl, BM, Area, P_fin_bi,  cover
-    line = sys.argv[1:] + list(map(str, [Level2[0], Level2[1],
-                                         Level2[2], Level2[3], Level3[1], cover, SA_FF]))
+    line = sys.argv[1:12] + list(map(str, [Level2[0], Level2[1],
+                                           Level2[2], Level2[3], Level3[1], cover]))
 
     print(line)
 

@@ -192,16 +192,6 @@ export const AmpelkarteTable = ({ results, setTablesAdded }) => {
           <tbody>{hinweiseEWS}</tbody>
         </table>
       )}
-      {hinweiseGWWP.length > 0 && (
-        <table id="hinweise-gwwp-table">
-          <thead>
-            <tr>
-              <TableHeader>Hinweise thermische Grundwassernutzung</TableHeader>
-            </tr>
-          </thead>
-          <tbody>{hinweiseGWWP}</tbody>
-        </table>
-      )}
       {einschraenkungenEWS.length > 0 && (
         <table id="einschraenkungen-ews-table">
           <thead>
@@ -212,6 +202,16 @@ export const AmpelkarteTable = ({ results, setTablesAdded }) => {
             </tr>
           </thead>
           <tbody>{einschraenkungenEWS}</tbody>
+        </table>
+      )}
+      {hinweiseGWWP.length > 0 && (
+        <table id="hinweise-gwwp-table">
+          <thead>
+            <tr>
+              <TableHeader>Hinweise thermische Grundwassernutzung</TableHeader>
+            </tr>
+          </thead>
+          <tbody>{hinweiseGWWP}</tbody>
         </table>
       )}
       {einschraenkungenGWWP.length > 0 && (

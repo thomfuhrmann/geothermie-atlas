@@ -4,9 +4,10 @@ import jsPDF from "jspdf";
 import styled from "styled-components";
 import "jspdf-autotable";
 
-import { initializeHandlers } from "../utils/view";
+import { useSelector } from "react-redux";
+
+import { initializeInfoPanel } from "../utils/view";
 import { AmpelkarteTable } from "./AmpelkarteTable";
-import LoadingSpinner from "./LoadingSpinner";
 import { ews_erklaerungen, gwwp_erklaerungen } from "../Beschreibungen";
 
 import {
@@ -18,7 +19,7 @@ import {
 
 const StyledInfoPanel = styled.div`
   position: absolute;
-  top: 30px;
+  top: 15px;
   right: 30px;
   width: 20%;
   height: auto;
@@ -66,19 +67,14 @@ export default function InfoPanel(props) {
   const infoDivRef = useRef(null);
   const sketchToolColor = useRef(null);
 
-  const [error, setError] = useState(false);
   const [scale, setScale] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
   const [identifyAmpelkarte, setIdentifyAmpelkarte] = useState(null);
   const [identifyGWWP, setIdentifyGWWP] = useState(null);
   const [identifyEWS, setIdentifyEWS] = useState(null);
-  const [identifyBetriebsstunden, setIdentifyBetriebsstunden] = useState(null);
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [computationResults, setComputationResults] = useState(null);
   const [address, setAddress] = useState(null);
-  const [cadastralData, setCadastralData] = useState(null);
-  const [probeheads, setProbeheads] = useState(null);
-  const [bohrtiefe, setBohrtiefe] = useState(100);
+
+  const computationResult = useSelector(store => store.computationResult.value);
 
   const { t } = useTranslation();
 
@@ -92,68 +88,17 @@ export default function InfoPanel(props) {
 
   // initialize query handlers
   useEffect(() => {
-    initializeHandlers(
+    initializeInfoPanel(
       setIdentifyAmpelkarte,
-      setError,
       setScale,
       setScreenshot,
-      runPythonScript,
-      setIsCalculating,
       setIdentifyGWWP,
       setIdentifyEWS,
-      setIdentifyBetriebsstunden,
       setAddress,
-      setBohrtiefe
     );
   }, []);
 
-  const runPythonScript = ({
-    KG,
-    GNR,
-    EZ,
-    FF,
-    BT,
-    GT,
-    WLF,
-    BS_HZ_Norm,
-    BS_KL_Norm,
-    BS_HZ,
-    BS_KL,
-    P_HZ,
-    P_KL,
-    drawnProbeheads,
-  }) => {
-    setCadastralData({ KG, GNR, EZ });
-    setProbeheads(drawnProbeheads);
-    let url = "/api";
-    url +=
-      "?" +
-      new URLSearchParams({
-        EZ,
-        BT,
-        GT,
-        WLF,
-        BS_HZ_Norm,
-        BS_KL_Norm,
-        BS_HZ,
-        BS_KL,
-        P_HZ,
-        P_KL,
-        FF,
-      }).toString();
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setComputationResults(data);
-        setIsCalculating(false);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  // event handler for PDF button
+  // print pdf report
   const clickHandler = () => {
     const doc = new jsPDF({
       orientation: "portrait",
@@ -249,9 +194,18 @@ export default function InfoPanel(props) {
     }
 
     finalY = doc.lastAutoTable.finalY;
-    if (computationResults) {
+    if (Object.keys(computationResult).length !== 0) {
       doc.autoTable({
-        html: "#python-output-table",
+        html: "#gesamtpotential-table",
+        rowPageBreak: "avoid",
+        startY: finalY + 10,
+      });
+    }
+
+    finalY = doc.lastAutoTable.finalY;
+    if (Object.keys(computationResult).length !== 0 && computationResult.sondenleistung !== 0) {
+      doc.autoTable({
+        html: "#gebaeude-dimensionierung-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
       });
@@ -262,6 +216,11 @@ export default function InfoPanel(props) {
       html: "#disclaimer",
       rowPageBreak: "avoid",
       startY: finalY + 10,
+      willDrawCell: function (data) {
+        if (data.section === "body") {
+          doc.setFillColor(255, 255, 255);
+        }
+      },
     });
 
     finalY = doc.lastAutoTable.finalY;
@@ -279,19 +238,20 @@ export default function InfoPanel(props) {
     doc.save("Bericht.pdf");
   };
 
-  // mouse over and out events to highlight sketch tool
+  // mouse over event to highlight sketch tool
   const handleMouseOver = () => {
     const sketchTool = document.querySelector("div.esri-sketch__panel");
     sketchToolColor.current = sketchTool.style.backgroundColor;
     sketchTool.style.backgroundColor = "red";
   };
 
+  // mouse out event to de-highlight sketch tool
   const handleMouseOut = () => {
     document.querySelector("div.esri-sketch__panel").style.backgroundColor =
       sketchToolColor.current;
   };
 
-  // format values according to requirements
+  // format values
   const formatEWS = (layerId, layerName, value) => {
     if (value !== "NoData") {
       if ([4, 5, 6].includes(layerId)) {
@@ -310,6 +270,7 @@ export default function InfoPanel(props) {
     }
   };
 
+  // format values
   const formatGWWP = (layerId, layerName, value) => {
     if (value !== "NoData") {
       if ([5, 6, 7].includes(layerId)) {
@@ -344,34 +305,6 @@ export default function InfoPanel(props) {
     hinweiseGWWP = hinweiseGWWPAdded;
   };
 
-  // calculate values for EWS, current default value for bohrtiefe = 100
-  let leistung = 0;
-  if (computationResults) {
-    if (probeheads > 0) {
-      leistung = parseInt(
-        parseFloat(
-          probeheads * bohrtiefe * parseFloat(computationResults[15])
-        ) / 1000
-      );
-    } else {
-      leistung = parseInt(
-        parseFloat(
-          computationResults[17] *
-            bohrtiefe *
-            parseFloat(computationResults[15])
-        ) / 1000
-      );
-    }
-  }
-
-  let jahresenergiemenge = 0;
-  if (identifyBetriebsstunden) {
-    identifyBetriebsstunden.forEach((result) => {
-      jahresenergiemenge +=
-        parseInt(result.feature.attributes["Pixel Value"]) * leistung;
-    });
-  }
-
   return (
     <StyledInfoPanel ref={infoDivRef}>
       {!identifyAmpelkarte ? (
@@ -394,12 +327,6 @@ export default function InfoPanel(props) {
             </PDFButtonDiv>
           </h3>
           <Screenshot src={screenshot} id="screenshot"></Screenshot>
-        </div>
-      )}
-      {isCalculating && <LoadingSpinner></LoadingSpinner>}
-      {error && (
-        <div>
-          <Error>{t("info_div.error")}</Error>
         </div>
       )}
       {(!scale || scale > 20000) && (
@@ -475,44 +402,86 @@ export default function InfoPanel(props) {
           setTablesAdded={setTablesAdded}
         ></AmpelkarteTable>
       )}
-      {computationResults && (
-        <Table id="python-output-table">
+      {Object.keys(computationResult).length !== 0 && (
+        <Table id="gesamtpotential-table">
           <thead>
             <tr>
               <TableHeader>
-                Berechnungsergebnisse für Erdwärmesonden
+                Gesamtpotential für Erdwärmesonden
               </TableHeader>
             </tr>
           </thead>
           <tbody>
             <TableRow>
-              <TableData>Katastralgemeinde: {cadastralData.KG}</TableData>
+              <TableData>Katastralgemeinde: {computationResult.KG}</TableData>
             </TableRow>
             <TableRow>
-              <TableData>Grundstücksnummer: {cadastralData.GNR}</TableData>
+              <TableData>Grundstücksnummer: {computationResult.GNR}</TableData>
             </TableRow>
             <TableRow>
               <TableData>
-                verfügbare Fläche: {parseInt(computationResults[10])} m
+                verfügbare Fläche: {computationResult.FF} m
                 <sup>2</sup>
               </TableData>
             </TableRow>
             <TableRow>
               <TableData>
                 Sondenanzahl:{" "}
-                {probeheads > 0 ? probeheads : parseInt(computationResults[17])}
+                {computationResult.gridPoints}
               </TableData>
             </TableRow>
             <TableRow>
-              <TableData>Sondentiefe: {bohrtiefe} m</TableData>
+              <TableData>Sondentiefe: {computationResult.bohrtiefe} m</TableData>
             </TableRow>
             <TableRow>
-              <TableData>Leistung: {leistung} kW</TableData>
+              <TableData>Leistung: {computationResult && parseInt(computationResult.leistung)} kW</TableData>
             </TableRow>
             <TableRow>
               <TableData>
-                Jahresenergiemenge: {jahresenergiemenge} kWh/a
+                Jahresenergiemenge Kühlen: {computationResult && parseInt(computationResult.jahresEnergieMengeKuehlen)} kWh/a
               </TableData>
+            </TableRow>
+            <TableRow>
+              <TableData>
+                Jahresenergiemenge Heizen: {computationResult && parseInt(computationResult.jahresEnergieMengeHeizen)} kWh/a
+              </TableData>
+            </TableRow>
+          </tbody>
+        </Table>
+      )}
+      {Object.keys(computationResult).length !== 0 && computationResult.sondenleistung !== 0 && (
+        <Table id="gebaeude-dimensionierung-table">
+          <thead>
+            <tr>
+              <TableHeader>
+                Gebäudespezifisches Potential für Erdwärmesonden
+              </TableHeader>
+            </tr>
+          </thead>
+          <tbody>
+            <TableRow>
+              <TableData>Katastralgemeinde: {computationResult.KG}</TableData>
+            </TableRow>
+            <TableRow>
+              <TableData>Grundstücksnummer: {computationResult.GNR}</TableData>
+            </TableRow>
+            <TableRow>
+              <TableData>
+                notwendige Fläche: {computationResult.flaeche} m
+                <sup>2</sup>
+              </TableData>
+            </TableRow>
+            <TableRow>
+              <TableData>
+                notwendige Sondenanzahl:{" "}
+                {computationResult.sondenanzahl}
+              </TableData>
+            </TableRow>
+            <TableRow>
+              <TableData>notwendige Bohrmeter: {computationResult.bohrmeter} m</TableData>
+            </TableRow>
+            <TableRow>
+              <TableData>spezifische Sondenleistung: {computationResult && parseInt(computationResult.sondenleistung)} W/m</TableData>
             </TableRow>
           </tbody>
         </Table>

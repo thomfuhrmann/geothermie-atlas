@@ -17,13 +17,18 @@ import IdentifyParameters from "@arcgis/core/rest/support/IdentifyParameters";
 import * as locator from "@arcgis/core/rest/locator";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import Polygon from "@arcgis/core/geometry/Polygon";
+import Graphic from "@arcgis/core/Graphic";
 
-import { calculateGrid } from "./gridcomputer";
-
-import "./ui.css";
+import { updateWithResult } from "../redux/computationResultSlice";
+import { userInputDiv } from "./ParameterMenu";
 
 export const graphicsLayer = new GraphicsLayer({
   title: "Planung Erdwärmesonden",
+});
+
+const polygonGraphicsLayer = new GraphicsLayer({
+  title: "Grundstück",
+  listMode: "hide"
 });
 
 // instantiate layers
@@ -68,7 +73,7 @@ cadastre.when(() => {
 
 export const arcgisMap = new ArcGISMap({
   basemap: "gray-vector",
-  layers: [betriebsstunden, gwwp, ews, ampelkarte, cadastre, graphicsLayer],
+  layers: [betriebsstunden, gwwp, ews, ampelkarte, cadastre, graphicsLayer, polygonGraphicsLayer],
 });
 
 export const view = new MapView({
@@ -95,14 +100,14 @@ reactiveUtils.watch(
 
 const layerList = new LayerList({ view });
 
-let legend = new Legend({
+const legend = new Legend({
   view: view,
   hideLayersNotInCurrentView: true,
 });
 
 const search = new Search({
   view,
-  popupEnabled: false,
+  popupEnabled: false
 });
 
 const scaleBar = new ScaleBar({
@@ -116,13 +121,14 @@ const sketch = new Sketch({
   layer: graphicsLayer,
   view: view,
   // graphic will be selected as soon as it is created
-  availableCreateTools: ["point", "polyline"],
+  availableCreateTools: ["point"],
   visibleElements: {
     selectionTools: {
       "lasso-selection": false,
       "rectangle-selection": true,
     },
     settingsMenu: false,
+    undoRedoMenu: false,
   },
   snappingOptions: {
     enabled: true,
@@ -130,177 +136,52 @@ const sketch = new Sketch({
   },
 });
 
-let errorHandler;
-let gridSpacing = 10;
-sketch.on(["create"], (event) => {
-  if (event.tool === "polyline" && event.state === "start") {
-    graphicsLayer.removeAll();
-    errorHandler(false);
-  }
 
-  if (event.tool === "polyline" && event.state === "complete") {
-    const path = event.graphic.geometry.paths[0];
-    if (path.length < 3) {
-      errorHandler(true);
-      return;
-    }
-    calculateGrid(event, gridSpacing);
-
-    const polygon = new Polygon({
-      rings: path,
-      spatialReference: view.spatialReference,
-    });
-
-    setTimeout(() => takeScreenshot(polygon.centroid, false), 200);
-  }
-
+let gridPointsHandler;
+sketch.on("create", (event) => {
   if (event.tool === "point" && event.state === "complete") {
-    // do something here
+    graphicsLayer.remove(event.graphic);
+    graphicsLayer.add(
+      new Graphic({
+        geometry: event.graphic.geometry,
+        symbol: {
+          type: "simple-marker",
+          color: [90, 90, 90, 0],
+        },
+      })
+    );
+
+    const point = event.graphic.geometry;
+    gridPointsHandler(current => [...current, point]);
   }
 });
 
-// create drop down menu for selection of grid spacing
-const userInputDiv = document.createElement("div");
-userInputDiv.className = "input-container";
+sketch.on("delete", (event) => {
+  let points = event.graphics.map(graphic => graphic.geometry);
+  gridPointsHandler(current => current.filter(point => !points.includes(point)));
+});
 
-const dropDownDiv = document.createElement("div");
-dropDownDiv.className = "input-section";
-
-const dropDown = document.createElement("select");
-dropDown.id = "grid-spacing";
-dropDown.className = "spacing-dropdown";
-dropDown.onchange = (event) => {
-  gridSpacing = parseInt(event.target.value);
-};
-
-const option1 = document.createElement("option");
-option1.value = 5;
-option1.innerText = "5 Meter";
-
-const option2 = document.createElement("option");
-option2.value = 10;
-option2.innerText = "10 Meter";
-
-dropDown.appendChild(option2);
-dropDown.appendChild(option1);
-
-const spacingLabel = document.createElement("label");
-spacingLabel.innerText = "Abstand der Sonden";
-spacingLabel.for = "grid-spacing";
-
-dropDownDiv.appendChild(spacingLabel);
-dropDownDiv.appendChild(dropDown);
-
-userInputDiv.appendChild(dropDownDiv);
-
-// Bohrtiefe
-let handleBohrtiefe;
-const bohrtiefeInput = document.createElement("input");
-bohrtiefeInput.id = "bohrtiefe-input";
-bohrtiefeInput.type = "number";
-bohrtiefeInput.min = 80;
-bohrtiefeInput.max = 300;
-bohrtiefeInput.value = 100;
-bohrtiefeInput.onchange = (event) => {
-  handleBohrtiefe(parseInt(event.target.value));
-};
-const bohrtiefeLabel = document.createElement("label");
-bohrtiefeLabel.for = "bohrtiefe-input";
-bohrtiefeLabel.innerText = "Bohrtiefe in Meter";
-
-const bohrtiefeInputDiv = document.createElement("div");
-bohrtiefeInputDiv.className = "input-section";
-
-bohrtiefeInputDiv.appendChild(bohrtiefeLabel);
-bohrtiefeInputDiv.appendChild(bohrtiefeInput);
-
-userInputDiv.appendChild(bohrtiefeInputDiv);
-
-// Betriebsstunden Heizen
-let BS_HZ = 0;
-const bsHZInput = document.createElement("input");
-bsHZInput.id = "bshz-input";
-bsHZInput.type = "number";
-bsHZInput.min = 0;
-bsHZInput.onchange = (event) => {
-  BS_HZ = parseInt(event.target.value);
-};
-const bsHZLabel = document.createElement("label");
-bsHZLabel.for = "bshz-input";
-bsHZLabel.innerText = "Betriebsstunden Heizen pro Jahr (optional)";
-
-const bsHZInputDiv = document.createElement("div");
-bsHZInputDiv.className = "input-section";
-
-bsHZInputDiv.appendChild(bsHZLabel);
-bsHZInputDiv.appendChild(bsHZInput);
-
-userInputDiv.appendChild(bsHZInputDiv);
-
-// Betriebsstunden Kühlen
-let BS_KL = 0;
-const bsKLInput = document.createElement("input");
-bsKLInput.id = "bskl-input";
-bsKLInput.type = "number";
-bsKLInput.min = 0;
-bsKLInput.onchange = (event) => {
-  BS_KL = parseInt(event.target.value);
-};
-const bsKLLabel = document.createElement("label");
-bsKLLabel.for = "bskl-input";
-bsKLLabel.innerText = "Betriebsstunden Kühlen pro Jahr (optional)";
-
-const bsKLInputDiv = document.createElement("div");
-bsKLInputDiv.className = "input-section";
-
-bsKLInputDiv.appendChild(bsKLLabel);
-bsKLInputDiv.appendChild(bsKLInput);
-
-userInputDiv.appendChild(bsKLInputDiv);
-
-// Leistung Heizen
-let P_HZ = 0;
-const pHZInput = document.createElement("input");
-pHZInput.id = "pHZ-input";
-pHZInput.type = "number";
-pHZInput.min = 0;
-pHZInput.onchange = (event) => {
-  P_HZ = parseInt(event.target.value);
-};
-const pHZLabel = document.createElement("label");
-pHZLabel.for = "pHZ-input";
-pHZLabel.innerText = "Heizleistung in kW (optional)";
-
-const pHZInputDiv = document.createElement("div");
-pHZInputDiv.className = "input-section";
-
-pHZInputDiv.appendChild(pHZLabel);
-pHZInputDiv.appendChild(pHZInput);
-
-userInputDiv.appendChild(pHZInputDiv);
-
-// Leistung
-let P_KL = 0;
-const pKLInput = document.createElement("input");
-pKLInput.id = "pKL-input";
-pKLInput.type = "number";
-pKLInput.min = 0;
-pKLInput.onchange = (event) => {
-  P_KL = parseInt(event.target.value);
-};
-const pKLLabel = document.createElement("label");
-pKLLabel.for = "pKL-input";
-pKLLabel.innerText = "Kühlleistung in kW (optional)";
-
-const pKLInputDiv = document.createElement("div");
-pKLInputDiv.className = "input-section";
-
-pKLInputDiv.appendChild(pKLLabel);
-pKLInputDiv.appendChild(pKLInput);
-
-userInputDiv.appendChild(pKLInputDiv);
 
 view.ui.add([layerList, legend, search, sketch, userInputDiv], "top-left");
+
+// register event handlers for mouse clicks
+let handleIdentifyAmpelkarte,
+  screenshotHandler,
+  handleIdentifyGWWP,
+  handleIdentifyEWS,
+  dispatchHandler;
+view.on("click", ({ mapPoint }) => {
+  polygonGraphicsLayer.removeAll();
+  graphicsLayer.removeAll();
+
+  dispatchHandler(updateWithResult({}));
+  gridPointsHandler([]);
+
+  queryCadastre(mapPoint);
+  identifyLayers(mapPoint);
+  getAddress(mapPoint);
+  setTimeout(() => takeScreenshot(mapPoint), 200);
+});
 
 let handleAddress;
 function getAddress(mapPoint) {
@@ -320,22 +201,9 @@ function getAddress(mapPoint) {
   );
 }
 
-// register event handlers for mouse clicks
-let handleIdentifyAmpelkarte,
-  screenshotHandler,
-  pythonScriptHandler,
-  setCalculating,
-  handleIdentifyGWWP,
-  handleIdentifyEWS,
-  handleIdentifyBetriebsstunden;
-view.on("click", ({ mapPoint }) => {
-  takeScreenshot(mapPoint);
-  getAddress(mapPoint);
-  identifyLayers(mapPoint);
-});
-
 let BT, GT, WLF, BS_KL_Norm, BS_HZ_Norm;
-export const identifyLayers = (mapPoint, drawnProbeheads = 0) => {
+let identifyResultsHandler;
+export const identifyLayers = (mapPoint) => {
   const params = new IdentifyParameters();
   params.geometry = mapPoint;
   params.tolerance = 0;
@@ -357,15 +225,18 @@ export const identifyLayers = (mapPoint, drawnProbeheads = 0) => {
     handleIdentifyEWS(res.results);
 
     identify.identify(betriebsstunden_url, params).then((res) => {
-      handleIdentifyBetriebsstunden(res.results);
       BS_KL_Norm = res.results.find((result) => result.layerId === 0)?.feature
         .attributes["Pixel Value"];
       BS_HZ_Norm = res.results.find((result) => result.layerId === 1)?.feature
         .attributes["Pixel Value"];
 
-      if (view.scale <= 20000 && BT && GT && WLF && BS_KL_Norm && BS_HZ_Norm) {
-        queryCadastreAndRunScript(mapPoint, drawnProbeheads);
-      }
+      identifyResultsHandler({
+        BT,
+        GT,
+        WLF,
+        BS_HZ_Norm,
+        BS_KL_Norm,
+      });
     });
   });
 
@@ -378,7 +249,10 @@ export const identifyLayers = (mapPoint, drawnProbeheads = 0) => {
   });
 };
 
-const queryCadastreAndRunScript = (mapPoint, drawnProbeheads) => {
+let setPolygonHandler;
+let cadastralDataHandler;
+let KG, EZ, GNR, FF = 0;
+const queryCadastre = (mapPoint) => {
   const { x, y } = view.toScreen(mapPoint);
   let url =
     "https://data.bev.gv.at/geoserver/BEVdataKAT/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:3857&INFO_FORMAT=application/json";
@@ -410,45 +284,45 @@ const queryCadastreAndRunScript = (mapPoint, drawnProbeheads) => {
       response.data.features.length > 0
     ) {
       const feature = response.data.features[0];
-      const KG = feature.properties.KG;
-      const GNR = feature.properties.GNR;
+      KG = feature.properties.KG;
+      GNR = feature.properties.GNR;
       url = "https://kataster.bev.gv.at/api/gst/" + KG + "/" + GNR;
 
-      esriRequest(url, { responseType: "json" }).then((cadastralResponse) => {
-        let EZ;
-        let FF = 0;
-        if (cadastralResponse.data) {
-          EZ = cadastralResponse.data.properties.ez;
-          const garten = cadastralResponse.data.properties.nutzungen.find(
-            (element) => element.nutzung === "Gärten"
-          );
-          if (garten) FF = garten.fl;
+      const polygon = new Polygon({ rings: feature.geometry.coordinates, spatialReference: view.spatialReference });
+      setPolygonHandler(polygon);
 
-          setCalculating(true);
-          pythonScriptHandler({
-            KG,
-            GNR,
-            EZ,
-            FF,
-            BT,
-            GT,
-            WLF,
-            BS_HZ_Norm,
-            BS_KL_Norm,
-            BS_HZ,
-            BS_KL,
-            P_HZ,
-            P_KL,
-            drawnProbeheads,
-          });
+      const polygonSymbol = {
+        type: "simple-fill",
+        color: [51, 51, 204, 0],
+        style: "solid",
+        outline: {
+          color: "white",
+          width: 1
         }
+      };
+
+      const polygonGraphic = new Graphic({
+        geometry: polygon,
+        symbol: polygonSymbol,
+      });
+
+      polygonGraphicsLayer.add(polygonGraphic);
+
+      esriRequest(url, { responseType: "json" }).then(({ data }) => {
+        EZ = data.properties.ez;
+        const garten = data.properties.nutzungen.find(
+          (element) => element.nutzung === "Gärten"
+        );
+        if (garten) FF = garten.fl;
+
+        cadastralDataHandler({ KG, GNR, EZ, FF });
       });
     }
   });
 };
 
 // take screenshot for info panel
-export const takeScreenshot = (mapPoint, withMarker = true) => {
+export const takeScreenshot = (mapPoint, withMarker = false) => {
   const screenPoint = view.toScreen(mapPoint);
   const width = 1000;
   const height = 500;
@@ -511,30 +385,28 @@ export function initialize(container) {
 }
 
 // initialize handlers
-export function initializeHandlers(
+export function initializeInfoPanel(
   identifyAmpelkarteCallback,
-  errorCallback,
   scaleCallback,
   screenShotCallback,
-  pythonScriptCallback,
-  setIsCalculatingCallback,
   identifyGWWPCallback,
   identifyEWSCallback,
-  identifyBetriebsstundenCallback,
   addressCallback,
-  bohrtiefeCallback
 ) {
   handleIdentifyAmpelkarte = identifyAmpelkarteCallback;
-  errorHandler = errorCallback;
   scaleHandler = scaleCallback;
   screenshotHandler = screenShotCallback;
-  pythonScriptHandler = pythonScriptCallback;
-  setCalculating = setIsCalculatingCallback;
   handleIdentifyGWWP = identifyGWWPCallback;
   handleIdentifyEWS = identifyEWSCallback;
-  handleIdentifyBetriebsstunden = identifyBetriebsstundenCallback;
   handleAddress = addressCallback;
-  handleBohrtiefe = bohrtiefeCallback;
+}
+
+export function initializeCalculationsMenu(setPolygonCallback, setIdentifyResultsCallback, setGridPointsCallback, dispatchCallback, setCadastralDataCallback) {
+  setPolygonHandler = setPolygonCallback;
+  identifyResultsHandler = setIdentifyResultsCallback;
+  gridPointsHandler = setGridPointsCallback;
+  dispatchHandler = dispatchCallback;
+  cadastralDataHandler = setCadastralDataCallback;
 }
 
 export const updateLocale = (locale) => {
