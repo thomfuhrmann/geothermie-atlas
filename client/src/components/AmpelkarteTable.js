@@ -1,5 +1,5 @@
 import React from "react";
-import { einschraenkungen, hinweise } from "../Beschreibungen";
+import { einschraenkungen, hinweise } from "../assets/Beschreibungen";
 
 import { TableHeader, TableRow, TableData } from "./CommonStyledElements";
 

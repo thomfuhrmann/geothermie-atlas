@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import { initializeInfoPanelHandlers } from "../utils/view";
 import { AmpelkarteTable } from "./AmpelkarteTable";
-import { ews_erklaerungen, gwwp_erklaerungen } from "../Beschreibungen";
+import { ews_erklaerungen, gwwp_erklaerungen } from "../assets/Beschreibungen";
 
 import {
   Table,
