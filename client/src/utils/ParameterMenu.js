@@ -142,7 +142,7 @@ pKLInputDiv.appendChild(pKLInput);
 
 userInputDiv.appendChild(pKLInputDiv);
 
-export function initializeParameterMenu(setGridSpacingCallback, setBohrtiefeCallback, setBS_HZCallback, setBS_KLCallback, setP_HZCallback, setP_KLCallback) {
+export function initializeParameterMenuHandlers(setGridSpacingCallback, setBohrtiefeCallback, setBS_HZCallback, setBS_KLCallback, setP_HZCallback, setP_KLCallback) {
     gridSpacingHandler = setGridSpacingCallback;
     bohrtiefeHandler = setBohrtiefeCallback;
     BS_HZHandler = setBS_HZCallback;

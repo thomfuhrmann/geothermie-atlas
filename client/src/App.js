@@ -1,42 +1,25 @@
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import styled from "styled-components";
+import Layout from "./pages/Layout";
+import Map from "./pages/Map";
+import Help from "./pages/Help";
+import Impressum from "./pages/Impressum";
+import Data from "./pages/Data";
 
-import Header from "./components/Header";
-import InfoPanel from "./components/InfoPanel";
-import CalculationsMenu from "./components/CalculationsMenu";
-import LoadingSpinner from "./components/LoadingSpinner";
-
-import { initialize } from "./utils/view";
-
-const StyledMapDiv = styled.div`
-  padding: 0;
-  margin: 0;
-  height: 95%;
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-`;
 
 function App() {
-  const mapDiv = useRef(null);
-
-  const [loading, setLoading] = useState(null);
-
-  useEffect(() => {
-    // initialize the map interface
-    initialize(mapDiv.current);
-  }, []);
-
   return (
-    <div>
-      <Header></Header>
-      <StyledMapDiv ref={mapDiv}>
-        <CalculationsMenu isLoading={setLoading}></CalculationsMenu>
-        <InfoPanel></InfoPanel>
-        {loading && <LoadingSpinner></LoadingSpinner>}
-      </StyledMapDiv>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Map />} />
+          <Route path="data" element={<Data />} />
+          <Route path="help" element={<Help />} />
+          <Route path="impressum" element={<Impressum />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

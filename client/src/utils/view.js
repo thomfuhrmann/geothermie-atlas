@@ -69,6 +69,7 @@ export const cadastre = new WMSLayer({
 cadastre.when(() => {
   cadastre.findSublayerByName("DKM_NFL").legendEnabled = false;
   cadastre.findSublayerByName("DKM_GST").legendEnabled = false;
+  cadastre.findSublayerByName("KAT_DKM_GST-NFL").legendEnabled = false;
 });
 
 export const arcgisMap = new ArcGISMap({
@@ -77,7 +78,6 @@ export const arcgisMap = new ArcGISMap({
 });
 
 export const view = new MapView({
-  map: arcgisMap,
   extent: new Extent({
     xmin: 4775000,
     ymin: 2795000,
@@ -180,9 +180,10 @@ view.on("click", ({ mapPoint }) => {
   queryCadastre(mapPoint);
   identifyLayers(mapPoint);
   getAddress(mapPoint);
-  setTimeout(() => takeScreenshot(mapPoint), 200);
+  setTimeout(() => takeScreenshot(mapPoint), 500);
 });
 
+// reverse-geocode address for a given point
 let handleAddress;
 function getAddress(mapPoint) {
   const serviceUrl =
@@ -192,7 +193,6 @@ function getAddress(mapPoint) {
   };
   locator.locationToAddress(serviceUrl, params).then(
     function (response) {
-      // Show the address found
       handleAddress(response.address.split(","));
     },
     function () {
@@ -201,6 +201,7 @@ function getAddress(mapPoint) {
   );
 }
 
+// query layers
 let BT, GT, WLF, BS_KL_Norm, BS_HZ_Norm;
 let identifyResultsHandler;
 export const identifyLayers = (mapPoint) => {
@@ -259,23 +260,7 @@ const queryCadastre = (mapPoint) => {
   const { xmin, ymin, xmax, ymax } = view.extent;
   const width = view.width;
   const height = view.height;
-  url +=
-    "&BBOX=" +
-    xmin +
-    "," +
-    ymin +
-    "," +
-    xmax +
-    "," +
-    ymax +
-    "&WIDTH=" +
-    width +
-    "&HEIGHT=" +
-    height +
-    "&I=" +
-    Math.round(x) +
-    "&J=" +
-    Math.round(y);
+  url += "&BBOX=" + xmin + "," + ymin + "," + xmax + "," + ymax + "&WIDTH=" + width + "&HEIGHT=" + height + "&I=" + Math.round(x) + "&J=" + Math.round(y);
 
   esriRequest(url, { responseType: "json" }).then((response) => {
     if (
@@ -381,11 +366,13 @@ export const takeScreenshot = (mapPoint, withMarker = false) => {
 
 // initialize the map view container
 export function initialize(container) {
+  view.map = arcgisMap;
   view.container = container;
+  return view;
 }
 
 // initialize handlers
-export function initializeInfoPanel(
+export function initializeInfoPanelHandlers(
   identifyAmpelkarteCallback,
   scaleCallback,
   screenShotCallback,
@@ -401,7 +388,7 @@ export function initializeInfoPanel(
   handleAddress = addressCallback;
 }
 
-export function initializeCalculationsMenu(setPolygonCallback, setIdentifyResultsCallback, setGridPointsCallback, dispatchCallback, setCadastralDataCallback) {
+export function initializeCalculationsMenuHandlers(setPolygonCallback, setIdentifyResultsCallback, setGridPointsCallback, dispatchCallback, setCadastralDataCallback) {
   setPolygonHandler = setPolygonCallback;
   identifyResultsHandler = setIdentifyResultsCallback;
   gridPointsHandler = setGridPointsCallback;

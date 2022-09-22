@@ -6,7 +6,7 @@ import "jspdf-autotable";
 
 import { useSelector } from "react-redux";
 
-import { initializeInfoPanel } from "../utils/view";
+import { initializeInfoPanelHandlers } from "../utils/view";
 import { AmpelkarteTable } from "./AmpelkarteTable";
 import { ews_erklaerungen, gwwp_erklaerungen } from "../Beschreibungen";
 
@@ -17,10 +17,10 @@ import {
   TableHeader,
 } from "./CommonStyledElements";
 
-const StyledInfoPanel = styled.div`
+const InfoPanelContainer = styled.div`
   position: absolute;
   top: 15px;
-  right: 30px;
+  right: 15px;
   width: 20%;
   height: auto;
   max-height: 90%;
@@ -88,7 +88,7 @@ export default function InfoPanel(props) {
 
   // initialize query handlers
   useEffect(() => {
-    initializeInfoPanel(
+    initializeInfoPanelHandlers(
       setIdentifyAmpelkarte,
       setScale,
       setScreenshot,
@@ -306,7 +306,7 @@ export default function InfoPanel(props) {
   };
 
   return (
-    <StyledInfoPanel ref={infoDivRef}>
+    <InfoPanelContainer ref={infoDivRef}>
       {!identifyAmpelkarte ? (
         <div>
           <p>{t("info_div.instruction_click")}</p>
@@ -526,6 +526,6 @@ export default function InfoPanel(props) {
           </table>
         </>
       )}
-    </StyledInfoPanel>
+    </InfoPanelContainer>
   );
 }

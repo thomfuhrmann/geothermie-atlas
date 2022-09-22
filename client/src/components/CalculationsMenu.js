@@ -5,9 +5,9 @@ import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import { updateWithResult } from "../redux/computationResultSlice";
 
-import { initializeCalculationsMenu, takeScreenshot } from "../utils/view";
+import { initializeCalculationsMenuHandlers, takeScreenshot } from "../utils/view";
 import { calculateGrid } from "../utils/orthogonal_gridcomputer";
-import { initializeParameterMenu } from "../utils/ParameterMenu";
+import { initializeParameterMenuHandlers } from "../utils/ParameterMenu";
 
 const Menu = styled.div`
     position: absolute;
@@ -62,7 +62,7 @@ export default function CalculationsMenu({ isLoading }) {
 
     // run python script with values from layers
     const handlePythonCalculation = () => {
-        if (identifyResults) {
+        if (cadastralData && identifyResults) {
             takeScreenshot(polygon.centroid);
             isLoading(true);
             let url = "/api";
@@ -104,7 +104,7 @@ export default function CalculationsMenu({ isLoading }) {
     };
 
     useEffect(() => {
-        initializeCalculationsMenu(
+        initializeCalculationsMenuHandlers(
             setPolygon,
             setIdentifyResults,
             setGridPoints,
@@ -112,12 +112,13 @@ export default function CalculationsMenu({ isLoading }) {
             setCadastralData
         );
 
-        initializeParameterMenu(setGridSpacing, setBohrtiefe, setBS_HZ, setBS_KL, setP_HZ, setP_KL);
+        initializeParameterMenuHandlers(setGridSpacing, setBohrtiefe, setBS_HZ, setBS_KL, setP_HZ, setP_KL);
     }, [dispatch]);
 
 
     return ((<Menu> {
-        polygon && <>
+        polygon &&
+        <>
             <ButtonDiv><Button onClick={handleGridCalculation}>Erdwärmesondennetz zeichnen</Button></ButtonDiv>
             <ButtonDiv><Button onClick={handlePythonCalculation}>Berechnung starten</Button></ButtonDiv>
         </>}
