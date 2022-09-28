@@ -1,35 +1,77 @@
-.esri-component.esri-layer-list.esri-widget.esri-widget--panel{
-    max-height: 500px;
+.esri-component.esri-layer-list.esri-widget.esri-widget--panel {
+  max-height: 500px;
 }
 
 .esri-component.esri-legend.esri-widget.esri-widget--panel {
-    max-height: 300px;
+  max-height: 300px;
 }
 
 .spacing-dropdown {
-    background-color: white;
-    border: 1px solid #afafaf;
-    border-radius: 0px;
+  background-color: white;
+  border: 1px solid #afafaf;
+  border-radius: 0px;
 }
 
 .input-container {
-    box-sizing: border-box;
-    background-color: white;
-    padding: 10px;
-    margin: 0px;
-    width: 300px;
+  box-sizing: border-box;
+  background-color: white;
+  padding: 10px;
+  margin: 0px;
+  width: 300px;
 }
 
 .input-section {
-    padding-bottom: 10px;
+  padding-bottom: 10px;
 }
 
-input, select {
-    font-family: inherit;
-    font-size: 100%;
-    box-sizing: border-box;
-    width : 100%;
-    padding: 0;
-    margin: 0;
-  }
-  
+input,
+select {
+  font-family: inherit;
+  font-size: 100%;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.collapsible-container {
+  width: 300px;
+  height: fit-content;
+  background-color: white;
+}
+
+.collapsible-button {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active,
+.collapsible-button:hover {
+  background-color: #ccc;
+}
+
+.collapsible-content {
+  padding: 15px 18px;
+  background-color: white;
+  display: none;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+.collapsible-button:after {
+  content: "+";
+  font-size: 13px;
+  color: black;
+  float: right;
+}
+
+.active:after {
+  content: "-";
+}

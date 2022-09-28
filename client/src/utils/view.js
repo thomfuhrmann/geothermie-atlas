@@ -1,8 +1,10 @@
 import ArcGISMap from "@arcgis/core/Map";
 import Extent from "@arcgis/core/geometry/Extent";
 import MapView from "@arcgis/core/views/MapView";
+import Basemap from "@arcgis/core/Basemap";
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
+import WMTSLayer from "@arcgis/core/layers/WMTSLayer";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference";
 import LayerList from "@arcgis/core/widgets/LayerList";
 import Legend from "@arcgis/core/widgets/Legend";
@@ -15,20 +17,28 @@ import esriRequest from "@arcgis/core/request";
 import * as identify from "@arcgis/core/rest/identify";
 import IdentifyParameters from "@arcgis/core/rest/support/IdentifyParameters";
 import * as locator from "@arcgis/core/rest/locator";
-import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import Polygon from "@arcgis/core/geometry/Polygon";
 import Graphic from "@arcgis/core/Graphic";
+import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 
 import { updateWithResult } from "../redux/computationResultSlice";
-import { userInputDiv } from "./ParameterMenu";
+import { collapsible } from "./ParameterMenu";
 
-export const graphicsLayer = new GraphicsLayer({
+const SRS = 31256;
+
+export const pointGraphicsLayer = new GraphicsLayer({
   title: "Planung Erdwärmesonden",
+  listMode: "hide",
+});
+
+export const boundaryGraphicsLayer = new GraphicsLayer({
+  title: "Planung Erdwärmesonden",
+  listMode: "hide",
 });
 
 const polygonGraphicsLayer = new GraphicsLayer({
   title: "Grundstück",
-  listMode: "hide"
+  listMode: "hide",
 });
 
 // instantiate layers
@@ -37,7 +47,8 @@ const ampelkarte_url =
 const ampelkarte = new MapImageLayer({
   url: ampelkarte_url,
   title: "Ampelkarte",
-  visible: true,
+  visible: false,
+  listMode: "hide",
 });
 
 const gwwp_url =
@@ -45,6 +56,7 @@ const gwwp_url =
 export const gwwp = new MapImageLayer({
   title: "Grundwasserwärmepumpen",
   url: gwwp_url,
+  visible: false,
 });
 
 const ews_url =
@@ -52,6 +64,7 @@ const ews_url =
 const ews = new MapImageLayer({
   title: "Erdwärmesonden",
   url: ews_url,
+  visible: false,
 });
 
 const betriebsstunden_url =
@@ -59,44 +72,79 @@ const betriebsstunden_url =
 const betriebsstunden = new MapImageLayer({
   title: "Betriebsstunden",
   url: betriebsstunden_url,
+  visible: false,
 });
 
+// "http://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-382e30c7-69df-4a53-9331-c44821d9916e"
 export const cadastre = new WMSLayer({
   title: "Kataster",
   url: "https://data.bev.gv.at/geoserver/BEVdataKAT/wms",
+  spatialReference: SRS,
 });
 
-cadastre.when(() => {
-  cadastre.findSublayerByName("DKM_NFL").legendEnabled = false;
-  cadastre.findSublayerByName("DKM_GST").legendEnabled = false;
-  cadastre.findSublayerByName("KAT_DKM_GST-NFL").legendEnabled = false;
+export const cadastreOverlay = new WMSLayer({
+  title: "Kataster",
+  url: "https://data.bev.gv.at/geoserver/BEVdataKAT/wms",
+  listMode: "hide",
+  spatialReference: SRS,
+});
+
+cadastreOverlay.when(() => {
+  cadastreOverlay.findSublayerByName("DKM_NFL").legendEnabled = false;
+  cadastreOverlay.findSublayerByName("DKM_NFL").visible = false;
+  cadastreOverlay.findSublayerByName("DKM_GST").legendEnabled = false;
+  cadastreOverlay.findSublayerByName("KAT_DKM_GST-NFL").legendEnabled = false;
+  cadastreOverlay.findSublayerByName("KAT_DKM_GST-NFL").visible = false;
+});
+
+// "https://basemap.at/wmts/1.0.0/WMTSCapabilities.xml"
+const basemap_at = new WMTSLayer({
+  url: "https://maps.wien.gv.at/basemap/1.0.0/WMTSCapabilities_31256.xml",
+  activeLayer: {
+    id: "geolandbasemap",
+  },
+  listMode: "hide",
+});
+
+let basemap = new Basemap({
+  baseLayers: [cadastre],
+  title: "basemap",
+  id: "basemap",
+  spatialReference: SRS,
 });
 
 export const arcgisMap = new ArcGISMap({
-  basemap: "gray-vector",
-  layers: [betriebsstunden, gwwp, ews, ampelkarte, cadastre, graphicsLayer, polygonGraphicsLayer],
+  //basemap: "gray-vector",
+  basemap: basemap,
+  layers: [
+    basemap_at,
+    betriebsstunden,
+    gwwp,
+    ews,
+    ampelkarte,
+    cadastreOverlay,
+    pointGraphicsLayer,
+    boundaryGraphicsLayer,
+    polygonGraphicsLayer,
+  ],
 });
 
 export const view = new MapView({
   extent: new Extent({
-    xmin: 4775000,
-    ymin: 2795000,
-    xmax: 4816000,
-    ymax: 2824000,
-    spatialReference: new SpatialReference({ wkid: 3035 }),
+    xmin: -14663,
+    ymin: 326096,
+    xmax: 23660,
+    ymax: 352619,
+    spatialReference: new SpatialReference({ wkid: SRS }),
   }),
 });
 
-view.ui.components = [];
-
-// listen to scale changes
-let scaleHandler;
 reactiveUtils.watch(
-  () => view?.scale,
-  (scale) => {
-    scaleHandler(scale);
-  }
+  () => view.scale,
+  () => console.log(view.scale)
 );
+
+view.ui.components = [];
 
 const layerList = new LayerList({ view });
 
@@ -107,7 +155,7 @@ const legend = new Legend({
 
 const search = new Search({
   view,
-  popupEnabled: false
+  popupEnabled: false,
 });
 
 const scaleBar = new ScaleBar({
@@ -118,7 +166,7 @@ const scaleBar = new ScaleBar({
 view.ui.add(scaleBar, "bottom-left");
 
 const sketch = new Sketch({
-  layer: graphicsLayer,
+  layer: pointGraphicsLayer,
   view: view,
   // graphic will be selected as soon as it is created
   availableCreateTools: ["point"],
@@ -136,12 +184,11 @@ const sketch = new Sketch({
   },
 });
 
-
 let gridPointsHandler;
 sketch.on("create", (event) => {
   if (event.tool === "point" && event.state === "complete") {
-    graphicsLayer.remove(event.graphic);
-    graphicsLayer.add(
+    pointGraphicsLayer.remove(event.graphic);
+    pointGraphicsLayer.add(
       new Graphic({
         geometry: event.graphic.geometry,
         symbol: {
@@ -152,17 +199,18 @@ sketch.on("create", (event) => {
     );
 
     const point = event.graphic.geometry;
-    gridPointsHandler(current => [...current, point]);
+    gridPointsHandler((current) => [...current, point]);
   }
 });
 
 sketch.on("delete", (event) => {
-  let points = event.graphics.map(graphic => graphic.geometry);
-  gridPointsHandler(current => current.filter(point => !points.includes(point)));
+  let points = event.graphics.map((graphic) => graphic.geometry);
+  gridPointsHandler((current) =>
+    current.filter((point) => !points.includes(point))
+  );
 });
 
-
-view.ui.add([layerList, legend, search, sketch, userInputDiv], "top-left");
+view.ui.add([layerList, legend, search, sketch, collapsible], "top-left");
 
 // register event handlers for mouse clicks
 let handleIdentifyAmpelkarte,
@@ -172,7 +220,8 @@ let handleIdentifyAmpelkarte,
   dispatchHandler;
 view.on("click", ({ mapPoint }) => {
   polygonGraphicsLayer.removeAll();
-  graphicsLayer.removeAll();
+  pointGraphicsLayer.removeAll();
+  boundaryGraphicsLayer.removeAll();
 
   dispatchHandler(updateWithResult({}));
   gridPointsHandler([]);
@@ -180,7 +229,12 @@ view.on("click", ({ mapPoint }) => {
   queryCadastre(mapPoint);
   identifyLayers(mapPoint);
   getAddress(mapPoint);
-  setTimeout(() => takeScreenshot(mapPoint), 500);
+
+  if (view.scale > 37000) {
+    setTimeout(() => takeScreenshot(mapPoint, true), 500);
+  } else {
+    setTimeout(() => takeScreenshot(mapPoint), 500);
+  }
 });
 
 // reverse-geocode address for a given point
@@ -252,15 +306,34 @@ export const identifyLayers = (mapPoint) => {
 
 let setPolygonHandler;
 let cadastralDataHandler;
-let KG, EZ, GNR, FF = 0;
+let KG,
+  EZ,
+  GNR,
+  FF = 0;
 const queryCadastre = (mapPoint) => {
   const { x, y } = view.toScreen(mapPoint);
   let url =
-    "https://data.bev.gv.at/geoserver/BEVdataKAT/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:3857&INFO_FORMAT=application/json";
+    "https://data.bev.gv.at/geoserver/BEVdataKAT/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:31256&INFO_FORMAT=application/json";
   const { xmin, ymin, xmax, ymax } = view.extent;
   const width = view.width;
   const height = view.height;
-  url += "&BBOX=" + xmin + "," + ymin + "," + xmax + "," + ymax + "&WIDTH=" + width + "&HEIGHT=" + height + "&I=" + Math.round(x) + "&J=" + Math.round(y);
+  url +=
+    "&BBOX=" +
+    ymin +
+    "," +
+    xmin +
+    "," +
+    ymax +
+    "," +
+    xmax +
+    "&WIDTH=" +
+    width +
+    "&HEIGHT=" +
+    height +
+    "&I=" +
+    Math.round(x) +
+    "&J=" +
+    Math.round(y);
 
   esriRequest(url, { responseType: "json" }).then((response) => {
     if (
@@ -271,9 +344,12 @@ const queryCadastre = (mapPoint) => {
       const feature = response.data.features[0];
       KG = feature.properties.KG;
       GNR = feature.properties.GNR;
-      url = "https://kataster.bev.gv.at/api/gst/" + KG + "/" + GNR;
 
-      const polygon = new Polygon({ rings: feature.geometry.coordinates, spatialReference: view.spatialReference });
+      let polygon = new Polygon({
+        rings: feature.geometry.coordinates,
+        spatialReference: view.spatialReference,
+      });
+
       setPolygonHandler(polygon);
 
       const polygonSymbol = {
@@ -281,9 +357,9 @@ const queryCadastre = (mapPoint) => {
         color: [51, 51, 204, 0],
         style: "solid",
         outline: {
-          color: "white",
-          width: 1
-        }
+          color: "blue",
+          width: 1,
+        },
       };
 
       const polygonGraphic = new Graphic({
@@ -293,15 +369,18 @@ const queryCadastre = (mapPoint) => {
 
       polygonGraphicsLayer.add(polygonGraphic);
 
-      esriRequest(url, { responseType: "json" }).then(({ data }) => {
-        EZ = data.properties.ez;
-        const garten = data.properties.nutzungen.find(
-          (element) => element.nutzung === "Gärten"
-        );
-        if (garten) FF = garten.fl;
+      cadastralDataHandler({ KG, GNR, EZ, FF });
 
-        cadastralDataHandler({ KG, GNR, EZ, FF });
-      });
+      // url = "https://kataster.bev.gv.at/api/gst/" + KG + "/" + GNR;
+      // esriRequest(url, { responseType: "json" }).then(({ data }) => {
+      //   EZ = data.properties.ez;
+      //   const garten = data.properties.nutzungen.find(
+      //     (element) => element.nutzung === "Gärten"
+      //   );
+      //   if (garten) FF = garten.fl;
+
+      //   cadastralDataHandler({ KG, GNR, EZ, FF });
+      // });
     }
   });
 };
@@ -374,21 +453,25 @@ export function initialize(container) {
 // initialize handlers
 export function initializeInfoPanelHandlers(
   identifyAmpelkarteCallback,
-  scaleCallback,
   screenShotCallback,
   identifyGWWPCallback,
   identifyEWSCallback,
-  addressCallback,
+  addressCallback
 ) {
   handleIdentifyAmpelkarte = identifyAmpelkarteCallback;
-  scaleHandler = scaleCallback;
   screenshotHandler = screenShotCallback;
   handleIdentifyGWWP = identifyGWWPCallback;
   handleIdentifyEWS = identifyEWSCallback;
   handleAddress = addressCallback;
 }
 
-export function initializeCalculationsMenuHandlers(setPolygonCallback, setIdentifyResultsCallback, setGridPointsCallback, dispatchCallback, setCadastralDataCallback) {
+export function initializeCalculationsMenuHandlers(
+  setPolygonCallback,
+  setIdentifyResultsCallback,
+  setGridPointsCallback,
+  dispatchCallback,
+  setCadastralDataCallback
+) {
   setPolygonHandler = setPolygonCallback;
   identifyResultsHandler = setIdentifyResultsCallback;
   gridPointsHandler = setGridPointsCallback;
@@ -401,10 +484,10 @@ export const updateLocale = (locale) => {
   if (locale === "en") {
     for (const source of search.allSources)
       source.placeholder = "Find address or place";
-    graphicsLayer.title = "Geothermal planning";
+    pointGraphicsLayer.title = "Geothermal planning";
   } else {
     for (const source of search.allSources)
       source.placeholder = "Adresse oder Ort suchen";
-    graphicsLayer.title = "Geothermische Planung";
+    pointGraphicsLayer.title = "Geothermische Planung";
   }
 };

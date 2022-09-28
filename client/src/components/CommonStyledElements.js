@@ -5,6 +5,10 @@ import "tippy.js/dist/tippy.css";
 
 import info from "../assets/icons/information-line.svg";
 
+export const Placeholder = styled.div`
+  padding: 15px;
+`;
+
 const TablePadding = `padding: 10px;`;
 
 export const Table = styled.table`

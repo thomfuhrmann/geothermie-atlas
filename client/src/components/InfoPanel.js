@@ -3,18 +3,19 @@ import { useTranslation } from "react-i18next";
 import jsPDF from "jspdf";
 import styled from "styled-components";
 import "jspdf-autotable";
-
 import { useSelector } from "react-redux";
 
 import { initializeInfoPanelHandlers } from "../utils/view";
 import { AmpelkarteTable } from "./AmpelkarteTable";
 import { ews_erklaerungen, gwwp_erklaerungen } from "../assets/Beschreibungen";
+import CollapsibleSection from "./CollapsibleSection";
 
 import {
   Table,
   TableRow,
   TableData,
   TableHeader,
+  Placeholder,
 } from "./CommonStyledElements";
 
 const InfoPanelContainer = styled.div`
@@ -49,13 +50,9 @@ const PDFButton = styled.button`
   }
 `;
 
-const Screenshot = styled.img`
+const Image = styled.img`
   width: 100%;
   height: 100%;
-`;
-
-const Error = styled.p`
-  color: red;
 `;
 
 const Underline = styled.u`
@@ -66,15 +63,18 @@ const Underline = styled.u`
 export default function InfoPanel(props) {
   const infoDivRef = useRef(null);
   const sketchToolColor = useRef(null);
+  const image_bal = useRef(null);
+  const image_unbal = useRef(null);
 
-  const [scale, setScale] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
   const [identifyAmpelkarte, setIdentifyAmpelkarte] = useState(null);
   const [identifyGWWP, setIdentifyGWWP] = useState(null);
   const [identifyEWS, setIdentifyEWS] = useState(null);
   const [address, setAddress] = useState(null);
 
-  const computationResult = useSelector(store => store.computationResult.value);
+  const computationResult = useSelector(
+    (store) => store.computationResult.value
+  );
 
   const { t } = useTranslation();
 
@@ -90,11 +90,10 @@ export default function InfoPanel(props) {
   useEffect(() => {
     initializeInfoPanelHandlers(
       setIdentifyAmpelkarte,
-      setScale,
       setScreenshot,
       setIdentifyGWWP,
       setIdentifyEWS,
-      setAddress,
+      setAddress
     );
   }, []);
 
@@ -136,6 +135,11 @@ export default function InfoPanel(props) {
         html: "#ews-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text = "Ressourcen für Erdwärmesonden";
+          }
+        },
       });
     }
 
@@ -145,6 +149,11 @@ export default function InfoPanel(props) {
         html: "#gwwp-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text = "Ressourcen für thermische Grundwassernutzung";
+          }
+        },
       });
     }
 
@@ -154,6 +163,11 @@ export default function InfoPanel(props) {
         html: "#hinweise-ews-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text = "Hinweise Erdwärmesonden";
+          }
+        },
       });
     }
 
@@ -163,6 +177,11 @@ export default function InfoPanel(props) {
         html: "#hinweise-gwwp-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text = "Hinweise thermische Grundwassernutzung";
+          }
+        },
       });
     }
 
@@ -172,6 +191,11 @@ export default function InfoPanel(props) {
         html: "#einschraenkungen-ews-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text = "Einschränkungen Erdwärmesonden";
+          }
+        },
       });
     }
 
@@ -181,6 +205,11 @@ export default function InfoPanel(props) {
         html: "#einschraenkungen-gwwp-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text = "Einschränkungen thermische Grundwassernutzung";
+          }
+        },
       });
     }
 
@@ -190,33 +219,82 @@ export default function InfoPanel(props) {
         html: "#erlaeuterungen-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text = "Erläuterungen zu den Einschränkungen";
+          }
+        },
       });
     }
 
     finalY = doc.lastAutoTable.finalY;
     if (Object.keys(computationResult).length !== 0) {
       doc.autoTable({
-        html: "#gesamtpotential-table",
+        html: "#calculations-output-table",
         rowPageBreak: "avoid",
         startY: finalY + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text = "Berechnungsergebnis für Erdwärmesonden";
+          }
+        },
       });
     }
 
     finalY = doc.lastAutoTable.finalY;
-    if (Object.keys(computationResult).length !== 0 && computationResult.sondenleistung !== 0) {
+    let height = 0;
+    if (Object.keys(computationResult).length !== 0) {
+      const imgProps = doc.getImageProperties(image_unbal.current);
+      const width = doc.internal.pageSize.getWidth() - 40;
+      const totalHeight = doc.internal.pageSize.getHeight();
+      height = (imgProps.height * width) / imgProps.width;
+      if (height > totalHeight - finalY) {
+        doc.addPage();
+        doc.addImage(image_unbal.current, "PNG", 20, 20, width, height);
+      } else {
+        doc.addImage(image_unbal.current, "PNG", 20, finalY, width, height);
+      }
+    }
+
+    finalY = doc.lastAutoTable.finalY;
+    if (Object.keys(computationResult).length !== 0) {
       doc.autoTable({
-        html: "#gebaeude-dimensionierung-table",
+        html: "#calculations-bal-output-table",
         rowPageBreak: "avoid",
-        startY: finalY + 10,
+        startY: finalY + height + 10,
+        willDrawCell: function (data) {
+          if (data.section === "head") {
+            data.cell.text =
+              "Berechnungsergebnis für Erdwärmesonden (bilanzierter Betrieb)";
+          }
+        },
       });
+    }
+
+    finalY = doc.lastAutoTable.finalY;
+    height = 0;
+    if (Object.keys(computationResult).length !== 0) {
+      const imgProps = doc.getImageProperties(image_bal.current);
+      const width = doc.internal.pageSize.getWidth() - 40;
+      const totalHeight = doc.internal.pageSize.getHeight();
+      height = (imgProps.height * width) / imgProps.width;
+      if (height > totalHeight - finalY) {
+        doc.addPage();
+        doc.addImage(image_bal.current, "PNG", 20, 20, width, height);
+      } else {
+        doc.addImage(image_bal.current, "PNG", 20, finalY, width, height);
+      }
     }
 
     finalY = doc.lastAutoTable.finalY;
     doc.autoTable({
       html: "#disclaimer",
       rowPageBreak: "avoid",
-      startY: finalY + 10,
+      startY: finalY + height + 10,
       willDrawCell: function (data) {
+        if (data.section === "head") {
+          data.cell.text = "Haftungsausschluss";
+        }
         if (data.section === "body") {
           doc.setFillColor(255, 255, 255);
         }
@@ -229,6 +307,9 @@ export default function InfoPanel(props) {
       rowPageBreak: "avoid",
       startY: finalY + 10,
       willDrawCell: function (data) {
+        if (data.section === "head") {
+          data.cell.text = "Kontakt";
+        }
         if (data.section === "body") {
           doc.setFillColor(255, 255, 255);
         }
@@ -242,7 +323,7 @@ export default function InfoPanel(props) {
   const handleMouseOver = () => {
     const sketchTool = document.querySelector("div.esri-sketch__panel");
     sketchToolColor.current = sketchTool.style.backgroundColor;
-    sketchTool.style.backgroundColor = "red";
+    sketchTool.style.backgroundColor = "#ffdc01";
   };
 
   // mouse out event to de-highlight sketch tool
@@ -326,75 +407,78 @@ export default function InfoPanel(props) {
               <PDFButton onClick={clickHandler}>PDF erstellen</PDFButton>
             </PDFButtonDiv>
           </h3>
-          <Screenshot src={screenshot} id="screenshot"></Screenshot>
+          <Image src={screenshot} id="screenshot"></Image>
         </div>
       )}
-      {(!scale || scale > 20000) && (
-        <Error className="scale-alert">{t("info_div.scale_alert")}</Error>
-      )}
       {address && address.length > 0 && (
-        <table id="address-table">
-          <tbody>
-            <tr>
-              <td style={{ textAlign: "center" }}>{address[0]}</td>
-            </tr>
-            <tr>
-              <td>
-                {address[1]} {address[3]}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <>
+          <table id="address-table">
+            <tbody>
+              <tr>
+                <td>
+                  {address[0]}
+                  <br></br>
+                  {address[1]} {address[3]}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <Placeholder></Placeholder>
+        </>
       )}
       {identifyEWS && (
-        <table id="ews-table">
-          <thead>
-            <tr>
-              <TableHeader>Ressourcen für Erdwärmesonden</TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {identifyEWS.map((result) => {
-              return (
-                <TableRow key={result.layerId}>
-                  <TableData>
-                    {formatEWS(
-                      result.layerId,
-                      result.layerName,
-                      result.feature.attributes["Pixel Value"]
-                    )}
-                  </TableData>
-                </TableRow>
-              );
-            })}
-          </tbody>
-        </table>
+        <CollapsibleSection title="Ressourcen für Erdwärmesonden">
+          <table id="ews-table">
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              {identifyEWS.map((result) => {
+                return (
+                  <TableRow key={result.layerId}>
+                    <TableData>
+                      {formatEWS(
+                        result.layerId,
+                        result.layerName,
+                        result.feature.attributes["Pixel Value"]
+                      )}
+                    </TableData>
+                  </TableRow>
+                );
+              })}
+            </tbody>
+          </table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
       {identifyGWWP && (
-        <table id="gwwp-table">
-          <thead>
-            <tr>
-              <TableHeader>
-                Ressourcen für thermische Grundwassernutzung
-              </TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {identifyGWWP.map((result) => {
-              return (
-                <TableRow key={result.layerId}>
-                  <TableData>
-                    {formatGWWP(
-                      result.layerId,
-                      result.layerName,
-                      result.feature.attributes["Pixel Value"]
-                    )}
-                  </TableData>
-                </TableRow>
-              );
-            })}
-          </tbody>
-        </table>
+        <CollapsibleSection title="Ressourcen für thermische Grundwassernutzung">
+          <table id="gwwp-table">
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              {identifyGWWP.map((result) => {
+                return (
+                  <TableRow key={result.layerId}>
+                    <TableData>
+                      {formatGWWP(
+                        result.layerId,
+                        result.layerName,
+                        result.feature.attributes["Pixel Value"]
+                      )}
+                    </TableData>
+                  </TableRow>
+                );
+              })}
+            </tbody>
+          </table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
       {identifyAmpelkarte && (
         <AmpelkarteTable
@@ -403,127 +487,178 @@ export default function InfoPanel(props) {
         ></AmpelkarteTable>
       )}
       {Object.keys(computationResult).length !== 0 && (
-        <Table id="gesamtpotential-table">
-          <thead>
-            <tr>
-              <TableHeader>
-                Gesamtpotential für Erdwärmesonden
-              </TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            <TableRow>
-              <TableData>Katastralgemeinde: {computationResult.KG}</TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>Grundstücksnummer: {computationResult.GNR}</TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>
-                verfügbare Fläche: {computationResult.FF} m
-                <sup>2</sup>
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>
-                Sondenanzahl:{" "}
-                {computationResult.gridPoints}
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>Sondentiefe: {computationResult.bohrtiefe} m</TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>Leistung: {computationResult && parseInt(computationResult.leistung)} kW</TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>
-                Jahresenergiemenge Kühlen: {computationResult && parseInt(computationResult.jahresEnergieMengeKuehlen)} kWh/a
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>
-                Jahresenergiemenge Heizen: {computationResult && parseInt(computationResult.jahresEnergieMengeHeizen)} kWh/a
-              </TableData>
-            </TableRow>
-          </tbody>
-        </Table>
+        <CollapsibleSection title="Berechnungsergebnis für Erdwärmesonden">
+          <Table id="calculations-output-table">
+            <thead>
+              <tr>
+                <TableHeader></TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              <TableRow>
+                <TableData>Katastralgemeinde: {computationResult.KG}</TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Grundstücksnummer: {computationResult.GNR}
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Sondenanzahl: {computationResult.gridPoints}
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Sondentiefe: {computationResult.bohrtiefe} m
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Leistung Heizen: {parseInt(computationResult.leistungHZ)} kW
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Leistung Kühlen: {-parseInt(computationResult.leistungKL)} kW
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Jahresenergiemenge Heizen:{" "}
+                  {parseInt(computationResult.jahresEnergieMengeHZ)} kWh/a
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Jahresenergiemenge Kühlen:{" "}
+                  {-parseInt(computationResult.jahresEnergieMengeKL)} kWh/a
+                </TableData>
+              </TableRow>
+              {computationResult.cover > 0 && (
+                <TableRow>
+                  <TableData>
+                    Deckungsgrad: {parseInt(computationResult.cover)} %
+                  </TableData>
+                </TableRow>
+              )}
+            </tbody>
+          </Table>
+          <Image
+            src={computationResult.imagehash}
+            alt="Grafik mit Berechnungsergebnissen"
+            ref={image_unbal}
+          ></Image>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
-      {Object.keys(computationResult).length !== 0 && computationResult.sondenleistung !== 0 && (
-        <Table id="gebaeude-dimensionierung-table">
-          <thead>
-            <tr>
-              <TableHeader>
-                Gebäudespezifisches Potential für Erdwärmesonden
-              </TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            <TableRow>
-              <TableData>Katastralgemeinde: {computationResult.KG}</TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>Grundstücksnummer: {computationResult.GNR}</TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>
-                notwendige Fläche: {computationResult.flaeche} m
-                <sup>2</sup>
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>
-                notwendige Sondenanzahl:{" "}
-                {computationResult.sondenanzahl}
-              </TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>notwendige Bohrmeter: {computationResult.bohrmeter} m</TableData>
-            </TableRow>
-            <TableRow>
-              <TableData>spezifische Sondenleistung: {computationResult && parseInt(computationResult.sondenleistung)} W/m</TableData>
-            </TableRow>
-          </tbody>
-        </Table>
+      {Object.keys(computationResult).length !== 0 && (
+        <CollapsibleSection title="Berechnungsergebnis für Erdwärmesonden (bilanzierter Betrieb)">
+          <Table id="calculations-bal-output-table">
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              <TableRow>
+                <TableData>
+                  Für einen bilanzierten Betrieb muss eine zusätzliche Quelle
+                  mit {parseInt(computationResult.differenz_PKL)} W/m über einen
+                  Zeitraum von {computationResult.differenz_BS_KL} Stunden
+                  betrieben werden. Bei bilanziertem Betrieb kann der
+                  Sondenabstand auf bis zu 5 Meter reduziert werden.
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>Katastralgemeinde: {computationResult.KG}</TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Grundstücksnummer: {computationResult.GNR}
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Sondenanzahl: {computationResult.gridPoints}
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Sondentiefe: {computationResult.bohrtiefe} m
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Leistung Heizen: {parseInt(computationResult.leistungHZ_bal)}{" "}
+                  kW
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Leistung Kühlen: {-parseInt(computationResult.leistungKL_bal)}{" "}
+                  kW
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Jahresenergiemenge Heizen:{" "}
+                  {parseInt(computationResult.jahresEnergieMengeHZ_bal)} kWh/a
+                </TableData>
+              </TableRow>
+              <TableRow>
+                <TableData>
+                  Jahresenergiemenge Kühlen:{" "}
+                  {-parseInt(computationResult.jahresEnergieMengeKL_bal)} kWh/a
+                </TableData>
+              </TableRow>
+            </tbody>
+          </Table>
+          <Image
+            src={computationResult.imagehash_bal}
+            alt="Grafik mit bilanzierten Berechnungsergebnissen"
+            ref={image_bal}
+          ></Image>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
       {identifyAmpelkarte && (
         <>
-          <table id="disclaimer">
-            <thead>
-              <tr>
-                <TableHeader>{t("info_div.disclaimer_title")}</TableHeader>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{t("info_div.disclaimer")}</td>
-              </tr>
-            </tbody>
-          </table>
-          <table id="contact">
-            <thead>
-              <tr>
-                <TableHeader>Kontakt</TableHeader>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>office@geologie.ac.at</td>
-              </tr>
-              <tr>
-                <td>{t("info_div.gba")}</td>
-              </tr>
-              <tr>
-                <td>{t("info_div.dep")}</td>
-              </tr>
-              <tr>
-                <td>Neulinggasse 38</td>
-              </tr>
-              <tr>
-                <td>1030 {t("info_div.city")}</td>
-              </tr>
-            </tbody>
-          </table>
+          <CollapsibleSection title="Haftungsausschluss">
+            <table id="disclaimer">
+              <thead>
+                <tr>
+                  <td></td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{t("info_div.disclaimer")}</td>
+                </tr>
+              </tbody>
+            </table>
+            <Placeholder></Placeholder>
+          </CollapsibleSection>
+          <CollapsibleSection title="Kontakt">
+            <table id="contact">
+              <thead>
+                <tr>
+                  <td></td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    office@geologie.ac.at<br></br>
+                    Geologische Bundesanstalt<br></br>
+                    Fachbereich Hydrogeologie und Geothermie<br></br>
+                    Neulinggasse 38<br></br>
+                    1030 Wien
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </CollapsibleSection>
         </>
       )}
     </InfoPanelContainer>

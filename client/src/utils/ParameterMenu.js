@@ -1,39 +1,56 @@
 import "./ui.css";
 
-// create drop down menu for selection of grid spacing
+// create collapsible
+export const collapsible = document.createElement("div");
+collapsible.classList = "collapsible-container";
+
+// button for collapsible
+const button = document.createElement("button");
+button.classList = "collapsible-button";
+button.innerHTML = "Parameter Erdwärmesonden";
+button.addEventListener("click", () => {
+  button.classList.toggle("active");
+  var content = button.nextElementSibling;
+  if (content.style.display === "block") {
+    content.style.display = "none";
+  } else {
+    content.style.display = "block";
+  }
+});
+collapsible.appendChild(button);
+
+// content of collapsible
+const content = document.createElement("div");
+content.className = "collapsible-content";
+collapsible.appendChild(content);
+
 let gridSpacingHandler;
-export const userInputDiv = document.createElement("div");
-userInputDiv.className = "input-container";
-
-const dropDownDiv = document.createElement("div");
-dropDownDiv.className = "input-section";
-
-const dropDown = document.createElement("select");
-dropDown.id = "grid-spacing";
-dropDown.className = "spacing-dropdown";
-dropDown.onchange = (event) => {
-    gridSpacingHandler(parseInt(event.target.value));
+const gridSpacingInput = document.createElement("input");
+gridSpacingInput.id = "gridspacing-input";
+gridSpacingInput.type = "number";
+gridSpacingInput.min = 5;
+gridSpacingInput.max = 15;
+gridSpacingInput.value = 10;
+gridSpacingInput.onchange = (event) => {
+  if (event.target.value < 5) {
+    event.target.value = 5;
+  } else if (event.target.value > 15) {
+    event.target.value = 15;
+  }
+  gridSpacingHandler(parseInt(event.target.value));
 };
 
-const option1 = document.createElement("option");
-option1.value = 5;
-option1.innerText = "5 Meter";
+const gridSpacingLabel = document.createElement("label");
+gridSpacingLabel.for = "gridspacing-input";
+gridSpacingLabel.innerText = "Sondenabstand in Meter";
 
-const option2 = document.createElement("option");
-option2.value = 10;
-option2.innerText = "10 Meter";
+const gridSpacingInputDiv = document.createElement("div");
+gridSpacingInputDiv.className = "input-section";
 
-dropDown.appendChild(option2);
-dropDown.appendChild(option1);
+gridSpacingInputDiv.appendChild(gridSpacingLabel);
+gridSpacingInputDiv.appendChild(gridSpacingInput);
 
-const spacingLabel = document.createElement("label");
-spacingLabel.innerText = "Abstand der Sonden";
-spacingLabel.for = "grid-spacing";
-
-dropDownDiv.appendChild(spacingLabel);
-dropDownDiv.appendChild(dropDown);
-
-userInputDiv.appendChild(dropDownDiv);
+content.appendChild(gridSpacingInputDiv);
 
 // Sondentiefe
 let bohrtiefeHandler;
@@ -41,10 +58,15 @@ const bohrtiefeInput = document.createElement("input");
 bohrtiefeInput.id = "sondentiefe-input";
 bohrtiefeInput.type = "number";
 bohrtiefeInput.min = 80;
-bohrtiefeInput.max = 300;
+bohrtiefeInput.max = 250;
 bohrtiefeInput.value = 100;
 bohrtiefeInput.onchange = (event) => {
-    bohrtiefeHandler(parseInt(event.target.value));
+  if (event.target.value > 250) {
+    event.target.value = 250;
+  } else if (event.target.value < 80) {
+    event.target.value = 80;
+  }
+  bohrtiefeHandler(parseInt(event.target.value));
 };
 const bohrtiefeLabel = document.createElement("label");
 bohrtiefeLabel.for = "sondentiefe-input";
@@ -56,7 +78,7 @@ bohrtiefeInputDiv.className = "input-section";
 bohrtiefeInputDiv.appendChild(bohrtiefeLabel);
 bohrtiefeInputDiv.appendChild(bohrtiefeInput);
 
-userInputDiv.appendChild(bohrtiefeInputDiv);
+content.appendChild(bohrtiefeInputDiv);
 
 // Betriebsstunden Heizen
 let BS_HZHandler;
@@ -64,8 +86,14 @@ const bsHZInput = document.createElement("input");
 bsHZInput.id = "bshz-input";
 bsHZInput.type = "number";
 bsHZInput.min = 0;
+bsHZInput.max = 4379;
 bsHZInput.onchange = (event) => {
-    BS_HZHandler(parseInt(event.target.value));
+  if (event.target.value > 4379) {
+    event.target.value = 4379;
+  } else if (event.target.value < 0) {
+    event.target.value = 0;
+  }
+  BS_HZHandler(parseInt(event.target.value));
 };
 const bsHZLabel = document.createElement("label");
 bsHZLabel.for = "bshz-input";
@@ -77,7 +105,7 @@ bsHZInputDiv.className = "input-section";
 bsHZInputDiv.appendChild(bsHZLabel);
 bsHZInputDiv.appendChild(bsHZInput);
 
-userInputDiv.appendChild(bsHZInputDiv);
+content.appendChild(bsHZInputDiv);
 
 // Betriebsstunden Kühlen
 let BS_KLHandler;
@@ -85,8 +113,14 @@ const bsKLInput = document.createElement("input");
 bsKLInput.id = "bskl-input";
 bsKLInput.type = "number";
 bsKLInput.min = 0;
+bsKLInput.max = 4379;
 bsKLInput.onchange = (event) => {
-    BS_KLHandler(parseInt(event.target.value));
+  if (event.target.value > 4379) {
+    event.target.value = 4379;
+  } else if (event.target.value < 0) {
+    event.target.value = 0;
+  }
+  BS_KLHandler(parseInt(event.target.value));
 };
 const bsKLLabel = document.createElement("label");
 bsKLLabel.for = "bskl-input";
@@ -98,7 +132,7 @@ bsKLInputDiv.className = "input-section";
 bsKLInputDiv.appendChild(bsKLLabel);
 bsKLInputDiv.appendChild(bsKLInput);
 
-userInputDiv.appendChild(bsKLInputDiv);
+content.appendChild(bsKLInputDiv);
 
 // Leistung Heizen
 let P_HZHandler;
@@ -107,7 +141,10 @@ pHZInput.id = "pHZ-input";
 pHZInput.type = "number";
 pHZInput.min = 0;
 pHZInput.onchange = (event) => {
-    P_HZHandler(parseInt(event.target.value));
+  if (event.target.value < 0) {
+    event.target.value = 0;
+  }
+  P_HZHandler(parseInt(event.target.value));
 };
 const pHZLabel = document.createElement("label");
 pHZLabel.for = "pHZ-input";
@@ -119,7 +156,7 @@ pHZInputDiv.className = "input-section";
 pHZInputDiv.appendChild(pHZLabel);
 pHZInputDiv.appendChild(pHZInput);
 
-userInputDiv.appendChild(pHZInputDiv);
+content.appendChild(pHZInputDiv);
 
 // Leistung Kühlen
 let P_KLHandler;
@@ -128,7 +165,10 @@ pKLInput.id = "pKL-input";
 pKLInput.type = "number";
 pKLInput.min = 0;
 pKLInput.onchange = (event) => {
-    P_KLHandler(parseInt(event.target.value));
+  if (event.target.value < 0) {
+    event.target.value = 0;
+  }
+  P_KLHandler(parseInt(event.target.value));
 };
 const pKLLabel = document.createElement("label");
 pKLLabel.for = "pKL-input";
@@ -140,13 +180,20 @@ pKLInputDiv.className = "input-section";
 pKLInputDiv.appendChild(pKLLabel);
 pKLInputDiv.appendChild(pKLInput);
 
-userInputDiv.appendChild(pKLInputDiv);
+content.appendChild(pKLInputDiv);
 
-export function initializeParameterMenuHandlers(setGridSpacingCallback, setBohrtiefeCallback, setBS_HZCallback, setBS_KLCallback, setP_HZCallback, setP_KLCallback) {
-    gridSpacingHandler = setGridSpacingCallback;
-    bohrtiefeHandler = setBohrtiefeCallback;
-    BS_HZHandler = setBS_HZCallback;
-    BS_KLHandler = setBS_KLCallback;
-    P_HZHandler = setP_HZCallback;
-    P_KLHandler = setP_KLCallback;
+export function initializeParameterMenuHandlers(
+  setGridSpacingCallback,
+  setBohrtiefeCallback,
+  setBS_HZCallback,
+  setBS_KLCallback,
+  setP_HZCallback,
+  setP_KLCallback
+) {
+  gridSpacingHandler = setGridSpacingCallback;
+  bohrtiefeHandler = setBohrtiefeCallback;
+  BS_HZHandler = setBS_HZCallback;
+  BS_KLHandler = setBS_KLCallback;
+  P_HZHandler = setP_HZCallback;
+  P_KLHandler = setP_KLCallback;
 }

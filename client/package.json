@@ -16,6 +16,7 @@
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.5.25",
     "react": "^18.1.0",
+    "react-collapse": "^5.1.1",
     "react-dom": "^18.1.0",
     "react-i18next": "^11.17.0",
     "react-redux": "^8.0.2",

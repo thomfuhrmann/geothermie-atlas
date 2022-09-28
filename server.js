@@ -11,6 +11,7 @@ const port = 5000;
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, "client/build")));
+// app.use(express.static(path.join(__dirname, "client/src/images")))
 
 app.get("/api", ({ query }, res) => {
   let options = {
@@ -26,7 +27,8 @@ app.get("/api", ({ query }, res) => {
       query.P_HZ,
       query.P_KL,
       query.FF,
-      query.bohrtiefe
+      query.bohrtiefe,
+      query.points,
     ],
   };
   runPythonShell(res, options);

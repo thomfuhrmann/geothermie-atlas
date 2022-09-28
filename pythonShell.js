@@ -1,11 +1,14 @@
 const { PythonShell } = require("python-shell");
 
-const scriptFile = "./python/BHEseppy_query_V41.py";
+const fs = require("fs");
+const path = require("path");
+
+const scriptFile = "./python/BHEseppy_query_V50_GTHAtlas_beta2.py";
 
 const runPythonShell = (res, options) => {
   PythonShell.run(scriptFile, options, function (err, results) {
     if (err) console.log(err);
-    let resultList;
+    let resultList = [];
     if (results && results.length > 0) {
       let resultString = results[results.length - 1];
       resultList = resultString

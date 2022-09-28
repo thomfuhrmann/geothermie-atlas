@@ -6,10 +6,15 @@ Diese Applikation dient zur Planung geothermischer Anlagen. Die der Applikation 
 
 ## Verwendete Software Libraries
 
-Die Applikation basiert auf folgenden Libraries:
+Clientseitig basiert die Applikation auf folgenden Libraries:
 
-- [Reac.js](https://reactjs.org/)
+- [React.js](https://reactjs.org/)
 - [ArcGIS API for Javascript](https://developers.arcgis.com/javascript/latest/)
+
+Serverseitig basiert die Applikation auf folgenden Libraries:
+
+- [Express Server](http://expressjs.com/)
+- [Python-shell](https://www.npmjs.com/package/python-shell)
 
 ## Kontakt
 

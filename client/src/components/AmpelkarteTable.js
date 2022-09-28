@@ -1,7 +1,8 @@
 import React from "react";
-import { einschraenkungen, hinweise } from "../assets/Beschreibungen";
 
-import { TableHeader, TableRow, TableData } from "./CommonStyledElements";
+import { einschraenkungen, hinweise } from "../assets/Beschreibungen";
+import { TableRow, TableData, Placeholder } from "./CommonStyledElements";
+import CollapsibleSection from "./CollapsibleSection";
 
 let einschraenkungen_erlaeuterungen = [];
 
@@ -183,68 +184,81 @@ export const AmpelkarteTable = ({ results, setTablesAdded }) => {
   return (
     <>
       {hinweiseEWS.length > 0 && (
-        <table id="hinweise-ews-table">
-          <thead>
-            <tr>
-              <TableHeader>Hinweise Erdwärmesonden</TableHeader>
-            </tr>
-          </thead>
-          <tbody>{hinweiseEWS}</tbody>
-        </table>
+        <CollapsibleSection title="Hinweise Erdwärmesonden">
+          <table id="hinweise-ews-table">
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>{hinweiseEWS}</tbody>
+          </table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
       {einschraenkungenEWS.length > 0 && (
-        <table id="einschraenkungen-ews-table">
-          <thead>
-            <tr>
-              <TableHeader colSpan={2}>
-                Einschränkungen Erdwärmesonden
-              </TableHeader>
-            </tr>
-          </thead>
-          <tbody>{einschraenkungenEWS}</tbody>
-        </table>
+        <CollapsibleSection title="Einschränkungen Erdwärmesonden">
+          <table id="einschraenkungen-ews-table">
+            <thead>
+              <tr>
+                <td colSpan={2}></td>
+              </tr>
+            </thead>
+            <tbody>{einschraenkungenEWS}</tbody>
+          </table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
       {hinweiseGWWP.length > 0 && (
-        <table id="hinweise-gwwp-table">
-          <thead>
-            <tr>
-              <TableHeader>Hinweise thermische Grundwassernutzung</TableHeader>
-            </tr>
-          </thead>
-          <tbody>{hinweiseGWWP}</tbody>
-        </table>
+        <CollapsibleSection title="Hinweise thermische Grundwassernutzung">
+          <table id="hinweise-gwwp-table">
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>{hinweiseGWWP}</tbody>
+          </table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
       {einschraenkungenGWWP.length > 0 && (
-        <table id="einschraenkungen-gwwp-table">
-          <thead>
-            <tr>
-              <TableHeader colSpan={2}>
-                Einschränkungen thermische Grundwassernutzung
-              </TableHeader>
-            </tr>
-          </thead>
-          <tbody>{einschraenkungenGWWP}</tbody>
-        </table>
+        <CollapsibleSection title="Einschränkungen thermische Grundwassernutzung">
+          <table id="einschraenkungen-gwwp-table">
+            <thead>
+              <tr>
+                <td colSpan={2}></td>
+              </tr>
+            </thead>
+            <tbody>{einschraenkungenGWWP}</tbody>
+          </table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
       {Object.keys(einschraenkungen_erlaeuterungen).length > 0 && (
-        <table id="erlaeuterungen-table">
-          <thead>
-            <tr>
-              <TableHeader>Erläuterungen zu den Einschränkungen</TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.keys(einschraenkungen_erlaeuterungen).map((key, index) => {
-              return (
-                <TableRow key={key}>
-                  <TableData>
-                    {index + 1}: {einschraenkungen_erlaeuterungen[key]}
-                  </TableData>
-                </TableRow>
-              );
-            })}
-          </tbody>
-        </table>
+        <CollapsibleSection title="Erläuterungen zu den Einschränkungen">
+          <table id="erlaeuterungen-table">
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.keys(einschraenkungen_erlaeuterungen).map(
+                (key, index) => {
+                  return (
+                    <TableRow key={key}>
+                      <TableData>
+                        {index + 1}: {einschraenkungen_erlaeuterungen[key]}
+                      </TableData>
+                    </TableRow>
+                  );
+                }
+              )}
+            </tbody>
+          </table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
       )}
     </>
   );

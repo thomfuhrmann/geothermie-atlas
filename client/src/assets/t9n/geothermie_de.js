@@ -6,10 +6,9 @@ export const geothermie_de = {
     title: "en",
   },
   info_div: {
-    scale_alert: "Bitte zoomen Sie hinein, um die Katasterkarte zu sehen.",
-    instruction_click: `Klicken Sie auf einen Ort in der Karte, um Informationen abzufragen. Zoomen Sie weiter hinein, um die Katasterkarte zu sehen. Nachdem Sie Ihr gewünschtes Grundstück gefunden haben, klicken Sie darauf. Sie können nun einen Erdwärmesondenraster zeichnen und Berechnungen durchführen lassen.`,
-    instruction_polyline_first: "Verwenden Sie das Werkzeug ",
-    instruction_polyline_middle: "Zeichnen",
+    instruction_click: `Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück. Sie können nun einen Erdwärmesondenraster zeichnen und Berechnungen durchführen lassen.`,
+    instruction_polyline_first: "Verwenden Sie das ",
+    instruction_polyline_middle: "Zeichen-Werkzeug",
     instruction_polyline_last: ` um zusätzliche Sondenpunkte zu zeichnen oder bestehende Punkte zu verschieben oder zu löschen.`,
     title: "Standortbasierter Bericht",
     no_data: "keine Daten",
