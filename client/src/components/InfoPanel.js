@@ -21,7 +21,7 @@ const Container = styled.div`
   position: absolute;
   top: 15px;
   right: 15px;
-  width: 20%;
+  width: 23%;
   height: fit-content;
   max-height: 95%;
   overflow-y: auto;
