@@ -7,7 +7,7 @@ const Button = styled.button`
   background-color: ${(props) => (props.isOpened ? "#555" : "#777")};
   color: white;
   cursor: pointer;
-  margin-bottom: 1px;
+  margin-bottom: ${(props) => props.marginBottom};
   padding: 18px;
   width: 100%;
   border: none;
@@ -25,13 +25,25 @@ const Span = styled.span`
   float: right;
 `;
 
-export default function CollapsibleSection({ title, children }) {
+const Container = styled.div`
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: fit-content;
+`;
+
+export default function CollapsibleSection({
+  title,
+  children,
+  open = false,
+  marginBottom = "1px",
+}) {
   const collapse = useRef(null);
   const button = useRef(null);
-  const [opened, setOpened] = useState(false);
+  const [opened, setOpened] = useState(open);
 
   return (
-    <div>
+    <Container>
       <Button
         type="button"
         onClick={() => {
@@ -39,12 +51,13 @@ export default function CollapsibleSection({ title, children }) {
         }}
         ref={button}
         isOpened={opened}
+        marginBottom={marginBottom}
       >
         {title} <Span>{opened ? "-" : "+"}</Span>
       </Button>
       <Collapse isOpened={opened} ref={collapse}>
         {children}
       </Collapse>
-    </div>
+    </Container>
   );
 }

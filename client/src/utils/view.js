@@ -19,7 +19,6 @@ import IdentifyParameters from "@arcgis/core/rest/support/IdentifyParameters";
 import * as locator from "@arcgis/core/rest/locator";
 import Polygon from "@arcgis/core/geometry/Polygon";
 import Graphic from "@arcgis/core/Graphic";
-import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 
 import { updateWithResult } from "../redux/computationResultSlice";
 import { collapsible } from "./ParameterMenu";
@@ -43,7 +42,7 @@ const polygonGraphicsLayer = new GraphicsLayer({
 
 // instantiate layers
 const ampelkarte_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/Ampelkarte/MapServer";
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Ampelkarte_Wien/MapServer";
 const ampelkarte = new MapImageLayer({
   url: ampelkarte_url,
   title: "Ampelkarte",
@@ -75,13 +74,14 @@ const betriebsstunden = new MapImageLayer({
   visible: false,
 });
 
-// "http://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-382e30c7-69df-4a53-9331-c44821d9916e"
+// cadastre used as basemap to filter points by category
 export const cadastre = new WMSLayer({
   title: "Kataster",
   url: "https://data.bev.gv.at/geoserver/BEVdataKAT/wms",
   spatialReference: SRS,
 });
 
+// cadastre overlay to query parcel boundaries
 export const cadastreOverlay = new WMSLayer({
   title: "Kataster",
   url: "https://data.bev.gv.at/geoserver/BEVdataKAT/wms",
@@ -138,11 +138,6 @@ export const view = new MapView({
     spatialReference: new SpatialReference({ wkid: SRS }),
   }),
 });
-
-reactiveUtils.watch(
-  () => view.scale,
-  () => console.log(view.scale)
-);
 
 view.ui.components = [];
 
@@ -306,6 +301,7 @@ export const identifyLayers = (mapPoint) => {
 
 let setPolygonHandler;
 let cadastralDataHandler;
+let handleCadastralData;
 let KG,
   EZ,
   GNR,
@@ -369,6 +365,7 @@ const queryCadastre = (mapPoint) => {
 
       polygonGraphicsLayer.add(polygonGraphic);
 
+      handleCadastralData({ KG, GNR });
       cadastralDataHandler({ KG, GNR, EZ, FF });
 
       // url = "https://kataster.bev.gv.at/api/gst/" + KG + "/" + GNR;
@@ -456,13 +453,15 @@ export function initializeInfoPanelHandlers(
   screenShotCallback,
   identifyGWWPCallback,
   identifyEWSCallback,
-  addressCallback
+  addressCallback,
+  cadastralDataCallback
 ) {
   handleIdentifyAmpelkarte = identifyAmpelkarteCallback;
   screenshotHandler = screenShotCallback;
   handleIdentifyGWWP = identifyGWWPCallback;
   handleIdentifyEWS = identifyEWSCallback;
   handleAddress = addressCallback;
+  handleCadastralData = cadastralDataCallback;
 }
 
 export function initializeCalculationsMenuHandlers(

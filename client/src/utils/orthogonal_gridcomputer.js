@@ -1,6 +1,7 @@
 import Graphic from "@arcgis/core/Graphic";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
 import Point from "@arcgis/core/geometry/Point";
+import Polygon from "@arcgis/core/geometry/Polygon";
 
 import {
   view,
@@ -12,13 +13,13 @@ import {
 // grid points have to be at least 2 meters away from parcel boundary
 const distanceToBoundary = 2;
 
-const drawPoint = (point) => {
+const drawPoint = (point, color = [90, 90, 90, 0]) => {
   pointGraphicsLayer.add(
     new Graphic({
       geometry: point,
       symbol: {
         type: "simple-marker",
-        color: [90, 90, 90, 0],
+        color,
       },
     })
   );
@@ -37,6 +38,10 @@ const drawPolygon = (polygon) => {
   );
 };
 
+const dotProduct = (u, v) => {
+  return u[0] * v[0] + u[1] * v[1];
+};
+
 const determinant = (m) =>
   m.length === 1
     ? m[0][0]
@@ -50,6 +55,12 @@ const determinant = (m) =>
             determinant(m.slice(1).map((c) => c.filter((_, j) => i !== j))),
         0
       );
+
+const spread = (u, v) => {
+  return (
+    Math.pow(determinant([u, v]), 2) / (dotProduct(u, u) * dotProduct(v, v))
+  );
+};
 
 const intersect = (x1, y1, x2, y2, x3, y3, x4, y4) => {
   // Check if no line is of length 0
@@ -150,16 +161,48 @@ export const calculateGrid = (polygon, gridSpacing = 10, setGridPoints) => {
     distanceToBoundary,
     "meters"
   );
-  drawPolygon(offsetPolygon);
+
+  // draw only outer polygon and ignore inner rings
+  drawPolygon(
+    new Polygon({
+      rings: offsetPolygon.rings[0],
+      spatialReference: view.spatialReference,
+    })
+  );
+
   if (offsetPolygon) {
     const points = offsetPolygon.rings[0];
 
-    let longestLength = 0;
+    // search for most perpendicular corner
+    let widestSpread = 0;
     let index = 0;
     for (let i = 0; i < points.length - 1; i++) {
-      const length = distance(points[i], points[i + 1]);
-      if (length > longestLength) {
-        longestLength = length;
+      let currentSpread, u, v;
+      if (i === 0) {
+        u = [
+          points[points.length - 1][0] - points[0][0],
+          points[points.length - 1][1] - points[0][1],
+        ];
+        v = [points[1][0] - points[0][0], points[1][1] - points[0][1]];
+        currentSpread = spread(u, v);
+      } else if (i === points.length - 1) {
+        u = [
+          points[points.length - 2][0] - points[points.length - 1][0],
+          points[points.length - 2][1] - points[points.length - 1][1],
+        ];
+        v = [
+          points[points.length - 1][0] - points[0][0],
+          points[points.length - 1][1] - points[0][1],
+        ];
+        currentSpread = spread(u, v);
+      } else {
+        u = [points[i - 1][0] - points[i][0], points[i - 1][1] - points[i][1]];
+        v = [points[i + 1][0] - points[i][0], points[i + 1][1] - points[i][1]];
+        currentSpread = spread(u, v);
+      }
+
+      if (currentSpread > widestSpread) {
+        widestSpread = currentSpread;
         index = i;
       }
     }

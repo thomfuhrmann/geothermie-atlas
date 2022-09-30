@@ -4,10 +4,12 @@ import { einschraenkungen, hinweise } from "../assets/Beschreibungen";
 import { TableRow, TableData, Placeholder } from "./CommonStyledElements";
 import CollapsibleSection from "./CollapsibleSection";
 
+const prefixEWS = "main_og_ampelkarte_ews_wien.";
+const prefixGWWP = "main_og_ampelkarte_gwp_wien.";
 let einschraenkungen_erlaeuterungen = [];
 
-const getEinschraenkung = (attributes) => {
-  switch (attributes["Parameter"]) {
+const getEinschraenkung = (attributes, prefix) => {
+  switch (attributes[prefix + "Parameter"]) {
     case "Naturschutz":
       einschraenkungen_erlaeuterungen["Naturschutz"] = (
         <>
@@ -28,12 +30,12 @@ const getEinschraenkung = (attributes) => {
       );
       return (
         <TableData>
-          {attributes["KATEGORIE"]}
+          {attributes[prefix + "KATEGORIE"]}
           <sup>{Object.keys(einschraenkungen_erlaeuterungen).length}</sup>
         </TableData>
       );
     case "Wasserschutz- und Schongebiete":
-      return <TableData>{attributes["KATEGORIE"]}</TableData>;
+      return <TableData>{attributes[prefix + "KATEGORIE"]}</TableData>;
     case "Artesisch gespannte Brunnen":
       einschraenkungen_erlaeuterungen["Artesisch gespannte Brunnen"] =
         einschraenkungen["Artesisch gespannte Brunnen"];
@@ -83,8 +85,8 @@ const getEinschraenkung = (attributes) => {
   }
 };
 
-const getHinweis = (attributes) => {
-  switch (attributes["Parameter"]) {
+const getHinweis = (attributes, prefix) => {
+  switch (attributes[prefix + "Parameter"]) {
     case "Naturdenkmal":
       return <TableData>{hinweise["Naturdenkmal"]}</TableData>;
     case "Gespannte Grundwasserzone":
@@ -96,7 +98,7 @@ const getHinweis = (attributes) => {
     case "Grundwasserchemismus":
       return (
         <TableData>
-          {hinweise.Grundwasserchemismus[attributes["KATEGORIE"]]}
+          {hinweise.Grundwasserchemismus[attributes[prefix + "KATEGORIE"]]}
         </TableData>
       );
     default:
@@ -126,50 +128,45 @@ export const AmpelkarteTable = ({ results, setTablesAdded }) => {
 
   results.forEach((result) => {
     const attributes = result.feature.attributes;
-    if (attributes["Anzeige"] === "Ampelkarte") {
-      switch (result.layerId) {
-        case 0:
-          einschraenkungenGWWP.push(
-            <TableRow key={attributes["FID"]}>
-              {getEinschraenkung(attributes)}
-              <TableData textAlign={"center"}>
-                {getAmpelText(attributes["GWWP"])}
-              </TableData>
-            </TableRow>
-          );
-          break;
-        case 1:
+    switch (result.layerId) {
+      case 0:
+        if (attributes[prefixEWS + "Anzeige"] === "Ampelkarte") {
           einschraenkungenEWS.push(
-            <TableRow key={attributes["FID"]}>
-              {getEinschraenkung(attributes)}
+            <TableRow key={attributes[prefixEWS + "fid"]}>
+              {getEinschraenkung(attributes, prefixEWS)}
               <TableData textAlign={"center"}>
-                {getAmpelText(attributes["EWS"])}
+                {getAmpelText(attributes[prefixEWS + "EWS"])}
               </TableData>
             </TableRow>
           );
-          break;
-        default:
-          break;
-      }
-    } else {
-      switch (result.layerId) {
-        case 0:
-          hinweiseGWWP.push(
-            <TableRow key={attributes["FID"]}>
-              {getHinweis(attributes)}
-            </TableRow>
-          );
-          break;
-        case 1:
+        } else {
           hinweiseEWS.push(
-            <TableRow key={attributes["FID"]}>
-              {getHinweis(attributes)}
+            <TableRow key={attributes[prefixEWS + "fid"]}>
+              {getHinweis(attributes, prefixEWS)}
             </TableRow>
           );
-          break;
-        default:
-          break;
-      }
+        }
+        break;
+      case 1:
+        if (attributes[prefixGWWP + "Anzeige"] === "Ampelkarte") {
+          einschraenkungenGWWP.push(
+            <TableRow key={attributes[prefixGWWP + "fid"]}>
+              {getEinschraenkung(attributes, prefixGWWP)}
+              <TableData textAlign={"center"}>
+                {getAmpelText(attributes[prefixGWWP + "GWWP"])}
+              </TableData>
+            </TableRow>
+          );
+        } else {
+          hinweiseGWWP.push(
+            <TableRow key={attributes[prefixGWWP + "fid"]}>
+              {getHinweis(attributes, prefixGWWP)}
+            </TableRow>
+          );
+        }
+        break;
+      default:
+        break;
     }
   });
 
