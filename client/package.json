@@ -1,7 +1,6 @@
 {
   "name": "geothermie",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
   "dependencies": {
     "@arcgis/core": "^4.23.7",
     "@reduxjs/toolkit": "^1.8.5",

@@ -71,7 +71,7 @@ export default function CalculationsMenu({ isLoading }) {
       let points = JSON.stringify(
         gridPoints.map((point) => [point.x, point.y])
       );
-      let url = "/api";
+      let url = "https://geothermie-atlas.herokuapp.com/api";
       url +=
         "?" +
         new URLSearchParams({

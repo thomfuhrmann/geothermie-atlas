@@ -1,7 +1,12 @@
 import React from "react";
 
 import { einschraenkungen, hinweise } from "../assets/Beschreibungen";
-import { TableRow, TableData, Placeholder } from "./CommonStyledElements";
+import {
+  TableRow,
+  TableData,
+  Placeholder,
+  Table,
+} from "./CommonStyledElements";
 import CollapsibleSection from "./CollapsibleSection";
 
 const prefixEWS = "main_og_ampelkarte_ews_wien.";
@@ -182,59 +187,59 @@ export const AmpelkarteTable = ({ results, setTablesAdded }) => {
     <>
       {hinweiseEWS.length > 0 && (
         <CollapsibleSection title="Hinweise Erdwärmesonden">
-          <table id="hinweise-ews-table">
+          <Table id="hinweise-ews-table">
             <thead>
               <tr>
                 <td></td>
               </tr>
             </thead>
             <tbody>{hinweiseEWS}</tbody>
-          </table>
+          </Table>
           <Placeholder></Placeholder>
         </CollapsibleSection>
       )}
       {einschraenkungenEWS.length > 0 && (
         <CollapsibleSection title="Einschränkungen Erdwärmesonden">
-          <table id="einschraenkungen-ews-table">
+          <Table id="einschraenkungen-ews-table">
             <thead>
               <tr>
                 <td colSpan={2}></td>
               </tr>
             </thead>
             <tbody>{einschraenkungenEWS}</tbody>
-          </table>
+          </Table>
           <Placeholder></Placeholder>
         </CollapsibleSection>
       )}
       {hinweiseGWWP.length > 0 && (
         <CollapsibleSection title="Hinweise thermische Grundwassernutzung">
-          <table id="hinweise-gwwp-table">
+          <Table id="hinweise-gwwp-table">
             <thead>
               <tr>
                 <td></td>
               </tr>
             </thead>
             <tbody>{hinweiseGWWP}</tbody>
-          </table>
+          </Table>
           <Placeholder></Placeholder>
         </CollapsibleSection>
       )}
       {einschraenkungenGWWP.length > 0 && (
         <CollapsibleSection title="Einschränkungen thermische Grundwassernutzung">
-          <table id="einschraenkungen-gwwp-table">
+          <Table id="einschraenkungen-gwwp-table">
             <thead>
               <tr>
                 <td colSpan={2}></td>
               </tr>
             </thead>
             <tbody>{einschraenkungenGWWP}</tbody>
-          </table>
+          </Table>
           <Placeholder></Placeholder>
         </CollapsibleSection>
       )}
       {Object.keys(einschraenkungen_erlaeuterungen).length > 0 && (
         <CollapsibleSection title="Erläuterungen zu den Einschränkungen">
-          <table id="erlaeuterungen-table">
+          <Table id="erlaeuterungen-table">
             <thead>
               <tr>
                 <td></td>
@@ -253,7 +258,7 @@ export const AmpelkarteTable = ({ results, setTablesAdded }) => {
                 }
               )}
             </tbody>
-          </table>
+          </Table>
           <Placeholder></Placeholder>
         </CollapsibleSection>
       )}

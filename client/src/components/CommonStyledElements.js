@@ -12,12 +12,15 @@ export const Placeholder = styled.div`
 const TablePadding = `padding: 10px;`;
 
 export const Table = styled.table`
+  table-layout: fixed;
   width: 100%;
 `;
 
 export const TableData = styled.td`
+  width: 100%;
   text-align: ${(props) => props.textAlign || "left"};
-  ${TablePadding}
+  ${TablePadding};
+  word-break: break-word;
 `;
 
 export const TableHeader = styled.th`
@@ -28,6 +31,7 @@ export const TableHeader = styled.th`
 `;
 
 export const TableRow = styled.tr`
+  width: 100%;
   &:nth-child(even) {
     background-color: #eee;
   }

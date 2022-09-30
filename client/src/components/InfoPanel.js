@@ -225,7 +225,7 @@ export default function InfoPanel(props) {
           )}
           {cadastralData && (
             <>
-              <table id="cadastral-data-table">
+              <Table id="cadastral-data-table">
                 <tbody>
                   <tr>
                     <td>
@@ -235,12 +235,12 @@ export default function InfoPanel(props) {
                     </td>
                   </tr>
                 </tbody>
-              </table>
+              </Table>
             </>
           )}
           {address && address.length > 0 && (
             <>
-              <table id="address-table">
+              <Table id="address-table">
                 <tbody>
                   <tr>
                     <td>
@@ -250,13 +250,13 @@ export default function InfoPanel(props) {
                     </td>
                   </tr>
                 </tbody>
-              </table>
+              </Table>
               <Placeholder></Placeholder>
             </>
           )}
           {identifyEWS && (
             <CollapsibleSection title="Ressourcen für Erdwärmesonden">
-              <table id="ews-table">
+              <Table id="ews-table">
                 <thead>
                   <tr>
                     <td></td>
@@ -277,13 +277,13 @@ export default function InfoPanel(props) {
                     );
                   })}
                 </tbody>
-              </table>
+              </Table>
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
           {identifyGWWP && (
             <CollapsibleSection title="Ressourcen für thermische Grundwassernutzung">
-              <table id="gwwp-table">
+              <Table id="gwwp-table">
                 <thead>
                   <tr>
                     <td></td>
@@ -304,7 +304,7 @@ export default function InfoPanel(props) {
                     );
                   })}
                 </tbody>
-              </table>
+              </Table>
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
@@ -442,7 +442,7 @@ export default function InfoPanel(props) {
           {identifyAmpelkarte && (
             <>
               <CollapsibleSection title="Haftungsausschluss">
-                <table id="disclaimer">
+                <Table id="disclaimer">
                   <thead>
                     <tr>
                       <td></td>
@@ -453,11 +453,11 @@ export default function InfoPanel(props) {
                       <td>{t("info_div.disclaimer")}</td>
                     </tr>
                   </tbody>
-                </table>
+                </Table>
                 <Placeholder></Placeholder>
               </CollapsibleSection>
               <CollapsibleSection title="Kontakt">
-                <table id="contact">
+                <Table id="contact">
                   <thead>
                     <tr>
                       <td></td>
@@ -474,7 +474,7 @@ export default function InfoPanel(props) {
                       </td>
                     </tr>
                   </tbody>
-                </table>
+                </Table>
               </CollapsibleSection>
             </>
           )}
