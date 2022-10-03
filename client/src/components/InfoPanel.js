@@ -2,8 +2,9 @@ import React, { useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 import "jspdf-autotable";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
+import { updateWithResult } from "../redux/computationResultSlice";
 import { initializeInfoPanelHandlers } from "../utils/view";
 import { AmpelkarteTable } from "./AmpelkarteTable";
 import { ews_erklaerungen, gwwp_erklaerungen } from "../assets/Beschreibungen";
@@ -86,16 +87,17 @@ export default function InfoPanel(props) {
     (store) => store.computationResult.value
   );
 
+  const dispatch = useDispatch();
+
   const { t } = useTranslation();
 
   // record which tables should be printed
-  let [
-    einschraenkungenEWS,
-    einschraenkungenGWWP,
-    erlaeuterungen,
-    hinweiseEWS,
-    hinweiseGWWP,
-  ] = [false, false, false, false, false];
+  let [einschraenkungenEWS, einschraenkungenGWWP, hinweiseEWS, hinweiseGWWP] = [
+    false,
+    false,
+    false,
+    false,
+  ];
 
   // initialize query handlers
   useEffect(() => {
@@ -107,20 +109,21 @@ export default function InfoPanel(props) {
       setAddress,
       setCadastralData
     );
-  }, []);
+    return () => dispatch(updateWithResult({}));
+  }, [dispatch]);
 
   // print pdf report
   const clickHandler = () => {
     print(
       einschraenkungenEWS,
       einschraenkungenGWWP,
-      erlaeuterungen,
       hinweiseEWS,
       hinweiseGWWP,
       Object.keys(computationResult).length > 0,
       screenshot,
       image_bal,
-      image_unbal
+      image_unbal,
+      cadastralData
     );
   };
 
@@ -177,18 +180,19 @@ export default function InfoPanel(props) {
     }
   };
 
-  const setTablesAdded = (
-    einschraenkungenEWSAdded,
-    einschraenkungenGWWPAdded,
-    erlaeuterungenAdded,
-    hinweiseEWSAdded,
-    hinweiseGWWPAdded
-  ) => {
-    einschraenkungenEWS = einschraenkungenEWSAdded;
-    einschraenkungenGWWP = einschraenkungenGWWPAdded;
-    erlaeuterungen = erlaeuterungenAdded;
-    hinweiseEWS = hinweiseEWSAdded;
-    hinweiseGWWP = hinweiseGWWPAdded;
+  const setTables = (layerId, einschraenkungen, hinweise) => {
+    switch (layerId) {
+      case 0:
+        einschraenkungenEWS = einschraenkungen;
+        hinweiseEWS = hinweise;
+        break;
+      case 1:
+        einschraenkungenGWWP = einschraenkungen;
+        hinweiseGWWP = hinweise;
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -210,6 +214,14 @@ export default function InfoPanel(props) {
                   </Underline>
                 </span>
                 {t("info_div.instruction_polyline_last")}
+              </p>
+              <p>
+                Im Menü "Parameter Erdwärmesonden" können Sie optional Parameter
+                für Erdwärmesonden festlegen.
+              </p>
+              <p>
+                Der gesetzliche Mindestabstand der Erdwärmesonden zur
+                Grundstücksgrenze beträgt zwei Meter.
               </p>
             </>
           ) : (
@@ -255,7 +267,7 @@ export default function InfoPanel(props) {
             </>
           )}
           {identifyEWS && (
-            <CollapsibleSection title="Ressourcen für Erdwärmesonden">
+            <CollapsibleSection title="Ressourcen Erdwärmesonden">
               <Table id="ews-table">
                 <thead>
                   <tr>
@@ -281,41 +293,15 @@ export default function InfoPanel(props) {
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {identifyGWWP && (
-            <CollapsibleSection title="Ressourcen für thermische Grundwassernutzung">
-              <Table id="gwwp-table">
-                <thead>
-                  <tr>
-                    <td></td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {identifyGWWP.map((result) => {
-                    return (
-                      <TableRow key={result.layerId}>
-                        <TableData>
-                          {formatGWWP(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes["Pixel Value"]
-                          )}
-                        </TableData>
-                      </TableRow>
-                    );
-                  })}
-                </tbody>
-              </Table>
-              <Placeholder></Placeholder>
-            </CollapsibleSection>
-          )}
           {identifyAmpelkarte && (
             <AmpelkarteTable
               results={identifyAmpelkarte}
-              setTablesAdded={setTablesAdded}
+              setTables={setTables}
+              layerId={0}
             ></AmpelkarteTable>
           )}
           {Object.keys(computationResult).length !== 0 && (
-            <CollapsibleSection title="Berechnungsergebnis für Erdwärmesonden">
+            <CollapsibleSection title="Berechnungsergebnis Erdwärmesonden">
               <Table id="calculations-output-table">
                 <thead>
                   <tr>
@@ -375,7 +361,7 @@ export default function InfoPanel(props) {
             </CollapsibleSection>
           )}
           {Object.keys(computationResult).length !== 0 && (
-            <CollapsibleSection title="Berechnungsergebnis für Erdwärmesonden (bilanzierter Betrieb)">
+            <CollapsibleSection title="Berechnungsergebnis Erdwärmesonden (bilanzierter Betrieb)">
               <Table id="calculations-bal-output-table">
                 <thead>
                   <tr>
@@ -438,6 +424,40 @@ export default function InfoPanel(props) {
               ></Image>
               <Placeholder></Placeholder>
             </CollapsibleSection>
+          )}
+          {identifyGWWP && (
+            <CollapsibleSection title="Ressourcen thermische Grundwassernutzung">
+              <Table id="gwwp-table">
+                <thead>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {identifyGWWP.map((result) => {
+                    return (
+                      <TableRow key={result.layerId}>
+                        <TableData>
+                          {formatGWWP(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes["Pixel Value"]
+                          )}
+                        </TableData>
+                      </TableRow>
+                    );
+                  })}
+                </tbody>
+              </Table>
+              <Placeholder></Placeholder>
+            </CollapsibleSection>
+          )}
+          {identifyAmpelkarte && (
+            <AmpelkarteTable
+              results={identifyAmpelkarte}
+              setTables={setTables}
+              layerId={1}
+            ></AmpelkarteTable>
           )}
           {identifyAmpelkarte && (
             <>

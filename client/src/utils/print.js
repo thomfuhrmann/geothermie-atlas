@@ -3,13 +3,13 @@ import jsPDF from "jspdf";
 export const print = (
   einschraenkungenEWS,
   einschraenkungenGWWP,
-  erlaeuterungen,
   hinweiseEWS,
   hinweiseGWWP,
   computationResult,
   screenshot,
   image_bal,
-  image_unbal
+  image_unbal,
+  cadastralData
 ) => {
   const doc = new jsPDF({
     orientation: "portrait",
@@ -27,30 +27,47 @@ export const print = (
 
   doc.addImage(screenshot, "PNG", 20, 30, 170, 85);
 
-  doc.autoTable({
-    html: "#cadastral-data-table",
-    rowPageBreak: "avoid",
-    startY: 120,
-    styles: { halign: "center" },
-    willDrawCell: function (data) {
-      if (data.section === "body") {
-        doc.setFillColor(255, 255, 255);
-      }
-    },
-  });
+  if (cadastralData) {
+    doc.autoTable({
+      html: "#cadastral-data-table",
+      rowPageBreak: "avoid",
+      startY: 120,
+      styles: { halign: "center" },
+      willDrawCell: function (data) {
+        if (data.section === "body") {
+          doc.setFillColor(255, 255, 255);
+        }
+      },
+    });
+  }
 
-  let finalY = doc.lastAutoTable.finalY;
-  doc.autoTable({
-    html: "#address-table",
-    rowPageBreak: "avoid",
-    startY: finalY,
-    styles: { halign: "center" },
-    willDrawCell: function (data) {
-      if (data.section === "body") {
-        doc.setFillColor(255, 255, 255);
-      }
-    },
-  });
+  let finalY;
+  if (cadastralData) {
+    finalY = doc.lastAutoTable.finalY;
+    doc.autoTable({
+      html: "#address-table",
+      rowPageBreak: "avoid",
+      startY: finalY,
+      styles: { halign: "center" },
+      willDrawCell: function (data) {
+        if (data.section === "body") {
+          doc.setFillColor(255, 255, 255);
+        }
+      },
+    });
+  } else {
+    doc.autoTable({
+      html: "#address-table",
+      rowPageBreak: "avoid",
+      startY: 120,
+      styles: { halign: "center" },
+      willDrawCell: function (data) {
+        if (data.section === "body") {
+          doc.setFillColor(255, 255, 255);
+        }
+      },
+    });
+  }
 
   finalY = doc.lastAutoTable.finalY;
   doc.autoTable({
@@ -65,21 +82,9 @@ export const print = (
   });
 
   finalY = doc.lastAutoTable.finalY;
-  doc.autoTable({
-    html: "#gwwp-table",
-    rowPageBreak: "avoid",
-    startY: finalY + 10,
-    willDrawCell: function (data) {
-      if (data.section === "head") {
-        data.cell.text = "Ressourcen für thermische Grundwassernutzung";
-      }
-    },
-  });
-
-  finalY = doc.lastAutoTable.finalY;
   if (hinweiseEWS) {
     doc.autoTable({
-      html: "#hinweise-ews-table",
+      html: "#hinweise-0-table",
       rowPageBreak: "avoid",
       startY: finalY + 10,
       willDrawCell: function (data) {
@@ -91,56 +96,14 @@ export const print = (
   }
 
   finalY = doc.lastAutoTable.finalY;
-  if (hinweiseGWWP) {
-    doc.autoTable({
-      html: "#hinweise-gwwp-table",
-      rowPageBreak: "avoid",
-      startY: finalY + 10,
-      willDrawCell: function (data) {
-        if (data.section === "head") {
-          data.cell.text = "Hinweise thermische Grundwassernutzung";
-        }
-      },
-    });
-  }
-
-  finalY = doc.lastAutoTable.finalY;
   if (einschraenkungenEWS) {
     doc.autoTable({
-      html: "#einschraenkungen-ews-table",
+      html: "#einschraenkungen-0-table",
       rowPageBreak: "avoid",
       startY: finalY + 10,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Einschränkungen Erdwärmesonden";
-        }
-      },
-    });
-  }
-
-  finalY = doc.lastAutoTable.finalY;
-  if (einschraenkungenGWWP) {
-    doc.autoTable({
-      html: "#einschraenkungen-gwwp-table",
-      rowPageBreak: "avoid",
-      startY: finalY + 10,
-      willDrawCell: function (data) {
-        if (data.section === "head") {
-          data.cell.text = "Einschränkungen thermische Grundwassernutzung";
-        }
-      },
-    });
-  }
-
-  finalY = doc.lastAutoTable.finalY;
-  if (erlaeuterungen) {
-    doc.autoTable({
-      html: "#erlaeuterungen-table",
-      rowPageBreak: "avoid",
-      startY: finalY + 10,
-      willDrawCell: function (data) {
-        if (data.section === "head") {
-          data.cell.text = "Erläuterungen zu den Einschränkungen";
         }
       },
     });
@@ -207,9 +170,49 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   doc.autoTable({
-    html: "#disclaimer",
+    html: "#gwwp-table",
     rowPageBreak: "avoid",
     startY: finalY + height + 10,
+    willDrawCell: function (data) {
+      if (data.section === "head") {
+        data.cell.text = "Ressourcen für thermische Grundwassernutzung";
+      }
+    },
+  });
+
+  finalY = doc.lastAutoTable.finalY;
+  if (hinweiseGWWP) {
+    doc.autoTable({
+      html: "#hinweise-1-table",
+      rowPageBreak: "avoid",
+      startY: finalY + 10,
+      willDrawCell: function (data) {
+        if (data.section === "head") {
+          data.cell.text = "Hinweise thermische Grundwassernutzung";
+        }
+      },
+    });
+  }
+
+  finalY = doc.lastAutoTable.finalY;
+  if (einschraenkungenGWWP) {
+    doc.autoTable({
+      html: "#einschraenkungen-1-table",
+      rowPageBreak: "avoid",
+      startY: finalY + 10,
+      willDrawCell: function (data) {
+        if (data.section === "head") {
+          data.cell.text = "Einschränkungen thermische Grundwassernutzung";
+        }
+      },
+    });
+  }
+
+  finalY = doc.lastAutoTable.finalY;
+  doc.autoTable({
+    html: "#disclaimer",
+    rowPageBreak: "avoid",
+    startY: finalY + 10,
     willDrawCell: function (data) {
       if (data.section === "head") {
         data.cell.text = "Haftungsausschluss";
