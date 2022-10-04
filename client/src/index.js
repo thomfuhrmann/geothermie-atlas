@@ -5,20 +5,15 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
-import { I18nextProvider } from "react-i18next";
-import i18n from "./utils/i18n";
-
-import { Provider } from 'react-redux'
-import { store } from "./redux/store"
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
 
 const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(
-  <I18nextProvider i18n={i18n}>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </I18nextProvider>
+  <Provider store={store}>
+    <App />
+  </Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function

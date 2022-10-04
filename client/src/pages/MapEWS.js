@@ -2,11 +2,11 @@ import React, { useRef, useEffect, useState } from "react";
 
 import styled from "styled-components";
 
-import InfoPanel from "../components/InfoPanel";
-import CalculationsMenu from "../components/CalculationsMenu";
+import InfoPanel from "../components/InfoPanelEWS";
+import CalculationsMenu from "../components/CalculationsMenuEWS";
 import LoadingSpinner from "../components/LoadingSpinner";
 
-import { initialize } from "../utils/view";
+import { initialize } from "../utils/viewEWS";
 
 const MapContainer = styled.div`
   position: absolute;
@@ -17,7 +17,7 @@ const MapContainer = styled.div`
   width: 100%;
 `;
 
-const Map = () => {
+const MapEWS = () => {
   const mapDiv = useRef(null);
 
   const [loading, setLoading] = useState(null);
@@ -26,7 +26,6 @@ const Map = () => {
     // initialize the map interface
     let view = initialize(mapDiv.current);
     return () => {
-      //view.container = null; view.map = null;
       view.destroy();
     };
   }, []);
@@ -40,4 +39,4 @@ const Map = () => {
   );
 };
 
-export default Map;
+export default MapEWS;

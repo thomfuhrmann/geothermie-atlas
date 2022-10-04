@@ -1,49 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-import styled from "styled-components";
-
-import { useDispatch } from "react-redux";
 import { updateWithResult } from "../redux/computationResultSlice";
-
 import {
   initializeCalculationsMenuHandlers,
   takeScreenshot,
-} from "../utils/view";
-import { calculateGrid } from "../utils/orthogonal_gridcomputer";
-import { initializeParameterMenuHandlers } from "../utils/ParameterMenu";
-
-const Menu = styled.div`
-  position: absolute;
-  top: 15px;
-  left: 50%;
-  transform: translate(-50%);
-  margin: 0px;
-  border: none;
-  color: #444444;
-  background-color: white;
-  width: 250px;
-  height: auto;
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  flex-direcation: column;
-`;
-
-const ButtonDiv = styled.div`
-  padding: 5px;
-  width: 100%;
-`;
-
-const Button = styled.button`
-  position: relative;
-  width: 100%;
-  height: 40px;
-  margin: 0px;
-  padding: 0px;
-  border: none;
-  cursor: pointer;
-`;
+} from "../utils/viewEWS";
+import { calculateGrid } from "../utils/gridcomputer";
+import { initializeParameterMenuHandlers } from "../utils/ParameterMenuEWS";
+import { Menu, Button, ButtonContainer } from "./CommonStyledElements";
 
 export default function CalculationsMenu({ isLoading }) {
   const [polygon, setPolygon] = useState(null);
@@ -55,7 +20,8 @@ export default function CalculationsMenu({ isLoading }) {
   const [P_HZ, setP_HZ] = useState(0);
   const [identifyResults, setIdentifyResults] = useState(null);
   const [gridPoints, setGridPoints] = useState([]);
-  const [cadastralData, setCadastralData] = useState(null);
+
+  const cadastralData = useSelector((store) => store.cadastre.value);
 
   const dispatch = useDispatch();
 
@@ -158,9 +124,7 @@ export default function CalculationsMenu({ isLoading }) {
     initializeCalculationsMenuHandlers(
       setPolygon,
       setIdentifyResults,
-      setGridPoints,
-      dispatch,
-      setCadastralData
+      setGridPoints
     );
 
     initializeParameterMenuHandlers(
@@ -177,16 +141,16 @@ export default function CalculationsMenu({ isLoading }) {
     <Menu>
       {polygon && (
         <>
-          <ButtonDiv>
+          <ButtonContainer>
             <Button onClick={handleGridCalculation}>
               Erdwärmesondennetz zeichnen
             </Button>
-          </ButtonDiv>
-          <ButtonDiv>
+          </ButtonContainer>
+          <ButtonContainer>
             <Button onClick={handlePythonCalculation}>
               Berechnung starten
             </Button>
-          </ButtonDiv>
+          </ButtonContainer>
         </>
       )}
     </Menu>

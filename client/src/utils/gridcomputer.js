@@ -1,30 +1,45 @@
 import Graphic from "@arcgis/core/Graphic";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
 import Point from "@arcgis/core/geometry/Point";
-import Circle from "@arcgis/core/geometry/Circle";
-import Polyline from "@arcgis/core/geometry/Polyline";
 import Polygon from "@arcgis/core/geometry/Polygon";
 
 import {
   view,
-  graphicsLayer,
-  cadastre as cadastralLayer,
-  identifyLayers,
-} from "./view";
+  pointGraphicsLayer,
+  boundaryGraphicsLayer,
+  cadastre,
+} from "./viewEWS";
 
 // grid points have to be at least 2 meters away from parcel boundary
 const distanceToBoundary = 2;
 
-const drawPoint = (point) => {
-  graphicsLayer.add(
+const drawPoint = (point, color = [90, 90, 90, 0]) => {
+  pointGraphicsLayer.add(
     new Graphic({
       geometry: point,
       symbol: {
         type: "simple-marker",
-        color: [90, 90, 90, 0],
+        color,
       },
     })
   );
+};
+
+const drawPolygon = (polygon) => {
+  boundaryGraphicsLayer.add(
+    new Graphic({
+      geometry: polygon,
+      symbol: {
+        type: "simple-fill",
+        color: [0, 0, 0, 0],
+        outline: { color: "red", width: "1px" },
+      },
+    })
+  );
+};
+
+const dotProduct = (u, v) => {
+  return u[0] * v[0] + u[1] * v[1];
 };
 
 const determinant = (m) =>
@@ -40,6 +55,12 @@ const determinant = (m) =>
             determinant(m.slice(1).map((c) => c.filter((_, j) => i !== j))),
         0
       );
+
+const spread = (u, v) => {
+  return (
+    Math.pow(determinant([u, v]), 2) / (dotProduct(u, u) * dotProduct(v, v))
+  );
+};
 
 const intersect = (x1, y1, x2, y2, x3, y3, x4, y4) => {
   // Check if no line is of length 0
@@ -58,145 +79,164 @@ const intersect = (x1, y1, x2, y2, x3, y3, x4, y4) => {
   return [x, y];
 };
 
-const orderPoints = (points) => {
-  if (
-    determinant([
-      [points[0][0], points[0][1], 1],
-      [points[1][0], points[1][1], 1],
-      [points[2][0], points[2][1], 1],
-    ]) > 0
-  ) {
-    points = [points[2], points[1], points[0]];
-  }
-  return points;
+const computeParallelLine = (line, offset) => {
+  const v = [line[1][0] - line[0][0], line[1][1] - line[0][1]];
+  const n = [-v[1], v[0]];
+  const il = 1 / Math.sqrt(Math.pow(n[0], 2) + Math.pow(n[1], 2));
+  const nn = [il * n[0], il * n[1]];
+  const p = [line[0][0] - offset * nn[0], line[0][1] - offset * nn[1]];
+  const q = [p[0] + v[0], p[1] + v[1]];
+  return [p, q];
 };
 
-const intersectLineCircle = (line, circle) => {
-  const intersectionLine = geometryEngine.intersect(line, circle);
-  const path = intersectionLine.paths && intersectionLine.paths[0];
-  const point =
-    circle.center.x === path[0][0] && circle.center.y === path[0][1]
-      ? new Point({
-          x: path[1][0],
-          y: path[1][1],
-          spatialReference: view.spatialReference,
-        })
-      : new Point({
-          x: path[0][0],
-          y: path[0][1],
-          spatialReference: view.spatialReference,
-        });
-  return point;
-};
-
-const calculatePointsOnLine = (line, start, offset) => {
-  const length = geometryEngine.planarLength(line, "meters");
-  let radius = offset;
-  const points = [];
-  while (radius < length - distanceToBoundary) {
-    const circle = new Circle({
-      center: start,
-      radius: radius,
-      radiusUnit: "meters",
-    });
-    const intersectionPoint = intersectLineCircle(line, circle);
-    points.push(intersectionPoint);
-    radius += offset;
-  }
-  return points;
-};
-
-const offsetLine = (line, offset, length, gridUnit) => {
-  let currentOffset = offset;
+const computeParallelLines = (line, offset, maxOffset) => {
   const lines = [];
-  let currentStep = gridUnit;
-  while (currentStep < length - distanceToBoundary) {
-    const offsetPolyline = geometryEngine.offset(line, currentOffset, "meters");
+  let currentOffset = offset;
+  while (Math.abs(currentOffset) < maxOffset) {
+    const offsetPolyline = computeParallelLine(line, currentOffset);
     lines.push(offsetPolyline);
     currentOffset += offset;
-    currentStep += gridUnit;
   }
   return lines;
 };
 
-export const calculateGrid = async (event, gridSpacing = 10) => {
-  let points = orderPoints(event.graphic.geometry.paths[0]);
-  let offsetPolyline = geometryEngine.offset(
-    new Polyline({ paths: points, spatialReference: view.spatialReference }),
+export const distance = (point1, point2) => {
+  return Math.sqrt(
+    Math.pow(point2[0] - point1[0], 2) + Math.pow(point2[1] - point1[1], 2)
+  );
+};
+
+const computeGridLines = (point1, point2, points, gridSpacing) => {
+  let v = [point2[0] - point1[0], point2[1] - point1[1]];
+  let n = [-v[0], -v[1]];
+  let c = -n[0] * point1[0] - n[1] * point1[1];
+  let longestDistanceRight = 0;
+  let longestDistanceLeft = 0;
+
+  for (let point of points) {
+    let projectedPoint = [
+      (point[0] * n[1] * n[1] - n[0] * n[1] * point[1] - n[0] * c) /
+        (n[0] * n[0] + n[1] * n[1]),
+      (n[0] * n[0] * point[1] - n[0] * n[1] * point[0] - n[1] * c) /
+        (n[0] * n[0] + n[1] * n[1]),
+    ];
+
+    const length = distance(point1, projectedPoint);
+
+    const m = [
+      [point1[0], point1[1], 1],
+      [point2[0], point2[1], 1],
+      [projectedPoint[0], projectedPoint[1], 1],
+    ];
+
+    if (determinant(m) < 0 && length > longestDistanceRight) {
+      longestDistanceRight = length;
+    } else if (determinant(m) > 0 && length > longestDistanceLeft) {
+      longestDistanceLeft = length;
+    }
+  }
+
+  const line = [point1, point2];
+
+  const linesRight = computeParallelLines(
+    [point1, point2],
+    gridSpacing,
+    longestDistanceRight
+  );
+  const linesLeft = computeParallelLines(
+    [point1, point2],
+    -gridSpacing,
+    longestDistanceLeft
+  );
+  const lines = linesRight.concat(linesLeft, [line]);
+
+  return lines;
+};
+
+export const calculateGrid = (polygon, gridSpacing = 10, setGridPoints) => {
+  pointGraphicsLayer.removeAll();
+
+  let offsetPolygon = geometryEngine.offset(
+    polygon,
     distanceToBoundary,
     "meters"
   );
 
-  if (offsetPolyline) {
-    // oder in clockwise direction
-    points = orderPoints(offsetPolyline.paths[0]);
-
-    const point1 = new Point({
-      x: points[0][0],
-      y: points[0][1],
+  // draw only outer polygon and ignore inner rings
+  drawPolygon(
+    new Polygon({
+      rings: offsetPolygon.rings[0],
       spatialReference: view.spatialReference,
-    });
-    const point2 = new Point({
-      x: points[1][0],
-      y: points[1][1],
-      spatialReference: view.spatialReference,
-    });
-    const point3 = new Point({
-      x: points[2][0],
-      y: points[2][1],
-      spatialReference: view.spatialReference,
-    });
-    const line1 = new Polyline({
-      paths: [points[0], points[1]],
-      spatialReference: view.spatialReference,
-    });
-    const line2 = new Polyline({
-      paths: [points[1], points[2]],
-      spatialReference: view.spatialReference,
-    });
-    const circle = new Circle({
-      center: point2,
-      radius: gridSpacing,
-      radiusUnit: "meters",
-    });
+    })
+  );
 
-    // create boundary polygon from polyline
-    const path = event.graphic.geometry.paths[0];
-    const firstPoint = path.length > 0 && path[0];
-    path.push(firstPoint);
-    const boundaryPolygon = new Polygon({
-      rings: path,
-      spatialReference: view.spatialReference,
-    });
+  if (offsetPolygon) {
+    const points = offsetPolygon.rings[0];
 
-    const intersectionPoint1 = intersectLineCircle(line1, circle);
-    const intersectionPoint2 = intersectLineCircle(line2, circle);
+    // search for most perpendicular corner
+    let widestSpread = 0;
+    let index = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      let currentSpread, u, v;
+      if (i === 0) {
+        u = [
+          points[points.length - 1][0] - points[0][0],
+          points[points.length - 1][1] - points[0][1],
+        ];
+        v = [points[1][0] - points[0][0], points[1][1] - points[0][1]];
+        currentSpread = spread(u, v);
+      } else if (i === points.length - 1) {
+        u = [
+          points[points.length - 2][0] - points[points.length - 1][0],
+          points[points.length - 2][1] - points[points.length - 1][1],
+        ];
+        v = [
+          points[points.length - 1][0] - points[0][0],
+          points[points.length - 1][1] - points[0][1],
+        ];
+        currentSpread = spread(u, v);
+      } else {
+        u = [points[i - 1][0] - points[i][0], points[i - 1][1] - points[i][1]];
+        v = [points[i + 1][0] - points[i][0], points[i + 1][1] - points[i][1]];
+        currentSpread = spread(u, v);
+      }
 
-    const offset1 = geometryEngine.distance(line1, intersectionPoint2);
-    const offset2 = geometryEngine.distance(line2, intersectionPoint1);
+      if (currentSpread > widestSpread) {
+        widestSpread = currentSpread;
+        index = i;
+      }
+    }
 
-    const length1 = geometryEngine.distance(point1, point2);
-    const length2 = geometryEngine.distance(point2, point3);
-
-    const lines1 = offsetLine(line1, offset1, length2, gridSpacing);
-    const lines2 = offsetLine(line2, offset2, length1, gridSpacing);
+    const v = [
+      points[index + 1][0] - points[index][0],
+      points[index + 1][1] - points[index][1],
+    ];
+    const n = [-v[1], v[0]];
+    const lines = computeGridLines(
+      points[index],
+      points[index + 1],
+      points,
+      gridSpacing
+    );
+    const orthogonalLines = computeGridLines(
+      points[index],
+      [points[index][0] + n[0], points[index][1] + n[1]],
+      points,
+      gridSpacing
+    );
 
     const gridPoints = [];
-    gridPoints.push(point2);
-    gridPoints.push(...calculatePointsOnLine(line1, point2, gridSpacing));
-    gridPoints.push(...calculatePointsOnLine(line2, point2, gridSpacing));
-
-    for (let line1 of lines1) {
-      for (let line2 of lines2) {
+    for (let line1 of lines) {
+      for (let line2 of orthogonalLines) {
         const intersection = intersect(
-          line1.paths[0][0][0],
-          line1.paths[0][0][1],
-          line1.paths[0][1][0],
-          line1.paths[0][1][1],
-          line2.paths[0][0][0],
-          line2.paths[0][0][1],
-          line2.paths[0][1][0],
-          line2.paths[0][1][1]
+          line1[0][0],
+          line1[0][1],
+          line1[1][0],
+          line1[1][1],
+          line2[0][0],
+          line2[0][1],
+          line2[1][0],
+          line2[1][1]
         );
 
         const intersectionPoint =
@@ -214,65 +254,47 @@ export const calculateGrid = async (event, gridSpacing = 10) => {
     // filter points that are inside the boundary polygon
     const filteredGridPoints = gridPoints.filter((point) => {
       let include = false;
-      if (
-        geometryEngine.distance(point, event.graphic.geometry, "meters") >
-          1.8 &&
-        geometryEngine.within(point, boundaryPolygon)
-      ) {
+      if (geometryEngine.intersects(point, offsetPolygon)) {
         include = true;
       }
       return include;
     });
 
     // filter points that are not on buildings
-    filterPointsByPixelAndDraw(
-      cadastralLayer,
-      filteredGridPoints,
-      boundaryPolygon.centroid
-    );
+    filterPointsByPixelAndDraw(filteredGridPoints, setGridPoints);
   }
 };
 
 // select points that are not on buildings
-const filterPointsByPixelAndDraw = (
-  cadastralLayer,
-  filteredGridPoints,
-  centroid
-) => {
-  cadastralLayer
-    .fetchImage(view.extent, view.width, view.height)
-    .then((image) => {
-      const canvas = document.createElement("canvas");
-      canvas.width = view.width;
-      canvas.height = view.height;
+const filterPointsByPixelAndDraw = (points, setGridPoints) => {
+  cadastre.fetchImage(view.extent, view.width, view.height).then((image) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = view.width;
+    canvas.height = view.height;
 
-      const context = canvas.getContext("2d");
-      context.drawImage(image, 0, 0);
+    const context = canvas.getContext("2d");
+    context.drawImage(image, 0, 0);
 
-      const selectedGridPoints = [];
-      let m = 1;
-      for (const point of filteredGridPoints) {
-        const screenPoint = view.toScreen(point);
+    const selectedGridPoints = [];
+    for (const point of points) {
+      const screenPoint = view.toScreen(point);
 
-        const { data } = context.getImageData(
-          Math.round(screenPoint.x),
-          Math.round(screenPoint.y),
-          1,
-          1
-        );
+      const { data } = context.getImageData(
+        Math.round(screenPoint.x),
+        Math.round(screenPoint.y),
+        1,
+        1
+      );
 
-        // buildings are identified by their RGB value (218, 62, 56) in the cadastral layer
-        if (!(data[0] === 218 && data[1] === 62 && data[2] === 56)) {
-          point.m = m;
-          selectedGridPoints.push(point);
-          m++;
-        }
+      // buildings are identified by their RGB value (218, 62, 56) in the cadastral layer
+      if (!(data[0] === 218 && data[1] === 62 && data[2] === 56)) {
+        selectedGridPoints.push(point);
       }
+    }
+    // draw points
+    selectedGridPoints.map((point) => drawPoint(point));
 
-      // query layer values and execute scipt
-      identifyLayers(centroid, selectedGridPoints.length);
-
-      // draw points
-      selectedGridPoints.map((point) => drawPoint(point));
-    });
+    // set grid points for the UI
+    setGridPoints(selectedGridPoints);
+  });
 };

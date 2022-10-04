@@ -6,8 +6,8 @@ import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import WMSLayer from "@arcgis/core/layers/WMSLayer";
 import WMTSLayer from "@arcgis/core/layers/WMTSLayer";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference";
-import LayerList from "@arcgis/core/widgets/LayerList";
-import Legend from "@arcgis/core/widgets/Legend";
+// import LayerList from "@arcgis/core/widgets/LayerList";
+// import Legend from "@arcgis/core/widgets/Legend";
 import Search from "@arcgis/core/widgets/Search";
 import ScaleBar from "@arcgis/core/widgets/ScaleBar";
 import Sketch from "@arcgis/core/widgets/Sketch";
@@ -20,7 +20,8 @@ import Polygon from "@arcgis/core/geometry/Polygon";
 import Graphic from "@arcgis/core/Graphic";
 
 import { updateWithResult } from "../redux/computationResultSlice";
-import { initializeCollapsible } from "./ParameterMenu";
+import { initializeCollapsible } from "./ParameterMenuEWS";
+import { updateCadastralData } from "../redux/cadastreSlice";
 
 // spatial reference WKID
 const SRS = 31256;
@@ -30,8 +31,6 @@ const ampelkarte_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Ampelkarte_Wien/MapServer";
 const ews_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Erdwaermesonden_EWS_Wien_TEST/MapServer";
-const gwwp_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_thermischeGrundwassernutzung_GWP_Wien_TEST/MapServer";
 const betriebsstunden_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BetriebsStd_Wien_TEST/MapServer";
 
@@ -42,7 +41,7 @@ export let boundaryGraphicsLayer;
 export let cadastre;
 
 // reverse-geocode address for a given point
-let handleAddress;
+let setAddress;
 function getAddress(mapPoint) {
   const serviceUrl =
     "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
@@ -51,10 +50,10 @@ function getAddress(mapPoint) {
   };
   locator.locationToAddress(serviceUrl, params).then(
     function (response) {
-      handleAddress(response.address.split(","));
+      setAddress(response.address.split(","));
     },
     function () {
-      handleAddress([]);
+      setAddress([]);
     }
   );
 }
@@ -66,9 +65,8 @@ let BT,
   BS_KL_Norm,
   BS_HZ_Norm,
   identifyResultsHandler,
-  handleIdentifyGWWP,
-  handleIdentifyEWS,
-  handleIdentifyAmpelkarte;
+  setResources,
+  setAmpelkarte;
 export const identifyLayers = (mapPoint) => {
   const params = new IdentifyParameters();
   params.geometry = mapPoint;
@@ -88,7 +86,7 @@ export const identifyLayers = (mapPoint) => {
     WLF = res.results.find((result) => result.layerId === 6)?.feature
       .attributes["Pixel Value"];
 
-    handleIdentifyEWS(res.results);
+    setResources(res.results);
 
     identify.identify(betriebsstunden_url, params).then((res) => {
       BS_KL_Norm = res.results.find((result) => result.layerId === 0)?.feature
@@ -106,18 +104,13 @@ export const identifyLayers = (mapPoint) => {
     });
   });
 
-  identify.identify(gwwp_url, params).then((res) => {
-    handleIdentifyGWWP(res.results);
-  });
-
   identify.identify(ampelkarte_url, params).then((res) => {
-    handleIdentifyAmpelkarte(res.results);
+    setAmpelkarte(res.results);
   });
 };
 
-let setPolygonHandler,
-  cadastralDataHandler,
-  handleCadastralData,
+let setPolygon,
+  dispatch,
   polygonGraphicsLayer,
   KG,
   EZ = 0,
@@ -163,7 +156,7 @@ const queryCadastre = (mapPoint) => {
         spatialReference: view.spatialReference,
       });
 
-      setPolygonHandler(polygon);
+      setPolygon(polygon);
 
       const polygonSymbol = {
         type: "simple-fill",
@@ -182,8 +175,7 @@ const queryCadastre = (mapPoint) => {
 
       polygonGraphicsLayer.add(polygonGraphic);
 
-      handleCadastralData({ KG, GNR });
-      cadastralDataHandler({ KG, GNR, EZ, FF });
+      dispatch(updateCadastralData({ KG, GNR, EZ, FF }));
 
       // url = "https://kataster.bev.gv.at/api/gst/" + KG + "/" + GNR;
       // esriRequest(url, { responseType: "json" }).then(({ data }) => {
@@ -200,7 +192,7 @@ const queryCadastre = (mapPoint) => {
 };
 
 // take screenshot for info panel
-let screenshotHandler;
+let setScreenshot;
 export const takeScreenshot = (mapPoint, withMarker = false) => {
   const screenPoint = view.toScreen(mapPoint);
   const width = 1000;
@@ -239,7 +231,7 @@ export const takeScreenshot = (mapPoint, withMarker = false) => {
           context.closePath();
           context.stroke();
 
-          screenshotHandler(canvas.toDataURL());
+          setScreenshot(canvas.toDataURL());
         };
       });
   } else {
@@ -253,13 +245,13 @@ export const takeScreenshot = (mapPoint, withMarker = false) => {
         },
       })
       .then((screenshot) => {
-        screenshotHandler(screenshot.dataUrl);
+        setScreenshot(screenshot.dataUrl);
       });
   }
 };
 
 // initialize the map view container
-let dispatchHandler, gridPointsHandler;
+let setGridPoints;
 export function initialize(container) {
   view = new MapView({
     extent: new Extent({
@@ -294,22 +286,18 @@ export function initialize(container) {
     listMode: "hide",
   });
 
-  const gwwp = new MapImageLayer({
-    title: "Grundwasserwärmepumpen",
-    url: gwwp_url,
-    visible: false,
-  });
-
   const ews = new MapImageLayer({
     title: "Erdwärmesonden",
     url: ews_url,
     visible: false,
+    listMode: "hide",
   });
 
   const betriebsstunden = new MapImageLayer({
     title: "Betriebsstunden",
     url: betriebsstunden_url,
     visible: false,
+    listMode: "hide",
   });
 
   // cadastre used as basemap to filter points by category
@@ -357,7 +345,6 @@ export function initialize(container) {
     layers: [
       basemap_at,
       betriebsstunden,
-      gwwp,
       ews,
       ampelkarte,
       cadastreOverlay,
@@ -367,12 +354,12 @@ export function initialize(container) {
     ],
   });
 
-  const layerList = new LayerList({ view });
+  // const layerList = new LayerList({ view });
 
-  const legend = new Legend({
-    view: view,
-    hideLayersNotInCurrentView: true,
-  });
+  // const legend = new Legend({
+  //   view: view,
+  //   hideLayersNotInCurrentView: true,
+  // });
 
   const search = new Search({
     view,
@@ -419,13 +406,13 @@ export function initialize(container) {
 
       // add point to current list of points
       const point = event.graphic.geometry;
-      gridPointsHandler((current) => [...current, point]);
+      setGridPoints((current) => [...current, point]);
     }
   });
 
   sketch.on("delete", (event) => {
     let points = event.graphics.map((graphic) => graphic.geometry);
-    gridPointsHandler((current) =>
+    setGridPoints((current) =>
       current.filter((point) => !points.includes(point))
     );
   });
@@ -436,14 +423,14 @@ export function initialize(container) {
     boundaryGraphicsLayer.removeAll();
     pointGraphicsLayer.removeAll();
 
-    dispatchHandler(updateWithResult({}));
-    gridPointsHandler([]);
+    dispatch(updateWithResult({}));
+    setGridPoints([]);
 
     queryCadastre(mapPoint);
     identifyLayers(mapPoint);
     getAddress(mapPoint);
 
-    if (view.scale > 37000) {
+    if (view.scale > 45000) {
       setTimeout(() => takeScreenshot(mapPoint, true), 500);
     } else {
       setTimeout(() => takeScreenshot(mapPoint), 500);
@@ -452,10 +439,7 @@ export function initialize(container) {
 
   view.map = arcgisMap;
   view.ui.components = [];
-  view.ui.add(
-    [layerList, legend, search, sketch, initializeCollapsible()],
-    "top-left"
-  );
+  view.ui.add([search, sketch, initializeCollapsible()], "top-left");
   view.ui.add(scaleBar, "bottom-left");
   view.container = container;
   return view;
@@ -463,31 +447,25 @@ export function initialize(container) {
 
 // initialize handlers
 export function initializeInfoPanelHandlers(
-  identifyAmpelkarteCallback,
-  screenShotCallback,
-  identifyGWWPCallback,
-  identifyEWSCallback,
-  addressCallback,
-  cadastralDataCallback
+  setResourcesCallback,
+  setAmpelkarteCallback,
+  setScreenShotCallback,
+  setAddressCallback,
+  dispatchCallback
 ) {
-  handleIdentifyAmpelkarte = identifyAmpelkarteCallback;
-  screenshotHandler = screenShotCallback;
-  handleIdentifyGWWP = identifyGWWPCallback;
-  handleIdentifyEWS = identifyEWSCallback;
-  handleAddress = addressCallback;
-  handleCadastralData = cadastralDataCallback;
+  setResources = setResourcesCallback;
+  setAmpelkarte = setAmpelkarteCallback;
+  setScreenshot = setScreenShotCallback;
+  setAddress = setAddressCallback;
+  dispatch = dispatchCallback;
 }
 
 export function initializeCalculationsMenuHandlers(
   setPolygonCallback,
   setIdentifyResultsCallback,
-  setGridPointsCallback,
-  dispatchCallback,
-  setCadastralDataCallback
+  setGridPointsCallback
 ) {
-  setPolygonHandler = setPolygonCallback;
+  setPolygon = setPolygonCallback;
   identifyResultsHandler = setIdentifyResultsCallback;
-  gridPointsHandler = setGridPointsCallback;
-  dispatchHandler = dispatchCallback;
-  cadastralDataHandler = setCadastralDataCallback;
+  setGridPoints = setGridPointsCallback;
 }

@@ -1,10 +1,8 @@
 import jsPDF from "jspdf";
 
 export const print = (
-  einschraenkungenEWS,
-  einschraenkungenGWWP,
-  hinweiseEWS,
-  hinweiseGWWP,
+  einschraenkungen,
+  hinweise,
   computationResult,
   screenshot,
   image_bal,
@@ -71,39 +69,39 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   doc.autoTable({
-    html: "#ews-table",
+    html: "#resources-table",
     rowPageBreak: "avoid",
     startY: finalY + 10,
     willDrawCell: function (data) {
       if (data.section === "head") {
-        data.cell.text = "Ressourcen für Erdwärmesonden";
+        data.cell.text = "Ressourcen";
       }
     },
   });
 
   finalY = doc.lastAutoTable.finalY;
-  if (hinweiseEWS) {
+  if (hinweise) {
     doc.autoTable({
-      html: "#hinweise-0-table",
+      html: "#hinweise-table",
       rowPageBreak: "avoid",
       startY: finalY + 10,
       willDrawCell: function (data) {
         if (data.section === "head") {
-          data.cell.text = "Hinweise Erdwärmesonden";
+          data.cell.text = "Hinweise";
         }
       },
     });
   }
 
   finalY = doc.lastAutoTable.finalY;
-  if (einschraenkungenEWS) {
+  if (einschraenkungen) {
     doc.autoTable({
-      html: "#einschraenkungen-0-table",
+      html: "#einschraenkungen-table",
       rowPageBreak: "avoid",
       startY: finalY + 10,
       willDrawCell: function (data) {
         if (data.section === "head") {
-          data.cell.text = "Einschränkungen Erdwärmesonden";
+          data.cell.text = "Einschränkungen";
         }
       },
     });
@@ -117,7 +115,7 @@ export const print = (
       startY: finalY + 10,
       willDrawCell: function (data) {
         if (data.section === "head") {
-          data.cell.text = "Berechnungsergebnis für Erdwärmesonden";
+          data.cell.text = "Berechnungsergebnis";
         }
       },
     });
@@ -125,7 +123,7 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   let height = 0;
-  if (computationResult) {
+  if (image_unbal) {
     const imgProps = doc.getImageProperties(image_unbal.current);
     const width = doc.internal.pageSize.getWidth() - 40;
     const totalHeight = doc.internal.pageSize.getHeight();
@@ -139,15 +137,14 @@ export const print = (
   }
 
   finalY = doc.lastAutoTable.finalY;
-  if (computationResult) {
+  if (computationResult && image_bal) {
     doc.autoTable({
       html: "#calculations-bal-output-table",
       rowPageBreak: "avoid",
       startY: finalY + height + 10,
       willDrawCell: function (data) {
         if (data.section === "head") {
-          data.cell.text =
-            "Berechnungsergebnis für Erdwärmesonden (bilanzierter Betrieb)";
+          data.cell.text = "Berechnungsergebnis (bilanzierter Betrieb)";
         }
       },
     });
@@ -155,7 +152,7 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   height = 0;
-  if (computationResult) {
+  if (image_bal) {
     const imgProps = doc.getImageProperties(image_bal.current);
     const width = doc.internal.pageSize.getWidth() - 40;
     const totalHeight = doc.internal.pageSize.getHeight();
@@ -170,49 +167,9 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   doc.autoTable({
-    html: "#gwwp-table",
-    rowPageBreak: "avoid",
-    startY: finalY + height + 10,
-    willDrawCell: function (data) {
-      if (data.section === "head") {
-        data.cell.text = "Ressourcen für thermische Grundwassernutzung";
-      }
-    },
-  });
-
-  finalY = doc.lastAutoTable.finalY;
-  if (hinweiseGWWP) {
-    doc.autoTable({
-      html: "#hinweise-1-table",
-      rowPageBreak: "avoid",
-      startY: finalY + 10,
-      willDrawCell: function (data) {
-        if (data.section === "head") {
-          data.cell.text = "Hinweise thermische Grundwassernutzung";
-        }
-      },
-    });
-  }
-
-  finalY = doc.lastAutoTable.finalY;
-  if (einschraenkungenGWWP) {
-    doc.autoTable({
-      html: "#einschraenkungen-1-table",
-      rowPageBreak: "avoid",
-      startY: finalY + 10,
-      willDrawCell: function (data) {
-        if (data.section === "head") {
-          data.cell.text = "Einschränkungen thermische Grundwassernutzung";
-        }
-      },
-    });
-  }
-
-  finalY = doc.lastAutoTable.finalY;
-  doc.autoTable({
     html: "#disclaimer",
     rowPageBreak: "avoid",
-    startY: finalY + 10,
+    startY: finalY + height + 10,
     willDrawCell: function (data) {
       if (data.section === "head") {
         data.cell.text = "Haftungsausschluss";

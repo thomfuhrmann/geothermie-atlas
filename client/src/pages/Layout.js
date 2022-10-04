@@ -47,7 +47,8 @@ const Layout = () => {
         <Title>Geothermie Atlas</Title>
         <Nav>
           <NavMenu>
-            <NavLink to="/">Karte</NavLink>
+            <NavLink to="/">Erdwärmesonden</NavLink>
+            <NavLink to="/gwwp">Thermische Grundwassernutzung</NavLink>
             <NavLink to="/data">Daten</NavLink>
             <NavLink to="/help">Hilfe</NavLink>
             <NavLink to="/impressum">Impressum</NavLink>

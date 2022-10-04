@@ -138,17 +138,6 @@ const getPostfix = (layerId) => {
   }
 };
 
-const getTitle = (layerId) => {
-  switch (layerId) {
-    case 0:
-      return "Erdwärmesonden";
-    case 1:
-      return "thermische Grundwassernutzung";
-    default:
-      return;
-  }
-};
-
 export const AmpelkarteTable = ({ results, setTables, layerId }) => {
   let einschraenkungen = [];
   let hinweise = [];
@@ -178,13 +167,13 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
     }
   });
 
-  setTables(layerId, einschraenkungen.length > 0, hinweise.length > 0);
+  setTables(einschraenkungen.length > 0, hinweise.length > 0);
 
   return (
     <>
       {hinweise.length > 0 && (
-        <CollapsibleSection title={"Hinweise " + getTitle(layerId)}>
-          <Table id={"hinweise-" + layerId + "-table"}>
+        <CollapsibleSection title="Hinweise">
+          <Table id={"hinweise-table"}>
             <thead>
               <tr>
                 <td></td>
@@ -196,8 +185,8 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
         </CollapsibleSection>
       )}
       {einschraenkungen.length > 0 && (
-        <CollapsibleSection title={"Einschränkungen " + getTitle(layerId)}>
-          <Table id={"einschraenkungen-" + layerId + "-table"}>
+        <CollapsibleSection title="Einschränkungen">
+          <Table id={"einschraenkungen-table"}>
             <thead>
               <tr>
                 <td colSpan={2}></td>

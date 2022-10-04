@@ -15,7 +15,7 @@ export const initializeCollapsible = () => {
   // button for collapsible
   const button = document.createElement("button");
   button.classList = "collapsible-button";
-  button.innerHTML = "Parameter Erdwärmesonden";
+  button.innerHTML = "Parameter";
   button.addEventListener("click", () => {
     button.classList.toggle("active");
     var content = button.nextElementSibling;

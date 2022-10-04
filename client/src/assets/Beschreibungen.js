@@ -30,48 +30,6 @@ export const ews_erklaerungen = {
   ],
 };
 
-export const gwwp_erklaerungen = {
-  0: [
-    `Die flächenspezifische Jahresenergie für eine thermische Grundwassernutzung mit ausgeglichener Jahresbilanz, wobei die im Winter zur Heizung entzogene Wärme  im Sommer vollständig wieder zurückgegeben wird, 
-  abhängig von der bestehenden Grundwassertemperatur und einer minimalen Rückgabetemperatur von 5 °C und einer maximalen Rückgabetemperatur von 18 °C beträgt rund `,
-    " kWh/m²/a",
-  ],
-  1: [
-    `Die flächenspezifische Jahresenergie für eine thermische Grundwassernutzung im Heiz- und Kühlbetrieb bei Normbetriebsstunden, 
-  abhängig von der bestehenden Grundwassertemperatur und einer minimalen Rückgabetemperatur von 5 °C und einer maximalen Rückgabetemperatur von 18 °C beträgt rund `,
-    " kWh/m²/a",
-  ],
-  2: [
-    "Der Grundwasserspiegel ist am Grundstück in einer Tiefe von rund ",
-    " m zu erwarten.",
-  ],
-  3: ["Das Grundwasser ist am Grundstück rund ", " m mächtig."],
-  4: [
-    "Die hydraulische Leitfähigkeit (kf-Wert) beträgt am Grundstück rund ",
-    " m/s.",
-  ],
-  5: [
-    "Die maximale Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ",
-    " °C.",
-  ],
-  6: [
-    "Die mittlere Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ",
-    " °C.",
-  ],
-  7: [
-    "Die minimale Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ",
-    " °C.",
-  ],
-  8: [
-    "Die maximale Pumpleistung eines Brunnenpaars mit 50 m Abstand zwischen Entnahme- und Rückgabebrunnen beträgt rund ",
-    " l/s.",
-  ],
-  9: [
-    "Die maximale Volllast-Leistung eines Brunnenpaars mit 50 m Abstand zwischen Entnahme- und Rückgabebrunnen beträgt rund ",
-    " kW.",
-  ],
-};
-
 export const hinweise = {
   Grundwasserchemismus: {
     "Eisen- und Manganausfällung": `Am Standort kann es zu Eisen- und Manganausfällungen in den Brunnen kommen. 

@@ -1,75 +1,27 @@
 import React, { useRef, useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import styled from "styled-components";
 import "jspdf-autotable";
 import { useDispatch, useSelector } from "react-redux";
 
 import { updateWithResult } from "../redux/computationResultSlice";
-import { initializeInfoPanelHandlers } from "../utils/view";
+import { initializeInfoPanelHandlers } from "../utils/viewEWS";
 import { AmpelkarteTable } from "./AmpelkarteTable";
-import { ews_erklaerungen, gwwp_erklaerungen } from "../assets/Beschreibungen";
+import { ews_erklaerungen } from "../assets/Beschreibungen";
 import CollapsibleSection from "./CollapsibleSection";
 import { print } from "../utils/print";
 
+import Footer from "./Footer";
 import {
   Table,
   TableRow,
   TableData,
   Placeholder,
+  Underline,
+  Container,
+  InfoPanelContent,
+  PDFButton,
+  PDFButtonDiv,
+  Image,
 } from "./CommonStyledElements";
-
-const Container = styled.div`
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 23%;
-  height: fit-content;
-  max-height: 95%;
-  overflow-y: auto;
-  overflow-x: auto;
-  padding: 0px;
-  background-color: white;
-`;
-
-const InfoPanelContent = styled.div`
-  position: relative;
-  box-sizing: border-box;
-  width: 100%;
-  height: fit-content;
-  overflow-y: auto;
-  overflow-x: auto;
-  padding: 10px 30px 30px;
-  color: #444444;
-  background-color: white;
-`;
-
-const PDFButtonDiv = styled.div`
-  float: right;
-  justify-content: center;
-`;
-
-const PDFButton = styled.button`
-  color: white;
-  background-color: #9c4b4b;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  &:hover {
-    background-color: #9c0d0d;
-    transition: 0.7s;
-  }
-`;
-
-const Image = styled.img`
-  width: 100%;
-  height: 100%;
-`;
-
-const Underline = styled.u`
-  text-decoration-line: underline;
-  text-decoration-style: dotted;
-`;
 
 export default function InfoPanel(props) {
   const sketchToolColor = useRef(null);
@@ -77,37 +29,28 @@ export default function InfoPanel(props) {
   const image_unbal = useRef(null);
 
   const [screenshot, setScreenshot] = useState(null);
-  const [identifyAmpelkarte, setIdentifyAmpelkarte] = useState(null);
-  const [identifyGWWP, setIdentifyGWWP] = useState(null);
-  const [identifyEWS, setIdentifyEWS] = useState(null);
+  const [ampelkarte, setAmpelkarte] = useState(null);
+  const [resources, setResources] = useState(null);
   const [address, setAddress] = useState(null);
-  const [cadastralData, setCadastralData] = useState(null);
 
+  const cadastralData = useSelector((store) => store.cadastre.value);
   const computationResult = useSelector(
     (store) => store.computationResult.value
   );
 
   const dispatch = useDispatch();
 
-  const { t } = useTranslation();
-
   // record which tables should be printed
-  let [einschraenkungenEWS, einschraenkungenGWWP, hinweiseEWS, hinweiseGWWP] = [
-    false,
-    false,
-    false,
-    false,
-  ];
+  let [einschraenkungen, hinweise] = [false, false];
 
   // initialize query handlers
   useEffect(() => {
     initializeInfoPanelHandlers(
-      setIdentifyAmpelkarte,
+      setResources,
+      setAmpelkarte,
       setScreenshot,
-      setIdentifyGWWP,
-      setIdentifyEWS,
       setAddress,
-      setCadastralData
+      dispatch
     );
     return () => dispatch(updateWithResult({}));
   }, [dispatch]);
@@ -115,10 +58,8 @@ export default function InfoPanel(props) {
   // print pdf report
   const clickHandler = () => {
     print(
-      einschraenkungenEWS,
-      einschraenkungenGWWP,
-      hinweiseEWS,
-      hinweiseGWWP,
+      einschraenkungen,
+      hinweise,
       Object.keys(computationResult).length > 0,
       screenshot,
       image_bal,
@@ -151,7 +92,7 @@ export default function InfoPanel(props) {
     }
 
     if (value === "NoData") {
-      return layerName + ": " + t("info_div.no_data");
+      return layerName + ": keine Daten";
     } else {
       return (
         ews_erklaerungen[layerId][0] + value + ews_erklaerungen[layerId][1]
@@ -159,65 +100,37 @@ export default function InfoPanel(props) {
     }
   };
 
-  // format values
-  const formatGWWP = (layerId, layerName, value) => {
-    if (value !== "NoData") {
-      if ([5, 6, 7].includes(layerId)) {
-        value = parseFloat(value).toFixed(1);
-      } else if (layerId === 4) {
-        value = parseFloat(value).toFixed(4);
-      } else {
-        value = parseFloat(value).toFixed(0);
-      }
-    }
-
-    if (value === "NoData") {
-      return layerName + ": " + t("info_div.no_data");
-    } else {
-      return (
-        gwwp_erklaerungen[layerId][0] + value + gwwp_erklaerungen[layerId][1]
-      );
-    }
-  };
-
-  const setTables = (layerId, einschraenkungen, hinweise) => {
-    switch (layerId) {
-      case 0:
-        einschraenkungenEWS = einschraenkungen;
-        hinweiseEWS = hinweise;
-        break;
-      case 1:
-        einschraenkungenGWWP = einschraenkungen;
-        hinweiseGWWP = hinweise;
-        break;
-      default:
-        break;
-    }
+  const setTables = (einschraenkungenAdded, hinweiseAdded) => {
+    einschraenkungen = einschraenkungenAdded;
+    hinweise = hinweiseAdded;
   };
 
   return (
     <Container>
       <CollapsibleSection
-        title={!identifyAmpelkarte ? "Erklärung" : "Bericht"}
+        title={!ampelkarte ? "Erklärung" : "Bericht"}
         open={true}
         marginBottom="0px"
       >
         <InfoPanelContent>
-          {!identifyAmpelkarte ? (
+          {!address ? (
             <>
-              <p>{t("info_div.instruction_click")}</p>
               <p>
-                {t("info_div.instruction_polyline_first")}{" "}
-                <span onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
-                  <Underline>
-                    {t("info_div.instruction_polyline_middle")}
-                  </Underline>
-                </span>
-                {t("info_div.instruction_polyline_last")}
+                Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes
+                Grundstück. Sie können nun einen Erdwärmesondenraster zeichnen
+                und Berechnungen durchführen lassen.
               </p>
               <p>
-                Im Menü "Parameter Erdwärmesonden" können Sie optional Parameter
-                für Erdwärmesonden festlegen.
+                Benutzen Sie das{" "}
+                <span onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
+                  <Underline>Zeichen-Werkzeug</Underline>
+                </span>{" "}
+                um zusätzliche Sondenpunkte zu zeichnen oder bestehende Punkte
+                zu verschieben oder zu löschen.
+              </p>
+              <p>
+                Im Menü "Parameter" können Sie optional Parameter für
+                Erdwärmesonden festlegen.
               </p>
               <p>
                 Der gesetzliche Mindestabstand der Erdwärmesonden zur
@@ -227,7 +140,7 @@ export default function InfoPanel(props) {
           ) : (
             <>
               <h3>
-                {t("info_div.title")}{" "}
+                Standortbasierter Bericht{" "}
                 <PDFButtonDiv className="pdf-button-div">
                   <PDFButton onClick={clickHandler}>PDF erstellen</PDFButton>
                 </PDFButtonDiv>
@@ -266,16 +179,16 @@ export default function InfoPanel(props) {
               <Placeholder></Placeholder>
             </>
           )}
-          {identifyEWS && (
-            <CollapsibleSection title="Ressourcen Erdwärmesonden">
-              <Table id="ews-table">
+          {resources && (
+            <CollapsibleSection title="Ressourcen">
+              <Table id="resources-table">
                 <thead>
                   <tr>
                     <td></td>
                   </tr>
                 </thead>
                 <tbody>
-                  {identifyEWS.map((result) => {
+                  {resources.map((result) => {
                     return (
                       <TableRow key={result.layerId}>
                         <TableData>
@@ -293,15 +206,15 @@ export default function InfoPanel(props) {
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {identifyAmpelkarte && (
+          {ampelkarte && (
             <AmpelkarteTable
-              results={identifyAmpelkarte}
+              results={ampelkarte}
               setTables={setTables}
               layerId={0}
             ></AmpelkarteTable>
           )}
           {Object.keys(computationResult).length !== 0 && (
-            <CollapsibleSection title="Berechnungsergebnis Erdwärmesonden">
+            <CollapsibleSection title="Berechnungsergebnis">
               <Table id="calculations-output-table">
                 <thead>
                   <tr>
@@ -361,7 +274,7 @@ export default function InfoPanel(props) {
             </CollapsibleSection>
           )}
           {Object.keys(computationResult).length !== 0 && (
-            <CollapsibleSection title="Berechnungsergebnis Erdwärmesonden (bilanzierter Betrieb)">
+            <CollapsibleSection title="Berechnungsergebnis (bilanzierter Betrieb)">
               <Table id="calculations-bal-output-table">
                 <thead>
                   <tr>
@@ -425,79 +338,7 @@ export default function InfoPanel(props) {
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {identifyGWWP && (
-            <CollapsibleSection title="Ressourcen thermische Grundwassernutzung">
-              <Table id="gwwp-table">
-                <thead>
-                  <tr>
-                    <td></td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {identifyGWWP.map((result) => {
-                    return (
-                      <TableRow key={result.layerId}>
-                        <TableData>
-                          {formatGWWP(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes["Pixel Value"]
-                          )}
-                        </TableData>
-                      </TableRow>
-                    );
-                  })}
-                </tbody>
-              </Table>
-              <Placeholder></Placeholder>
-            </CollapsibleSection>
-          )}
-          {identifyAmpelkarte && (
-            <AmpelkarteTable
-              results={identifyAmpelkarte}
-              setTables={setTables}
-              layerId={1}
-            ></AmpelkarteTable>
-          )}
-          {identifyAmpelkarte && (
-            <>
-              <CollapsibleSection title="Haftungsausschluss">
-                <Table id="disclaimer">
-                  <thead>
-                    <tr>
-                      <td></td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>{t("info_div.disclaimer")}</td>
-                    </tr>
-                  </tbody>
-                </Table>
-                <Placeholder></Placeholder>
-              </CollapsibleSection>
-              <CollapsibleSection title="Kontakt">
-                <Table id="contact">
-                  <thead>
-                    <tr>
-                      <td></td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        office@geologie.ac.at<br></br>
-                        Geologische Bundesanstalt<br></br>
-                        Fachbereich Hydrogeologie und Geothermie<br></br>
-                        Neulinggasse 38<br></br>
-                        1030 Wien
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </CollapsibleSection>
-            </>
-          )}
+          {address && <Footer></Footer>}
         </InfoPanelContent>
       </CollapsibleSection>
     </Container>
