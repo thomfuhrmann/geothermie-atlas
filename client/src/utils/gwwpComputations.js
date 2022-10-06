@@ -46,9 +46,8 @@ export const compute = ({
   P_HZ,
   P_KL,
   COP_WP,
+  LST,
 }) => {
-  let LST = 9.5;
-
   let BS_HZ = 0;
   if (E_HZ * P_HZ > 0) {
     BS_HZ = (1000 * E_HZ) / P_HZ;

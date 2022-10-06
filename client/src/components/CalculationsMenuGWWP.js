@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { distance } from "../utils/gridcomputer";
-import { compute } from "../utils/gwwp_computations";
+import { compute } from "../utils/gwwpComputations";
 import { initializeParameterMenuHandlers } from "../utils/ParameterMenuGWWP";
 import { initializeCalculationsMenuHandlers } from "../utils/viewGWWP";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
@@ -23,6 +23,9 @@ export default function CalculationsMenu({ isLoading }) {
 
   const cadastralData = useSelector((store) => store.cadastre.value);
   const resources = useSelector((store) => store.gwwpResources.value);
+  const bodentemperatur = useSelector((store) =>
+    store.ewsResources.value.filter((resource) => resource.layerId === 4)
+  );
 
   const handleGWWPCalculation = () => {
     isLoading(true);
@@ -40,12 +43,18 @@ export default function CalculationsMenu({ isLoading }) {
 
     const gst_flaeche = cadastralData.FF;
 
+    const LST =
+      bodentemperatur &&
+      bodentemperatur.length > 0 &&
+      bodentemperatur[0].feature?.attributes?.["Pixel Value"];
+
     if (
       flurabstand === "NoData" ||
       gw_macht === "NoData" ||
       kf === "NoData" ||
       gwt_max === "NoData" ||
-      gwt_min === "NoData"
+      gwt_min === "NoData" ||
+      LST === "NoData"
     ) {
       dispatch(
         updateGWWPComputationResult([
@@ -66,6 +75,7 @@ export default function CalculationsMenu({ isLoading }) {
         P_HZ: pHZ,
         P_KL: pKL,
         COP_WP: copWP,
+        LST,
       });
 
       dispatch(updateGWWPComputationResult(result));

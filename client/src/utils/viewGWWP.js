@@ -22,6 +22,7 @@ import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
 
 import { updateAmpelkarte } from "../redux/ampelkarteSlice";
 import { updateGWWPResources } from "../redux/gwwpResourcesSlice";
+import { updateEWSResources } from "../redux/ewsResourcesSlice";
 import { updateCadastralData } from "../redux/cadastreSlice";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
 import { initializeCollapsible } from "./ParameterMenuGWWP";
@@ -34,6 +35,8 @@ const ampelkarte_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Ampelkarte_Wien/MapServer";
 const gwwp_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_thermischeGrundwassernutzung_GWP_Wien_TEST/MapServer";
+const ews_url =
+  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Erdwaermesonden_EWS_Wien_TEST/MapServer";
 
 // exports
 export let view;
@@ -78,6 +81,17 @@ export const identifyLayers = (mapPoint) => {
       };
     });
     dispatch(updateGWWPResources(results));
+  });
+
+  identify.identify(ews_url, params).then((res) => {
+    const results = res.results.map((result) => {
+      return {
+        layerId: result.layerId,
+        layerName: result.layerName,
+        feature: { attributes: result.feature.attributes },
+      };
+    });
+    dispatch(updateEWSResources(results));
   });
 
   identify.identify(ampelkarte_url, params).then((res) => {
@@ -255,6 +269,13 @@ export function initialize(container) {
     listMode: "hide",
   });
 
+  const ews = new MapImageLayer({
+    title: "Erdwärmesonden",
+    url: ews_url,
+    visible: false,
+    listMode: "hide",
+  });
+
   // cadastre overlay to query parcel boundaries
   const cadastreOverlay = new WMSLayer({
     title: "Kataster",
@@ -292,6 +313,7 @@ export function initialize(container) {
     basemap: basemap,
     layers: [
       gwwp,
+      ews,
       ampelkarte,
       cadastreOverlay,
       pointGraphicsLayer,
@@ -316,6 +338,7 @@ export function initialize(container) {
     unit: "metric",
   });
 
+  // sketch widget for drawing points
   const sketch = new Sketch({
     layer: pointGraphicsLayer,
     view: view,
@@ -341,6 +364,7 @@ export function initialize(container) {
       pointGraphicsLayer.remove(event.graphic);
 
       // add point to current list of points
+      // keep only the last two points
       const point = event.graphic.geometry;
       let points;
       setPoints((current) => {
@@ -369,22 +393,27 @@ export function initialize(container) {
 
   // register event handlers for mouse clicks
   view.on("click", ({ mapPoint }) => {
+    // remove existing graphics
     polygonGraphicsLayer.removeAll();
     pointGraphicsLayer.removeAll();
 
+    // initialize store
     dispatch(updateCadastralData({}));
     dispatch(updateGWWPResources([]));
     dispatch(updateAmpelkarte([]));
     dispatch(updateGWWPComputationResult([]));
     setPoints([]);
 
+    // queries
     queryCadastre(mapPoint);
     identifyLayers(mapPoint);
     getAddress(mapPoint);
 
     if (view.scale > 45000) {
+      // take screenshot with marker at higher scales when parcels are not selectable
       setTimeout(() => takeScreenshot(mapPoint, true), 500);
     } else {
+      // take screenshot with selected parcel boundary
       setTimeout(() => takeScreenshot(mapPoint), 500);
     }
   });

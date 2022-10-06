@@ -19,7 +19,7 @@ import * as locator from "@arcgis/core/rest/locator";
 import Polygon from "@arcgis/core/geometry/Polygon";
 import Graphic from "@arcgis/core/Graphic";
 
-import { updateWithResult } from "../redux/computationResultSlice";
+import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
 import { initializeCollapsible } from "./ParameterMenuEWS";
 import { updateCadastralData } from "../redux/cadastreSlice";
 
@@ -423,7 +423,7 @@ export function initialize(container) {
     boundaryGraphicsLayer.removeAll();
     pointGraphicsLayer.removeAll();
 
-    dispatch(updateWithResult({}));
+    dispatch(updateEWSComputationResult({}));
     setGridPoints([]);
 
     queryCadastre(mapPoint);

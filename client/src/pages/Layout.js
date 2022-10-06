@@ -50,7 +50,7 @@ const Layout = () => {
             <NavLink to="/">Erdwärmesonden</NavLink>
             <NavLink to="/gwwp">Thermische Grundwassernutzung</NavLink>
             <NavLink to="/data">Daten</NavLink>
-            <NavLink to="/help">Hilfe</NavLink>
+            <NavLink to="/about">About</NavLink>
             <NavLink to="/impressum">Impressum</NavLink>
           </NavMenu>
         </Nav>

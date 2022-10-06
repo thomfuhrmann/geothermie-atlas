@@ -2,7 +2,6 @@ import React, { useRef, useState, useEffect } from "react";
 import "jspdf-autotable";
 import { useDispatch, useSelector } from "react-redux";
 
-import { updateWithResult } from "../redux/computationResultSlice";
 import { initializeInfoPanelHandlers } from "../utils/viewEWS";
 import { AmpelkarteTable } from "./AmpelkarteTable";
 import { ews_erklaerungen } from "../assets/Beschreibungen";
@@ -14,6 +13,7 @@ import {
   Table,
   TableRow,
   TableData,
+  TableHeader,
   Placeholder,
   Underline,
   Container,
@@ -34,9 +34,7 @@ export default function InfoPanel(props) {
   const [address, setAddress] = useState(null);
 
   const cadastralData = useSelector((store) => store.cadastre.value);
-  const computationResult = useSelector(
-    (store) => store.computationResult.value
-  );
+  const computationResult = useSelector((store) => store.ewsComputations.value);
 
   const dispatch = useDispatch();
 
@@ -52,7 +50,6 @@ export default function InfoPanel(props) {
       setAddress,
       dispatch
     );
-    return () => dispatch(updateWithResult({}));
   }, [dispatch]);
 
   // print pdf report
@@ -116,9 +113,9 @@ export default function InfoPanel(props) {
           {!address ? (
             <>
               <p>
-                Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes
-                Grundstück. Sie können nun einen Erdwärmesondenraster zeichnen
-                und Berechnungen durchführen lassen.
+                Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
+                um Informationen abzufragen. Sie können nun einen
+                Erdwärmesondenraster zeichnen und die Berechnung starten.
               </p>
               <p>
                 Benutzen Sie das{" "}
@@ -129,8 +126,9 @@ export default function InfoPanel(props) {
                 zu verschieben oder zu löschen.
               </p>
               <p>
-                Im Menü "Parameter" können Sie optional Parameter für
-                Erdwärmesonden festlegen.
+                Optional können sie im Menü "Parameter" die Konfiguration der
+                Erdwärmesonden verändern und gebäudespezifische Parameter
+                festlegen.
               </p>
               <p>
                 Der gesetzliche Mindestabstand der Erdwärmesonden zur
@@ -148,7 +146,7 @@ export default function InfoPanel(props) {
               <Image src={screenshot} id="screenshot"></Image>
             </>
           )}
-          {cadastralData && (
+          {Object.keys(cadastralData).length > 0 && (
             <>
               <Table id="cadastral-data-table">
                 <tbody>
@@ -213,7 +211,7 @@ export default function InfoPanel(props) {
               layerId={0}
             ></AmpelkarteTable>
           )}
-          {Object.keys(computationResult).length !== 0 && (
+          {Object.keys(computationResult).includes("error") && (
             <CollapsibleSection title="Berechnungsergebnis">
               <Table id="calculations-output-table">
                 <thead>
@@ -223,8 +221,39 @@ export default function InfoPanel(props) {
                 </thead>
                 <tbody>
                   <TableRow>
+                    <TableHeader textAlign="center">
+                      {computationResult.error}
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+              </Table>
+              <Placeholder></Placeholder>
+            </CollapsibleSection>
+          )}
+          {Object.keys(computationResult).length > 1 && (
+            <CollapsibleSection title="Berechnungsergebnis">
+              <Table id="calculations-output-table">
+                <thead>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Gewählte Parameter
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+                <tbody>
+                  <TableRow>
                     <TableData>
                       Sondenanzahl: {computationResult.gridPoints}
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Sondenabstand: {computationResult.gridSpacing} m
                     </TableData>
                   </TableRow>
                   <TableRow>
@@ -232,16 +261,51 @@ export default function InfoPanel(props) {
                       Sondentiefe: {computationResult.bohrtiefe} m
                     </TableData>
                   </TableRow>
+                  {computationResult.BS_HZ > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Betriebsstunden Heizen: {computationResult.BS_HZ} h
+                      </TableData>
+                    </TableRow>
+                  )}
+                  {computationResult.BS_KL > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Betriebsstunden Heizen: {computationResult.BS_KL} h
+                      </TableData>
+                    </TableRow>
+                  )}
+                  {computationResult.P_HZ > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Heizleistung: {computationResult.P_HZ} kW
+                      </TableData>
+                    </TableRow>
+                  )}
+                  {computationResult.P_KL > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Kühlleistung: {computationResult.P_KL} kW
+                      </TableData>
+                    </TableRow>
+                  )}
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Berechnungsergebnis
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+                <tbody>
                   <TableRow>
                     <TableData>
-                      Leistung Heizen: {parseInt(computationResult.leistungHZ)}{" "}
-                      kW
+                      Heizleistung: {parseInt(computationResult.leistungHZ)} kW
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Leistung Kühlen: {-parseInt(computationResult.leistungKL)}{" "}
-                      kW
+                      Kühlleistung: {-parseInt(computationResult.leistungKL)} kW
                     </TableData>
                   </TableRow>
                   <TableRow>
@@ -265,6 +329,7 @@ export default function InfoPanel(props) {
                   )}
                 </tbody>
               </Table>
+              <Placeholder></Placeholder>
               <Image
                 src={computationResult.imagehash}
                 alt="Grafik mit Berechnungsergebnissen"
@@ -273,7 +338,7 @@ export default function InfoPanel(props) {
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {Object.keys(computationResult).length !== 0 && (
+          {Object.keys(computationResult).length > 1 && (
             <CollapsibleSection title="Berechnungsergebnis (bilanzierter Betrieb)">
               <Table id="calculations-bal-output-table">
                 <thead>
@@ -292,6 +357,18 @@ export default function InfoPanel(props) {
                       auf bis zu 5 Meter reduziert werden.
                     </TableData>
                   </TableRow>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Gewählte Parameter
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+                <tbody>
                   <TableRow>
                     <TableData>
                       Sondenanzahl: {computationResult.gridPoints}
@@ -299,18 +376,60 @@ export default function InfoPanel(props) {
                   </TableRow>
                   <TableRow>
                     <TableData>
+                      Sondenabstand: {computationResult.gridSpacing} m
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
                       Sondentiefe: {computationResult.bohrtiefe} m
                     </TableData>
                   </TableRow>
+                  {computationResult.BS_HZ > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Betriebsstunden Heizen: {computationResult.BS_HZ} h
+                      </TableData>
+                    </TableRow>
+                  )}
+                  {computationResult.BS_KL > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Betriebsstunden Heizen: {computationResult.BS_KL} h
+                      </TableData>
+                    </TableRow>
+                  )}
+                  {computationResult.P_HZ > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Heizleistung: {computationResult.P_HZ} kW
+                      </TableData>
+                    </TableRow>
+                  )}
+                  {computationResult.P_KL > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Kühlleistung: {computationResult.P_KL} kW
+                      </TableData>
+                    </TableRow>
+                  )}
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Berechnungsergebnis
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+                <tbody>
                   <TableRow>
                     <TableData>
-                      Leistung Heizen:{" "}
-                      {parseInt(computationResult.leistungHZ_bal)} kW
+                      Heizleistung: {parseInt(computationResult.leistungHZ_bal)}{" "}
+                      kW
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Leistung Kühlen:{" "}
+                      Kühlleistung:{" "}
                       {-parseInt(computationResult.leistungKL_bal)} kW
                     </TableData>
                   </TableRow>
@@ -330,6 +449,7 @@ export default function InfoPanel(props) {
                   </TableRow>
                 </tbody>
               </Table>
+              <Placeholder></Placeholder>
               <Image
                 src={computationResult.imagehash_bal}
                 alt="Grafik mit bilanzierten Berechnungsergebnissen"

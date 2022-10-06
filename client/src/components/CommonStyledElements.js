@@ -1,6 +1,24 @@
 import React from "react";
 import styled from "styled-components";
 
+export const Content = styled.div`
+  position: absolute;
+  top: 100px;
+  left: 10%;
+  width: 60%;
+`;
+
+export const Heading = styled.h1`
+  margin: 0px;
+  color: #808080;
+`;
+
+export const Paragraph = styled.p`
+  width: 100%;
+  white-space: normal;
+  word-break: normal;
+`;
+
 export const Container = styled.div`
   position: absolute;
   top: 15px;
@@ -106,9 +124,10 @@ export const TableData = styled.td`
 `;
 
 export const TableHeader = styled.th`
-  padding-top: 20px;
-  padding-bottom: 5px;
+  padding-top: 15px;
+  padding-bottom: 10px;
   font-size: medium;
+  font-weight: normal;
   text-align: ${(props) => props.textAlign || "left"};
 `;
 

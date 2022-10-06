@@ -71,6 +71,7 @@ export const print = (
   doc.autoTable({
     html: "#resources-table",
     rowPageBreak: "avoid",
+    showHead: "firstPage",
     startY: finalY + 10,
     willDrawCell: function (data) {
       if (data.section === "head") {
@@ -84,6 +85,7 @@ export const print = (
     doc.autoTable({
       html: "#hinweise-table",
       rowPageBreak: "avoid",
+      showHead: "firstPage",
       startY: finalY + 10,
       willDrawCell: function (data) {
         if (data.section === "head") {
@@ -98,6 +100,7 @@ export const print = (
     doc.autoTable({
       html: "#einschraenkungen-table",
       rowPageBreak: "avoid",
+      showHead: "firstPage",
       startY: finalY + 10,
       willDrawCell: function (data) {
         if (data.section === "head") {
@@ -112,10 +115,21 @@ export const print = (
     doc.autoTable({
       html: "#calculations-output-table",
       rowPageBreak: "avoid",
+      showHead: "firstPage",
       startY: finalY + 10,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Berechnungsergebnis";
+        }
+
+        if (data.cell.text[0] === "Gewählte Parameter") {
+          doc.setFillColor(255, 255, 255);
+          data.cell.styles.halign = "center";
+        }
+
+        if (data.cell.text[0] === "Berechnungsergebnis") {
+          doc.setFillColor(255, 255, 255);
+          data.cell.styles.halign = "center";
         }
       },
     });
@@ -123,28 +137,47 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   let height = 0;
+  let pageAdded = false;
   if (image_unbal) {
     const imgProps = doc.getImageProperties(image_unbal.current);
     const width = doc.internal.pageSize.getWidth() - 40;
     const totalHeight = doc.internal.pageSize.getHeight();
     height = (imgProps.height * width) / imgProps.width;
-    if (height > totalHeight - finalY) {
+    if (height > totalHeight - finalY - 5) {
       doc.addPage();
+      pageAdded = true;
       doc.addImage(image_unbal.current, "PNG", 20, 20, width, height);
     } else {
-      doc.addImage(image_unbal.current, "PNG", 20, finalY, width, height);
+      doc.addImage(image_unbal.current, "PNG", 20, finalY + 5, width, height);
     }
   }
 
   finalY = doc.lastAutoTable.finalY;
+  let startY = 0;
+  if (pageAdded) {
+    startY = height + 30;
+  } else {
+    startY = finalY + height + 10;
+  }
   if (computationResult && image_bal) {
     doc.autoTable({
       html: "#calculations-bal-output-table",
       rowPageBreak: "avoid",
-      startY: finalY + height + 10,
+      showHead: "firstPage",
+      startY: startY,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Berechnungsergebnis (bilanzierter Betrieb)";
+        }
+
+        if (data.cell.text[0] === "Gewählte Parameter") {
+          doc.setFillColor(255, 255, 255);
+          data.cell.styles.halign = "center";
+        }
+
+        if (data.cell.text[0] === "Berechnungsergebnis") {
+          doc.setFillColor(255, 255, 255);
+          data.cell.styles.halign = "center";
         }
       },
     });
@@ -157,19 +190,25 @@ export const print = (
     const width = doc.internal.pageSize.getWidth() - 40;
     const totalHeight = doc.internal.pageSize.getHeight();
     height = (imgProps.height * width) / imgProps.width;
-    if (height > totalHeight - finalY) {
+    if (height > totalHeight - finalY - 5) {
       doc.addPage();
       doc.addImage(image_bal.current, "PNG", 20, 20, width, height);
     } else {
-      doc.addImage(image_bal.current, "PNG", 20, finalY, width, height);
+      doc.addImage(image_bal.current, "PNG", 20, finalY + 5, width, height);
     }
   }
 
   finalY = doc.lastAutoTable.finalY;
+  if (pageAdded) {
+    startY = height + 30;
+  } else {
+    startY = finalY + height + 10;
+  }
   doc.autoTable({
     html: "#disclaimer",
     rowPageBreak: "avoid",
-    startY: finalY + height + 10,
+    showHead: "firstPage",
+    startY: startY,
     willDrawCell: function (data) {
       if (data.section === "head") {
         data.cell.text = "Haftungsausschluss";
@@ -184,6 +223,7 @@ export const print = (
   doc.autoTable({
     html: "#contact",
     rowPageBreak: "avoid",
+    showHead: "firstPage",
     startY: finalY + 10,
     willDrawCell: function (data) {
       if (data.section === "head") {
