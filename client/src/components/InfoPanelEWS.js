@@ -2,9 +2,16 @@ import React, { useRef, useState, useEffect } from "react";
 import "jspdf-autotable";
 import { useDispatch, useSelector } from "react-redux";
 
-import { initializeInfoPanelHandlers } from "../utils/viewEWS";
+import { updateEWSResources } from "../redux/ewsResourcesSlice";
+import { updateGWWPResources } from "../redux/gwwpResourcesSlice";
+import { updateAmpelkarte } from "../redux/ampelkarteSlice";
+import { updateCadastralData } from "../redux/cadastreSlice";
+import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
+import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
+import { updateScreenshot } from "../redux/screenshotSlice";
+
+import { initializeInfoPanelHandlers } from "../utils/view";
 import { AmpelkarteTable } from "./AmpelkarteTable";
-import { ews_erklaerungen } from "../assets/Beschreibungen";
 import CollapsibleSection from "./CollapsibleSection";
 import { print } from "../utils/print";
 
@@ -23,18 +30,50 @@ import {
   Image,
 } from "./CommonStyledElements";
 
-export default function InfoPanel(props) {
+const textTemplates = {
+  0: [
+    `Die flächenspezifische Jahresenergie eines Sondenfelds mit 7 x 7 Sonden in 5 m Abstand und einer Tiefe von jeweils 100 m, das als Speicher verwendet wird (es wird eine ausgeglichene Jahresbilanz angenommen, das bedeutet, die im Winter zur Heizung entzogene Wärme wird im Sommer vollständig wieder zurückgegeben), beträgt rund `,
+    " kWh/m²/a.",
+  ],
+  1: [
+    `Die flächenspezifische Jahresenergie eines Sondenfelds mit 4 x 4 Sonden in 10 m Abstand und einer Tiefe von jeweils 100 m, das primär als Wärmequelle dient wobei ein Teil im Sommer durch Gebäudekühlung entsprechend des Bedarfs wieder regeneriert wird, 
+  (der Heiz- und Kühlbedarf ist klimaabhängig von der Jahresmitteltemperatur (Normbetriebsstunden)) beträgt rund `,
+    " kWh/m²/a.",
+  ],
+  2: [
+    "Die Entzugsleistung einer 100 m tiefen Einzelsonde, die als Speicher mit einer ausgeglichenen Jahresbilanz (im Winter entzogene Wärme wird im Sommer wieder vollständig zurück gegeben) betrieben wird, beträgt am Grundstück ",
+    " W/lfm.",
+  ],
+  3: [
+    "Die Entzugsleistung einer 100 m tiefen Einzelsonde, die primär als Wärmequelle dient wobei ein Teil im Sommer durch Gebäudekühlung entsprechend des Bedarfs wieder regeneriert wird (je nach klimaabhängigen Normbetriebsstunden), beträgt am Grundstück ",
+    " W/lfm.",
+  ],
+  4: [
+    "Die mittlere jährliche Bodentemperatur beträgt laut Satellitendaten (MODIS) ",
+    " °C.",
+  ],
+  5: [
+    "Die mittlere Temperatur des Untergrunds für eine Tiefe von 0 bis 100 m beträgt ",
+    " °C.",
+  ],
+  6: [
+    "Die mittlere konduktive Wärmeleitfähigkeit des Untergrunds für eine Tiefe von 0 bis 100 m beträgt ",
+    " W/m/K.",
+  ],
+};
+
+export default function InfoPanelEWS() {
   const sketchToolColor = useRef(null);
   const image_bal = useRef(null);
   const image_unbal = useRef(null);
 
-  const [screenshot, setScreenshot] = useState(null);
-  const [ampelkarte, setAmpelkarte] = useState(null);
-  const [resources, setResources] = useState(null);
   const [address, setAddress] = useState(null);
 
+  const resources = useSelector((store) => store.ewsResources.value);
+  const ampelkarte = useSelector((store) => store.ampelkarte.value);
   const cadastralData = useSelector((store) => store.cadastre.value);
   const computationResult = useSelector((store) => store.ewsComputations.value);
+  const screenshot = useSelector((store) => store.screenshot.value);
 
   const dispatch = useDispatch();
 
@@ -43,13 +82,17 @@ export default function InfoPanel(props) {
 
   // initialize query handlers
   useEffect(() => {
-    initializeInfoPanelHandlers(
-      setResources,
-      setAmpelkarte,
-      setScreenshot,
-      setAddress,
-      dispatch
-    );
+    initializeInfoPanelHandlers(setAddress, dispatch);
+
+    return () => {
+      dispatch(updateEWSResources([]));
+      dispatch(updateGWWPResources([]));
+      dispatch(updateCadastralData({}));
+      dispatch(updateAmpelkarte([]));
+      dispatch(updateGWWPComputationResult([]));
+      dispatch(updateEWSComputationResult({}));
+      dispatch(updateScreenshot(""));
+    };
   }, [dispatch]);
 
   // print pdf report
@@ -91,9 +134,7 @@ export default function InfoPanel(props) {
     if (value === "NoData") {
       return layerName + ": keine Daten";
     } else {
-      return (
-        ews_erklaerungen[layerId][0] + value + ews_erklaerungen[layerId][1]
-      );
+      return textTemplates[layerId][0] + value + textTemplates[layerId][1];
     }
   };
 
@@ -177,7 +218,7 @@ export default function InfoPanel(props) {
               <Placeholder></Placeholder>
             </>
           )}
-          {resources && (
+          {resources.length > 0 && (
             <CollapsibleSection title="Ressourcen">
               <Table id="resources-table">
                 <thead>
@@ -248,7 +289,7 @@ export default function InfoPanel(props) {
                 <tbody>
                   <TableRow>
                     <TableData>
-                      Sondenanzahl: {computationResult.gridPoints}
+                      Sondenanzahl: {computationResult.points}
                     </TableData>
                   </TableRow>
                   <TableRow>
@@ -371,7 +412,7 @@ export default function InfoPanel(props) {
                 <tbody>
                   <TableRow>
                     <TableData>
-                      Sondenanzahl: {computationResult.gridPoints}
+                      Sondenanzahl: {computationResult.points}
                     </TableData>
                   </TableRow>
                   <TableRow>

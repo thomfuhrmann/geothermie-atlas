@@ -9,6 +9,7 @@ Diese Applikation dient zur Planung geothermischer Anlagen. Die der Applikation 
 Clientseitig basiert die Applikation auf folgenden Libraries:
 
 - [React.js](https://reactjs.org/)
+- [React Redux](https://react-redux.js.org/)
 - [ArcGIS API for Javascript](https://developers.arcgis.com/javascript/latest/)
 
 Serverseitig basiert die Applikation auf folgenden Libraries:

@@ -2,15 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
-import {
-  initializeCalculationsMenuHandlers,
-  takeScreenshot,
-} from "../utils/viewEWS";
+import { view, initializeCalculationsMenuHandlers } from "../utils/view";
 import { calculateGrid } from "../utils/gridcomputer";
+import { takeScreenshot } from "../utils/screenshot";
 import { initializeParameterMenuHandlers } from "../utils/ParameterMenuEWS";
 import { Menu, Button, ButtonContainer } from "./CommonStyledElements";
 
-export default function CalculationsMenu({ isLoading }) {
+export default function CalculationsMenuEWS({ isLoading }) {
   const [polygon, setPolygon] = useState(null);
   const [gridSpacing, setGridSpacing] = useState(10);
   const [bohrtiefe, setBohrtiefe] = useState(100);
@@ -18,47 +16,60 @@ export default function CalculationsMenu({ isLoading }) {
   const [BS_KL, setBS_KL] = useState(0);
   const [P_KL, setP_KL] = useState(0);
   const [P_HZ, setP_HZ] = useState(0);
-  const [identifyResults, setIdentifyResults] = useState(null);
-  const [gridPoints, setGridPoints] = useState([]);
+  const [points, setPoints] = useState([]);
 
   const cadastralData = useSelector((store) => store.cadastre.value);
+  const resources = useSelector((store) => store.ewsResources.value);
+  const betriebsstunden = useSelector((store) => store.betriebsstunden.value);
 
   const dispatch = useDispatch();
 
   const handleGridCalculation = () => {
-    calculateGrid(polygon, gridSpacing, setGridPoints);
+    calculateGrid(polygon, gridSpacing, setPoints);
   };
 
   // run python script with values from layers
   const handlePythonCalculation = () => {
-    if (cadastralData && identifyResults) {
+    if (cadastralData && resources) {
       isLoading(true);
-      takeScreenshot(polygon.centroid);
+      takeScreenshot(view, polygon.centroid, dispatch);
 
-      let points = JSON.stringify(
-        gridPoints.map((point) => [point.x, point.y])
+      let pointsText = JSON.stringify(
+        points.map((point) => [point.x, point.y])
       );
+
+      const BT = resources.find((result) => result.layerId === 4)?.feature
+        ?.attributes["Pixel Value"];
+      const GT = resources.find((result) => result.layerId === 5)?.feature
+        ?.attributes["Pixel Value"];
+      const WLF = resources.find((result) => result.layerId === 6)?.feature
+        ?.attributes["Pixel Value"];
+
+      const BS_KL_Norm = betriebsstunden.find((result) => result.layerId === 0)
+        ?.feature?.attributes["Pixel Value"];
+      const BS_HZ_Norm = betriebsstunden.find((result) => result.layerId === 1)
+        ?.feature?.attributes["Pixel Value"];
 
       let url = "/api";
       url +=
         "?" +
         new URLSearchParams({
-          EZ: cadastralData.EZ,
-          BT: identifyResults.BT,
-          GT: identifyResults.GT,
-          WLF: identifyResults.WLF,
-          BS_HZ_Norm: identifyResults.BS_HZ_Norm,
-          BS_KL_Norm: identifyResults.BS_KL_Norm,
+          EZ: cadastralData.GNR,
+          BT,
+          GT,
+          WLF,
+          BS_HZ_Norm,
+          BS_KL_Norm,
           BS_HZ: BS_HZ,
           BS_KL: BS_KL,
           P_HZ: P_HZ,
           P_KL: P_KL,
           FF: cadastralData.FF,
           bohrtiefe,
-          points,
+          points: pointsText,
         }).toString();
 
-      if (identifyResults.BT !== "NoData") {
+      if (BT !== "NoData" && points.length !== 0 && pointsText !== undefined) {
         fetch(url)
           .then((res) => res.json())
           .then((data) => {
@@ -77,18 +88,18 @@ export default function CalculationsMenu({ isLoading }) {
             const imagehash = "data:image/png;base64," + data[21];
             const imagehash_bal = "data:image/png;base64," + data[22];
 
-            const leistungHZ = (gridPoints.length * bohrtiefe * PHZ_L3) / 1000;
+            const leistungHZ = (points.length * bohrtiefe * PHZ_L3) / 1000;
             const jahresEnergieMengeHZ = leistungHZ * BS_HZ_L3;
 
-            const leistungKL = (gridPoints.length * bohrtiefe * PKL_L3) / 1000;
+            const leistungKL = (points.length * bohrtiefe * PKL_L3) / 1000;
             const jahresEnergieMengeKL = leistungKL * BS_KL_L3;
 
             const leistungHZ_bal =
-              (gridPoints.length * bohrtiefe * PHZ_L3_bal) / 1000;
+              (points.length * bohrtiefe * PHZ_L3_bal) / 1000;
             const jahresEnergieMengeHZ_bal = leistungHZ_bal * BS_HZ_bal;
 
             const leistungKL_bal =
-              (gridPoints.length * bohrtiefe * PKL_L3_bal) / 1000;
+              (points.length * bohrtiefe * PKL_L3_bal) / 1000;
             const jahresEnergieMengeKL_bal = leistungKL_bal * BS_KL_L3;
 
             const differenz_PKL = PKL_L3 - PKL_L3_bal;
@@ -99,7 +110,7 @@ export default function CalculationsMenu({ isLoading }) {
                 KG: cadastralData.KG,
                 GNR: cadastralData.GNR,
                 FF: cadastralData.FF,
-                gridPoints: gridPoints.length,
+                points: points.length,
                 bohrtiefe,
                 leistungHZ,
                 jahresEnergieMengeHZ,
@@ -126,6 +137,13 @@ export default function CalculationsMenu({ isLoading }) {
           .catch((err) => {
             console.log(err);
           });
+      } else if (points.length === 0) {
+        dispatch(
+          updateEWSComputationResult({
+            error: "Bitte zeichnen Sie zuerst ein Sondennetz!",
+          })
+        );
+        isLoading(false);
       } else {
         dispatch(
           updateEWSComputationResult({
@@ -139,11 +157,7 @@ export default function CalculationsMenu({ isLoading }) {
   };
 
   useEffect(() => {
-    initializeCalculationsMenuHandlers(
-      setPolygon,
-      setIdentifyResults,
-      setGridPoints
-    );
+    initializeCalculationsMenuHandlers(setPoints, setPolygon);
 
     initializeParameterMenuHandlers(
       setGridSpacing,

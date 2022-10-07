@@ -8,7 +8,7 @@ import {
   pointGraphicsLayer,
   boundaryGraphicsLayer,
   cadastre,
-} from "./viewEWS";
+} from "./view";
 
 // grid points have to be at least 2 meters away from parcel boundary
 const distanceToBoundary = 2;

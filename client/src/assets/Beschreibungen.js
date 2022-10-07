@@ -1,35 +1,3 @@
-export const ews_erklaerungen = {
-  0: [
-    `Die flächenspezifische Jahresenergie eines Sondenfelds mit 7 x 7 Sonden in 5 m Abstand und einer Tiefe von jeweils 100 m, das als Speicher verwendet wird (es wird eine ausgeglichene Jahresbilanz angenommen, das bedeutet, die im Winter zur Heizung entzogene Wärme wird im Sommer vollständig wieder zurückgegeben), beträgt rund `,
-    " kWh/m²/a.",
-  ],
-  1: [
-    `Die flächenspezifische Jahresenergie eines Sondenfelds mit 4 x 4 Sonden in 10 m Abstand und einer Tiefe von jeweils 100 m, das primär als Wärmequelle dient wobei ein Teil im Sommer durch Gebäudekühlung entsprechend des Bedarfs wieder regeneriert wird, 
-  (der Heiz- und Kühlbedarf ist klimaabhängig von der Jahresmitteltemperatur (Normbetriebsstunden)) beträgt rund `,
-    " kWh/m²/a.",
-  ],
-  2: [
-    "Die Entzugsleistung einer 100 m tiefen Einzelsonde, die als Speicher mit einer ausgeglichenen Jahresbilanz (im Winter entzogene Wärme wird im Sommer wieder vollständig zurück gegeben) betrieben wird, beträgt am Grundstück ",
-    " W/lfm.",
-  ],
-  3: [
-    "Die Entzugsleistung einer 100 m tiefen Einzelsonde, die primär als Wärmequelle dient wobei ein Teil im Sommer durch Gebäudekühlung entsprechend des Bedarfs wieder regeneriert wird (je nach klimaabhängigen Normbetriebsstunden), beträgt am Grundstück ",
-    " W/lfm.",
-  ],
-  4: [
-    "Die mittlere jährliche Bodentemperatur beträgt laut Satellitendaten (MODIS) ",
-    " °C.",
-  ],
-  5: [
-    "Die mittlere Temperatur des Untergrunds für eine Tiefe von 0 bis 100 m beträgt ",
-    " °C.",
-  ],
-  6: [
-    "Die mittlere konduktive Wärmeleitfähigkeit des Untergrunds für eine Tiefe von 0 bis 100 m beträgt ",
-    " W/m/K.",
-  ],
-};
-
 export const hinweise = {
   Grundwasserchemismus: {
     "Eisen- und Manganausfällung": `Am Standort kann es zu Eisen- und Manganausfällungen in den Brunnen kommen. 

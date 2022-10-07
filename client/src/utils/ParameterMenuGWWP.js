@@ -2,7 +2,7 @@ import "./ui.css";
 
 let setEHZ, setEKL, setPHZ, setPKL, setCOPWP;
 
-export const initializeCollapsible = () => {
+export const initializeCollapsibleGWWP = () => {
   // create collapsible
   const collapsible = document.createElement("div");
   collapsible.classList = "collapsible-container";

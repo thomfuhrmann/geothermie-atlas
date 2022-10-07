@@ -3,13 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { distance } from "../utils/gridcomputer";
 import { compute } from "../utils/gwwpComputations";
+import { view } from "../utils/view";
 import { initializeParameterMenuHandlers } from "../utils/ParameterMenuGWWP";
-import { initializeCalculationsMenuHandlers } from "../utils/viewGWWP";
+import { initializeCalculationsMenuHandlers } from "../utils/view";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
-import { takeScreenshot } from "../utils/viewGWWP";
+import { takeScreenshot } from "../utils/screenshot";
 import { Menu, Button, ButtonContainer } from "./CommonStyledElements";
 
-export default function CalculationsMenu({ isLoading }) {
+export default function CalculationsMenuGWWP({ isLoading }) {
   const dispatch = useDispatch();
 
   const [points, setPoints] = useState([]);
@@ -29,7 +30,7 @@ export default function CalculationsMenu({ isLoading }) {
 
   const handleGWWPCalculation = () => {
     isLoading(true);
-    takeScreenshot(polygon.centroid);
+    takeScreenshot(view, polygon.centroid, dispatch);
 
     const point1 = points[0];
     const point2 = points[1];
@@ -86,7 +87,6 @@ export default function CalculationsMenu({ isLoading }) {
 
   useEffect(() => {
     initializeCalculationsMenuHandlers(setPoints, setPolygon);
-
     initializeParameterMenuHandlers(setEHZ, setEKL, setPHZ, setPKL, setCOPWP);
   }, []);
 

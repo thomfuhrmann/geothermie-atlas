@@ -7,7 +7,7 @@ let gridSpacingHandler,
   P_HZHandler,
   P_KLHandler;
 
-export const initializeCollapsible = () => {
+export const initializeCollapsibleEWS = () => {
   // create collapsible
   const collapsible = document.createElement("div");
   collapsible.classList = "collapsible-container";

@@ -148,7 +148,7 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
     if (result.layerId === layerId) {
       if (attributes[prefixes[layerId] + "Anzeige"] === "Ampelkarte") {
         einschraenkungen.push(
-          <TableRow key={attributes[prefixes[layerId] + "OBJECTID"]}>
+          <TableRow key={einschraenkungen.length}>
             {getEinschraenkung(attributes, prefixes[layerId])}
             <TableData textAlign={"center"}>
               {getAmpelText(
@@ -159,7 +159,7 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
         );
       } else {
         hinweise.push(
-          <TableRow key={attributes[prefixes[layerId] + "OBJECTID"]}>
+          <TableRow key={hinweise.length}>
             {getHinweis(attributes, prefixes[layerId])}
           </TableRow>
         );

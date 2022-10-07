@@ -2,11 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import "jspdf-autotable";
 import { useDispatch, useSelector } from "react-redux";
 
-import { updateAmpelkarte } from "../redux/ampelkarteSlice";
+import { updateScreenshot } from "../redux/screenshotSlice";
+import { updateEWSResources } from "../redux/ewsResourcesSlice";
 import { updateGWWPResources } from "../redux/gwwpResourcesSlice";
+import { updateAmpelkarte } from "../redux/ampelkarteSlice";
 import { updateCadastralData } from "../redux/cadastreSlice";
+import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
-import { initializeInfoPanelHandlers } from "../utils/viewGWWP";
+import { initializeInfoPanelHandlers } from "../utils/view";
 import { print } from "../utils/print";
 import { AmpelkarteTable } from "./AmpelkarteTable";
 import CollapsibleSection from "./CollapsibleSection";
@@ -66,9 +69,8 @@ const textTemplates = {
   ],
 };
 
-export default function InfoPanel(props) {
+export default function InfoPanelGWWP() {
   const sketchToolColor = useRef(null);
-  const [screenshot, setScreenshot] = useState(null);
   const [address, setAddress] = useState(null);
 
   const dispatch = useDispatch();
@@ -79,19 +81,23 @@ export default function InfoPanel(props) {
   const computationResult = useSelector(
     (store) => store.gwwpComputations.value
   );
+  const screenshot = useSelector((store) => store.screenshot.value);
 
   // record which tables should be printed
   let [einschraenkungen, hinweise] = [false, false];
 
   // initialize query handlers
   useEffect(() => {
-    initializeInfoPanelHandlers(setScreenshot, setAddress, dispatch);
+    initializeInfoPanelHandlers(setAddress, dispatch);
 
     return () => {
-      dispatch(updateCadastralData({}));
+      dispatch(updateEWSResources([]));
       dispatch(updateGWWPResources([]));
+      dispatch(updateCadastralData({}));
       dispatch(updateAmpelkarte([]));
       dispatch(updateGWWPComputationResult([]));
+      dispatch(updateEWSComputationResult({}));
+      dispatch(updateScreenshot(""));
     };
   }, [dispatch]);
 
@@ -140,6 +146,7 @@ export default function InfoPanel(props) {
       sketchToolColor.current;
   };
 
+  // register which tables are added to the report
   const setTables = (einschraenkungenAdded, hinweiseAdded) => {
     einschraenkungen = einschraenkungenAdded;
     hinweise = hinweiseAdded;
@@ -166,6 +173,10 @@ export default function InfoPanel(props) {
                 </Underline>{" "}
                 zwei Punkte für ein Brunnenpaar setzen und die Berechnung
                 starten.
+              </p>
+              <p>
+                Optional können sie im Menü "Parameter" gebäudespezifische
+                Parameter festlegen.
               </p>
             </>
           ) : (
