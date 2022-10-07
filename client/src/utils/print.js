@@ -80,13 +80,13 @@ export const print = (
     },
   });
 
-  finalY = doc.lastAutoTable.finalY;
+  doc.addPage();
   if (hinweise) {
     doc.autoTable({
       html: "#hinweise-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: finalY + 10,
+      startY: 20,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Hinweise";
@@ -140,15 +140,15 @@ export const print = (
   let pageAdded = false;
   if (image_unbal) {
     const imgProps = doc.getImageProperties(image_unbal.current);
-    const width = doc.internal.pageSize.getWidth() - 40;
+    const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
     height = (imgProps.height * width) / imgProps.width;
-    if (height > totalHeight - finalY - 5) {
+    if (height > totalHeight - finalY) {
       doc.addPage();
       pageAdded = true;
-      doc.addImage(image_unbal.current, "PNG", 20, 20, width, height);
+      doc.addImage(image_unbal.current, "PNG", 30, 20, width, height);
     } else {
-      doc.addImage(image_unbal.current, "PNG", 20, finalY + 5, width, height);
+      doc.addImage(image_unbal.current, "PNG", 30, finalY + 5, width, height);
     }
   }
 
@@ -187,28 +187,29 @@ export const print = (
   height = 0;
   if (image_bal) {
     const imgProps = doc.getImageProperties(image_bal.current);
-    const width = doc.internal.pageSize.getWidth() - 40;
+    const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
     height = (imgProps.height * width) / imgProps.width;
-    if (height > totalHeight - finalY - 5) {
+    if (height > totalHeight - finalY) {
       doc.addPage();
-      doc.addImage(image_bal.current, "PNG", 20, 20, width, height);
+      doc.addImage(image_bal.current, "PNG", 30, 20, width, height);
     } else {
-      doc.addImage(image_bal.current, "PNG", 20, finalY + 5, width, height);
+      doc.addImage(image_bal.current, "PNG", 30, finalY + 5, width, height);
     }
   }
 
-  finalY = doc.lastAutoTable.finalY;
-  if (pageAdded) {
-    startY = height + 30;
-  } else {
-    startY = finalY + height + 10;
-  }
+  // finalY = doc.lastAutoTable.finalY;
+  // if (pageAdded) {
+  //   startY = height + 30;
+  // } else {
+  //   startY = finalY + height + 10;
+  // }
+  doc.addPage();
   doc.autoTable({
     html: "#disclaimer",
     rowPageBreak: "avoid",
     showHead: "firstPage",
-    startY: startY,
+    startY: 20,
     willDrawCell: function (data) {
       if (data.section === "head") {
         data.cell.text = "Haftungsausschluss";
@@ -234,6 +235,21 @@ export const print = (
       }
     },
   });
+
+  // print the page number and the total pages
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    // go to page i
+    doc.setPage(i);
+
+    // set font size
+    doc.setFontSize(8);
+
+    // print text
+    doc.text("Seite " + i, 190, 280, {
+      align: "right",
+    });
+  }
 
   doc.save("Bericht.pdf");
 };
