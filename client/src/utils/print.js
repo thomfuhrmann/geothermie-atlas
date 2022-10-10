@@ -170,6 +170,10 @@ export const print = (
           data.cell.text = "Berechnungsergebnis (bilanzierter Betrieb)";
         }
 
+        if (data.cell.text[0].startsWith("Für einen bilanzierten")) {
+          doc.setFillColor(255, 255, 255);
+        }
+
         if (data.cell.text[0] === "Gewählte Parameter") {
           doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
@@ -246,7 +250,7 @@ export const print = (
     doc.setFontSize(8);
 
     // print text
-    doc.text("Seite " + i, 190, 280, {
+    doc.text("Seite " + i, 190, 283, {
       align: "right",
     });
   }

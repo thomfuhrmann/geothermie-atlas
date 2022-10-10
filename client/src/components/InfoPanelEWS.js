@@ -146,7 +146,7 @@ export default function InfoPanelEWS() {
   return (
     <Container>
       <CollapsibleSection
-        title={!ampelkarte ? "Erklärung" : "Bericht"}
+        title={!address ? "Erklärung" : "Bericht"}
         open={true}
         marginBottom="0px"
       >

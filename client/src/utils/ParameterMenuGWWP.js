@@ -65,7 +65,7 @@ export const initializeCollapsibleGWWP = () => {
   };
   const eKLLabel = document.createElement("label");
   eKLLabel.for = "ekl-input";
-  eKLLabel.innerText = "Jahresheizenergie (optional)";
+  eKLLabel.innerText = "Jahreskühlenergie (optional)";
 
   const eKLInputDiv = document.createElement("div");
   eKLInputDiv.className = "input-section";
