@@ -294,11 +294,6 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Sondenabstand: {computationResult.gridSpacing} m
-                    </TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
                       Sondentiefe: {computationResult.bohrtiefe} m
                     </TableData>
                   </TableRow>
@@ -413,11 +408,6 @@ export default function InfoPanelEWS() {
                   <TableRow>
                     <TableData>
                       Sondenanzahl: {computationResult.points}
-                    </TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
-                      Sondenabstand: {computationResult.gridSpacing} m
                     </TableData>
                   </TableRow>
                   <TableRow>
