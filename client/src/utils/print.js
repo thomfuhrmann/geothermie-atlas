@@ -202,12 +202,6 @@ export const print = (
     }
   }
 
-  // finalY = doc.lastAutoTable.finalY;
-  // if (pageAdded) {
-  //   startY = height + 30;
-  // } else {
-  //   startY = finalY + height + 10;
-  // }
   doc.addPage();
   doc.autoTable({
     html: "#disclaimer",

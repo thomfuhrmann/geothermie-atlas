@@ -45,10 +45,10 @@ let setPoints, setPolygon, polygonGraphicsLayer, dispatch, setAddress;
 export function initialize(container, theme) {
   view = new MapView({
     extent: new Extent({
-      xmin: -14663,
-      ymin: 326096,
-      xmax: 23660,
-      ymax: 352619,
+      xmin: -19000,
+      ymin: 325000,
+      xmax: 29000,
+      ymax: 360000,
       spatialReference: new SpatialReference({ wkid: SRS }),
     }),
   });
@@ -261,9 +261,27 @@ export function initialize(container, theme) {
     }
   });
 
+  sketch.on("update", (event) => {
+    let points = event.graphics.map((graphic) => graphic.geometry);
+    if (event.state === "start") {
+      setPoints((storedPoints) =>
+        storedPoints.filter((point) => !points.includes(point))
+      );
+    }
+
+    if (event.state === "complete") {
+      setPoints((storedPoints) => {
+        storedPoints.push(...points);
+        return storedPoints;
+      });
+    }
+  });
+
   sketch.on("delete", (event) => {
     let points = event.graphics.map((graphic) => graphic.geometry);
-    setPoints((current) => current.filter((point) => !points.includes(point)));
+    setPoints((storedPoints) =>
+      storedPoints.filter((point) => !points.includes(point))
+    );
   });
 
   // register event handlers for mouse clicks
