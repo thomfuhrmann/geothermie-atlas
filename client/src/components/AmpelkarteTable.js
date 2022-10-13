@@ -10,8 +10,8 @@ import {
 import CollapsibleSection from "./CollapsibleSection";
 
 const prefixes = {
-  0: "main_og_ampelkarte_ews_wien.",
-  1: "main_og_ampelkarte_gwp_wien.",
+  0: "og_ampelkarte_ews_wien.",
+  1: "og_ampelkarte_gwp_wien.",
 };
 
 let einschraenkungen_erlaeuterungen = [];
@@ -38,12 +38,12 @@ const getEinschraenkung = (attributes, prefix) => {
       );
       return (
         <TableData>
-          {attributes[prefix + "KATEGORIE"]}
+          {attributes[prefix + "Kategorie"]}
           <sup>{Object.keys(einschraenkungen_erlaeuterungen).length}</sup>
         </TableData>
       );
     case "Wasserschutz- und Schongebiete":
-      return <TableData>{attributes[prefix + "KATEGORIE"]}</TableData>;
+      return <TableData>{attributes[prefix + "Kategorie"]}</TableData>;
     case "Artesisch gespannte Brunnen":
       einschraenkungen_erlaeuterungen["Artesisch gespannte Brunnen"] =
         einschraenkungen["Artesisch gespannte Brunnen"];
@@ -106,7 +106,7 @@ const getHinweis = (attributes, prefix) => {
     case "Grundwasserchemismus":
       return (
         <TableData>
-          {hinweise.Grundwasserchemismus[attributes[prefix + "KATEGORIE"]]}
+          {hinweise.Grundwasserchemismus[attributes[prefix + "Kategorie"]]}
         </TableData>
       );
     default:
