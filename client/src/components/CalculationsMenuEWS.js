@@ -8,7 +8,7 @@ import { takeScreenshot } from "../utils/screenshot";
 import { initializeParameterMenuHandlers } from "../utils/ParameterMenuEWS";
 import { Menu, Button, ButtonContainer } from "./CommonStyledElements";
 
-export default function CalculationsMenuEWS({ isLoading }) {
+const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
   const [polygon, setPolygon] = useState(null);
   const [gridSpacing, setGridSpacing] = useState(10);
   const [bohrtiefe, setBohrtiefe] = useState(100);
@@ -170,7 +170,7 @@ export default function CalculationsMenuEWS({ isLoading }) {
   }, [dispatch]);
 
   return (
-    <Menu>
+    <Menu ref={ref}>
       {polygon && (
         <>
           <ButtonContainer>
@@ -187,4 +187,6 @@ export default function CalculationsMenuEWS({ isLoading }) {
       )}
     </Menu>
   );
-}
+});
+
+export default CalculationsMenuEWS;

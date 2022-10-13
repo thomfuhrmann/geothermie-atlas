@@ -11,6 +11,9 @@ import ScaleBar from "@arcgis/core/widgets/ScaleBar";
 import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Graphic from "@arcgis/core/Graphic";
+import Legend from "@arcgis/core/widgets/Legend";
+import LayerList from "@arcgis/core/widgets/LayerList";
+import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
 
 import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
@@ -42,7 +45,7 @@ export let cadastre;
 
 // initialize the map view container
 let setPoints, setPolygon, polygonGraphicsLayer, dispatch, setAddress;
-export function initialize(container, theme) {
+export function initialize(container, theme, calculationsMenu) {
   view = new MapView({
     extent: new Extent({
       xmin: -19000,
@@ -54,17 +57,17 @@ export function initialize(container, theme) {
   });
 
   pointGraphicsLayer = new GraphicsLayer({
-    title: "Planung Erdwärmesonden",
+    title: "Planungslayer - Punkte",
     listMode: "hide",
   });
 
   boundaryGraphicsLayer = new GraphicsLayer({
-    title: "Planung Erdwärmesonden",
+    title: "EWS - innere Grenze",
     listMode: "hide",
   });
 
   polygonGraphicsLayer = new GraphicsLayer({
-    title: "Grundstück",
+    title: "Grundstücksgrenze",
     listMode: "hide",
   });
 
@@ -73,21 +76,21 @@ export function initialize(container, theme) {
     url: ampelkarte_url,
     title: "Ampelkarte",
     visible: false,
-    listMode: "hide",
+    listMode: "show",
   });
 
   const ews = new MapImageLayer({
     title: "Erdwärmesonden",
     url: ews_url,
     visible: false,
-    listMode: "hide",
+    listMode: theme === "EWS" ? "show" : "hide",
   });
 
   const gwwp = new MapImageLayer({
     title: "Grundwasserwärmepumpen",
     url: gwwp_url,
     visible: false,
-    listMode: "hide",
+    listMode: theme === "GWWP" ? "show" : "hide",
   });
 
   const betriebsstunden = new MapImageLayer({
@@ -180,6 +183,10 @@ export function initialize(container, theme) {
       break;
   }
 
+  const legend = new Legend({ view });
+
+  const layerList = new LayerList({ view });
+
   const search = new Search({
     view,
     popupEnabled: false,
@@ -193,7 +200,6 @@ export function initialize(container, theme) {
   const sketch = new Sketch({
     layer: pointGraphicsLayer,
     view: view,
-    // graphic will be selected as soon as it is created
     availableCreateTools: ["point"],
     visibleElements: {
       selectionTools: {
@@ -203,10 +209,6 @@ export function initialize(container, theme) {
       settingsMenu: false,
       undoRedoMenu: false,
     },
-    snappingOptions: {
-      enabled: true,
-      selfEnabled: true,
-    },
   });
 
   sketch.on("create", (event) => {
@@ -214,7 +216,7 @@ export function initialize(container, theme) {
       // point symbol
       const symbol = {
         type: "simple-marker",
-        color: [90, 90, 90, 0],
+        color: [255, 255, 255, 0.25],
       };
 
       // delete default point symbol
@@ -263,14 +265,22 @@ export function initialize(container, theme) {
 
   sketch.on("update", (event) => {
     let points = event.graphics.map((graphic) => graphic.geometry);
+
+    // remove points being updated from list
     if (event.state === "start") {
       setPoints((storedPoints) =>
         storedPoints.filter((point) => !points.includes(point))
       );
     }
 
+    // add updated points to list
     if (event.state === "complete") {
       setPoints((storedPoints) => {
+        storedPoints.forEach((storedPoint) => {
+          if (geometryEngine.distance(storedPoint, points[0]) < 5) {
+            // console.log("too close!");
+          }
+        });
         storedPoints.push(...points);
         return storedPoints;
       });
@@ -286,36 +296,71 @@ export function initialize(container, theme) {
 
   // register event handlers for mouse clicks
   view.on("click", ({ mapPoint }) => {
-    polygonGraphicsLayer.removeAll();
-    boundaryGraphicsLayer.removeAll();
-    pointGraphicsLayer.removeAll();
+    if (
+      polygonGraphicsLayer.graphics.length === 0 ||
+      !geometryEngine.intersects(
+        mapPoint,
+        polygonGraphicsLayer.graphics.at(0).geometry
+      )
+    ) {
+      polygonGraphicsLayer.removeAll();
+      boundaryGraphicsLayer.removeAll();
+      pointGraphicsLayer.removeAll();
 
-    // initialize store in case there was a previous computation
-    switch (theme) {
-      case "EWS":
-        dispatch(updateEWSComputationResult({}));
-        break;
-      case "GWWP":
-        dispatch(updateGWWPComputationResult([]));
-        break;
-      default:
-        break;
-    }
+      // initialize store in case there was a previous computation
+      switch (theme) {
+        case "EWS":
+          dispatch(updateEWSComputationResult({}));
+          break;
+        case "GWWP":
+          dispatch(updateGWWPComputationResult([]));
+          break;
+        default:
+          break;
+      }
 
-    // initialize points
-    setPoints([]);
+      // initialize points
+      setPoints([]);
 
-    // query
-    queryCadastre(view, polygonGraphicsLayer, mapPoint, dispatch, setPolygon);
-    identifyAllLayers(view, mapPoint, dispatch);
-    getAddress(mapPoint, setAddress);
+      // query
+      queryCadastre(view, polygonGraphicsLayer, mapPoint, dispatch, setPolygon);
+      identifyAllLayers(view, mapPoint, dispatch);
+      getAddress(mapPoint, setAddress);
 
-    if (view.scale > 45000) {
-      // take screenshot with marker at higher scales when parcels are not selectable
-      setTimeout(() => takeScreenshot(view, mapPoint, dispatch, true), 500);
+      if (view.scale > 45000) {
+        // take screenshot with marker at higher scales when parcels are not selectable
+        setTimeout(() => takeScreenshot(view, mapPoint, dispatch, true), 500);
+      } else {
+        // take screenshot with selected parcel boundary
+        setTimeout(() => takeScreenshot(view, mapPoint, dispatch), 500);
+      }
+
+      if (view.scale < 45000) {
+        // open calculations menu
+        const calculationsMenuContent = document.querySelector(
+          ".collapsible-content"
+        );
+        const calculationsMenuButton = document.querySelector(
+          ".collapsible-button"
+        );
+        if (calculationsMenuContent.style.display !== "block") {
+          calculationsMenuContent.style.display = "block";
+          calculationsMenuButton.classList.toggle("active");
+        }
+
+        sketch.container = calculationsMenuContent;
+      }
     } else {
-      // take screenshot with selected parcel boundary
-      setTimeout(() => takeScreenshot(view, mapPoint, dispatch), 500);
+      view
+        .hitTest(view.toScreen(mapPoint), {
+          include: pointGraphicsLayer,
+        })
+        .then(({ results }) => {
+          if (results.length > 0) {
+            const pointGraphic = results.at(0).graphic;
+            sketch.update(pointGraphic);
+          }
+        });
     }
   });
 
@@ -324,23 +369,27 @@ export function initialize(container, theme) {
 
   // add UI components
   view.ui.components = [];
+  let collapsible, collapsibleContent;
   switch (theme) {
     case "EWS":
-      view.ui.add([search, sketch, initializeCollapsibleEWS()], "top-left");
+      collapsible = initializeCollapsibleEWS();
       break;
     case "GWWP":
-      view.ui.add([search, sketch, initializeCollapsibleGWWP()], "top-left");
+      collapsible = initializeCollapsibleGWWP();
       break;
     default:
       break;
   }
 
+  collapsibleContent = collapsible.querySelector(".collapsible-content");
+  collapsibleContent.appendChild(calculationsMenu);
+  view.ui.add([search, layerList, legend, collapsible], "top-left");
   view.ui.add(scaleBar, "bottom-left");
   view.container = container;
   return view;
 }
 
-// initialize handlers
+// initialize callback functions
 export function initializeInfoPanelHandlers(
   setAddressCallback,
   dispatchCallback

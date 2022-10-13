@@ -68,15 +68,12 @@ export const Image = styled.img`
 `;
 
 export const Menu = styled.div`
-  position: absolute;
-  top: 15px;
-  left: 50%;
-  transform: translate(-50%);
+  position: relative;
+  width: 100%;
   margin: 0px;
   border: none;
   color: #444444;
   background-color: white;
-  width: 250px;
   height: auto;
   box-sizing: border-box;
   display: flex;

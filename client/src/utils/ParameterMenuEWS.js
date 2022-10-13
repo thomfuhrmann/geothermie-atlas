@@ -15,7 +15,7 @@ export const initializeCollapsibleEWS = () => {
   // button for collapsible
   const button = document.createElement("button");
   button.classList = "collapsible-button";
-  button.innerHTML = "Parameter";
+  button.innerHTML = "Berechnungen";
   button.addEventListener("click", () => {
     button.classList.toggle("active");
     var content = button.nextElementSibling;
@@ -31,6 +31,9 @@ export const initializeCollapsibleEWS = () => {
   const content = document.createElement("div");
   content.className = "collapsible-content";
   collapsible.appendChild(content);
+
+  // add sketch widget to content
+  // sketch.container = content;
 
   // Sondenabstand
   const gridSpacingInput = document.createElement("input");
@@ -105,7 +108,7 @@ export const initializeCollapsibleEWS = () => {
   };
   const bsHZLabel = document.createElement("label");
   bsHZLabel.for = "bshz-input";
-  bsHZLabel.innerText = "Betriebsstunden Heizen pro Jahr (optional)";
+  bsHZLabel.innerText = "Jahresbetriebsstunden Heizen (optional)";
 
   const bsHZInputDiv = document.createElement("div");
   bsHZInputDiv.className = "input-section";
@@ -132,7 +135,7 @@ export const initializeCollapsibleEWS = () => {
   };
   const bsKLLabel = document.createElement("label");
   bsKLLabel.for = "bskl-input";
-  bsKLLabel.innerText = "Betriebsstunden Kühlen pro Jahr (optional)";
+  bsKLLabel.innerText = "Jahresbetriebsstunden Kühlen (optional)";
 
   const bsKLInputDiv = document.createElement("div");
   bsKLInputDiv.className = "input-section";

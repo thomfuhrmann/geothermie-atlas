@@ -10,7 +10,7 @@ import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
 import { takeScreenshot } from "../utils/screenshot";
 import { Menu, Button, ButtonContainer } from "./CommonStyledElements";
 
-export default function CalculationsMenuGWWP({ isLoading }) {
+const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
   const dispatch = useDispatch();
 
   const [points, setPoints] = useState([]);
@@ -91,7 +91,7 @@ export default function CalculationsMenuGWWP({ isLoading }) {
   }, []);
 
   return (
-    <Menu>
+    <Menu ref={ref}>
       {Object.keys(cadastralData).length > 0 && points.length >= 2 && (
         <ButtonContainer>
           <Button onClick={handleGWWPCalculation}>Berechnung starten</Button>
@@ -99,4 +99,6 @@ export default function CalculationsMenuGWWP({ isLoading }) {
       )}
     </Menu>
   );
-}
+});
+
+export default CalculationsMenuGWWP;

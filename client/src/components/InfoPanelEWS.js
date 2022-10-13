@@ -146,7 +146,7 @@ export default function InfoPanelEWS() {
   return (
     <Container>
       <CollapsibleSection
-        title={!address ? "Erklärung" : "Bericht"}
+        title={!address ? "Der Weg zu Ihrer Erdwärmesonde" : "Bericht"}
         open={true}
         marginBottom="0px"
       >
@@ -167,7 +167,7 @@ export default function InfoPanelEWS() {
                 zu verschieben oder zu löschen.
               </p>
               <p>
-                Optional können sie im Menü "Parameter" die Konfiguration der
+                Optional können sie im Menü "Berechnungen" die Konfiguration der
                 Erdwärmesonden verändern und gebäudespezifische Parameter
                 festlegen.
               </p>
@@ -425,7 +425,7 @@ export default function InfoPanelEWS() {
                   {computationResult.BS_KL > 0 && (
                     <TableRow>
                       <TableData>
-                        Betriebsstunden Heizen: {computationResult.BS_KL} h
+                        Betriebsstunden Kühlen: {computationResult.BS_KL} h
                       </TableData>
                     </TableRow>
                   )}

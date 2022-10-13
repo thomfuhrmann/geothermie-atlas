@@ -20,12 +20,14 @@ const MapContainer = styled.div`
 
 const Map = ({ theme }) => {
   const mapDiv = useRef(null);
+  const calculationsMenuRef = useRef(null);
 
   const [loading, setLoading] = useState(null);
 
   useEffect(() => {
     // initialize the map interface
-    let view = initialize(mapDiv.current, theme);
+    let view = initialize(mapDiv.current, theme, calculationsMenuRef.current);
+
     return () => {
       view.destroy();
     };
@@ -36,7 +38,10 @@ const Map = ({ theme }) => {
       return (
         <MapContainer ref={mapDiv} key={theme}>
           <InfoPanelEWS></InfoPanelEWS>
-          <CalculationsMenuEWS isLoading={setLoading}></CalculationsMenuEWS>
+          <CalculationsMenuEWS
+            ref={calculationsMenuRef}
+            isLoading={setLoading}
+          ></CalculationsMenuEWS>
           {loading && <LoadingSpinner></LoadingSpinner>}
         </MapContainer>
       );
@@ -44,7 +49,10 @@ const Map = ({ theme }) => {
       return (
         <MapContainer ref={mapDiv} key={theme}>
           <InfoPanelGWWP></InfoPanelGWWP>
-          <CalculationsMenuGWWP isLoading={setLoading}></CalculationsMenuGWWP>
+          <CalculationsMenuGWWP
+            ref={calculationsMenuRef}
+            isLoading={setLoading}
+          ></CalculationsMenuGWWP>
           {loading && <LoadingSpinner></LoadingSpinner>}
         </MapContainer>
       );

@@ -13,7 +13,7 @@ import {
 // grid points have to be at least 2 meters away from parcel boundary
 const distanceToBoundary = 2;
 
-const drawPoint = (point, color = [90, 90, 90, 0]) => {
+const drawPoint = (point, color = [255, 255, 255, 0.25]) => {
   pointGraphicsLayer.add(
     new Graphic({
       geometry: point,
