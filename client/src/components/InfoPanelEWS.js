@@ -151,7 +151,7 @@ export default function InfoPanelEWS() {
             <>
               <p>
                 Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
-                um Informationen abzufragen, einen Erdwärmesonderaster zu
+                um Informationen abzufragen, einen Erdwärmesondenraster zu
                 zeichnen und die Berechnnungen zu starten.
               </p>
               <p>
