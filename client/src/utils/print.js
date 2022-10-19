@@ -7,7 +7,8 @@ export const print = (
   screenshot,
   image_bal,
   image_unbal,
-  cadastralData
+  cadastralData,
+  warnings = false
 ) => {
   const doc = new jsPDF({
     orientation: "portrait",
@@ -68,11 +69,28 @@ export const print = (
   }
 
   finalY = doc.lastAutoTable.finalY;
+  if (computationResult && warnings) {
+    doc.autoTable({
+      html: "#warnings-table",
+      rowPageBreak: "avoid",
+      startY: finalY,
+      willDrawCell: function (data) {
+        if (data.section === "body" && data.cell.text[0] !== "") {
+          doc.setFillColor(255, 251, 214);
+          doc.setTextColor(113, 81, 0);
+        } else {
+          doc.setFillColor(255, 255, 255);
+        }
+      },
+    });
+  }
+
+  finalY = doc.lastAutoTable.finalY;
   doc.autoTable({
     html: "#resources-table",
     rowPageBreak: "avoid",
     showHead: "firstPage",
-    startY: finalY + 10,
+    startY: finalY + 5,
     willDrawCell: function (data) {
       if (data.section === "head") {
         data.cell.text = "Ressourcen";
@@ -81,21 +99,6 @@ export const print = (
   });
 
   doc.addPage();
-  if (hinweise) {
-    doc.autoTable({
-      html: "#hinweise-table",
-      rowPageBreak: "avoid",
-      showHead: "firstPage",
-      startY: 20,
-      willDrawCell: function (data) {
-        if (data.section === "head") {
-          data.cell.text = "Hinweise";
-        }
-      },
-    });
-  }
-
-  finalY = doc.lastAutoTable.finalY;
   if (einschraenkungen) {
     doc.autoTable({
       html: "#einschraenkungen-table",
@@ -105,6 +108,21 @@ export const print = (
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Einschränkungen";
+        }
+      },
+    });
+  }
+
+  finalY = doc.lastAutoTable.finalY;
+  if (hinweise) {
+    doc.autoTable({
+      html: "#hinweise-table",
+      rowPageBreak: "avoid",
+      showHead: "firstPage",
+      startY: 20,
+      willDrawCell: function (data) {
+        if (data.section === "head") {
+          data.cell.text = "Hinweise";
         }
       },
     });
@@ -138,7 +156,7 @@ export const print = (
   finalY = doc.lastAutoTable.finalY;
   let height = 0;
   let pageAdded = false;
-  if (image_unbal) {
+  if (image_unbal.current) {
     const imgProps = doc.getImageProperties(image_unbal.current);
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
@@ -159,7 +177,7 @@ export const print = (
   } else {
     startY = finalY + height + 10;
   }
-  if (computationResult && image_bal) {
+  if (computationResult && image_bal.current) {
     doc.autoTable({
       html: "#calculations-bal-output-table",
       rowPageBreak: "avoid",
@@ -189,7 +207,7 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   height = 0;
-  if (image_bal) {
+  if (image_bal.current) {
     const imgProps = doc.getImageProperties(image_bal.current);
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();

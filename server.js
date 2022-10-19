@@ -25,7 +25,7 @@ app.get("/api", ({ query }, res) => {
       query.P_HZ,
       query.P_KL,
       query.FF,
-      query.bohrtiefe,
+      query.boreDepth,
       query.points,
     ],
   };

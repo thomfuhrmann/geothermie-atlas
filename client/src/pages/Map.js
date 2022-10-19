@@ -29,7 +29,9 @@ const Map = ({ theme }) => {
     let view = initialize(mapDiv.current, theme, calculationsMenuRef.current);
 
     return () => {
-      view.destroy();
+      if (view) {
+        view.destroy();
+      }
     };
   }, [theme]);
 

@@ -4,13 +4,17 @@ import Polygon from "@arcgis/core/geometry/Polygon";
 import Graphic from "@arcgis/core/Graphic";
 
 import { updateCadastralData } from "../redux/cadastreSlice";
+import { calculateGrid } from "./gridcomputer";
 
 export const queryCadastre = (
   view,
   polygonGraphicsLayer,
   mapPoint,
   dispatch,
-  setPolygon
+  setPolygon,
+  setPoints,
+  theme,
+  gridSpacing = 10
 ) => {
   const { x, y } = view.toScreen(mapPoint);
   let url =
@@ -69,6 +73,10 @@ export const queryCadastre = (
       polygonGraphicsLayer.add(polygonGraphic);
 
       let FF = geometryEngine.planarArea(polygon, "square-meters");
+
+      if (theme === "EWS") {
+        calculateGrid(polygon, gridSpacing, setPoints);
+      }
 
       setPolygon(polygon);
       dispatch(updateCadastralData({ KG, GNR, FF }));

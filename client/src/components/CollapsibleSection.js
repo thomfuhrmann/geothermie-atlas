@@ -1,5 +1,4 @@
-import React, { useState, useRef } from "react";
-import { Collapse } from "react-collapse";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 const Button = styled.button`
@@ -30,34 +29,37 @@ const Container = styled.div`
   box-sizing: border-box;
   width: 100%;
   height: fit-content;
+  background-color: white;
+`;
+
+const CollapsibleContent = styled.div`
+  display: ${(props) => (props.isOpened === true ? "block" : "none")};
 `;
 
 export default function CollapsibleSection({
   title,
   children,
-  open = false,
+  open,
   marginBottom = "1px",
 }) {
-  const collapse = useRef(null);
-  const button = useRef(null);
   const [opened, setOpened] = useState(open);
+  const [previouslyOpened, setPreviouslyOpened] = useState();
+
+  if (open !== previouslyOpened) {
+    setOpened(open);
+    setPreviouslyOpened(open);
+  }
+
+  const handleClick = () => {
+    setOpened(!opened);
+  };
 
   return (
     <Container>
-      <Button
-        type="button"
-        onClick={() => {
-          setOpened(!collapse.current.props.isOpened);
-        }}
-        ref={button}
-        isOpened={opened}
-        marginBottom={marginBottom}
-      >
+      <Button type="button" onClick={handleClick} marginBottom={marginBottom}>
         {title} <Span>{opened ? "-" : "+"}</Span>
       </Button>
-      <Collapse isOpened={opened} ref={collapse}>
-        {children}
-      </Collapse>
+      <CollapsibleContent isOpened={opened}>{children}</CollapsibleContent>
     </Container>
   );
 }

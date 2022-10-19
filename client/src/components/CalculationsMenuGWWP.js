@@ -1,14 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import styled from "styled-components";
 
 import { distance } from "../utils/gridcomputer";
 import { compute } from "../utils/gwwpComputations";
 import { view } from "../utils/view";
-import { initializeParameterMenuHandlers } from "../utils/ParameterMenuGWWP";
 import { initializeCalculationsMenuHandlers } from "../utils/view";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
 import { takeScreenshot } from "../utils/screenshot";
+import CollapsibleSection from "./CollapsibleSection";
 import { Menu, Button, ButtonContainer } from "./CommonStyledElements";
+
+const CollapsibleContent = styled.div`
+  padding: 15px 18px;
+`;
+
+const InputSection = styled.div`
+  padding-bottom: 10px;
+`;
+
+const Input = styled.input`
+  font-family: inherit;
+  font-size: 100%;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+`;
 
 const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
   const dispatch = useDispatch();
@@ -87,16 +105,117 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
 
   useEffect(() => {
     initializeCalculationsMenuHandlers(setPoints, setPolygon);
-    initializeParameterMenuHandlers(setEHZ, setEKL, setPHZ, setPKL, setCOPWP);
   }, []);
 
+  const handleEHZ = (event) => {
+    if (event.target.value < 0) {
+      event.target.value = 0;
+    }
+    setEHZ(parseInt(event.target.value));
+  };
+
+  const handleEKL = (event) => {
+    if (event.target.value < 0) {
+      event.target.value = 0;
+    }
+    setEKL(parseInt(event.target.value));
+  };
+
+  const handlePHZ = (event) => {
+    if (event.target.value < 0) {
+      event.target.value = 0;
+    }
+    setPHZ(parseInt(event.target.value));
+  };
+
+  const handlePKL = (event) => {
+    if (event.target.value < 0) {
+      event.target.value = 0;
+    }
+    setPKL(parseInt(event.target.value));
+  };
+
+  const handleCOPWP = (event) => {
+    if (event.target.value < 0) {
+      event.target.value = 0;
+    }
+    setCOPWP(parseInt(event.target.value));
+  };
+
   return (
-    <Menu ref={ref}>
-      {Object.keys(cadastralData).length > 0 && points.length >= 2 && (
-        <ButtonContainer>
-          <Button onClick={handleGWWPCalculation}>Berechnung starten</Button>
-        </ButtonContainer>
-      )}
+    <Menu width="300px" ref={ref}>
+      <CollapsibleSection
+        title="Berechnnungen"
+        marginBottom="0px"
+        open={polygon !== null}
+      >
+        <CollapsibleContent id="collapsible-content">
+          {!polygon && <p>Bitte wählen Sie zuerst ein Grundstück aus!</p>}
+          {polygon && (
+            <>
+              <InputSection>
+                <label htmlFor="ehz-input">Jahresheizenergie (optional)</label>
+                <Input
+                  id="ehz-input"
+                  type="number"
+                  min="0"
+                  placeholder="Wert größer gleich 0"
+                  onChange={handleEHZ}
+                ></Input>
+              </InputSection>
+              <InputSection>
+                <label htmlFor="ekl-input">Jahreskühlenergie (optional)</label>
+                <Input
+                  id="ekl-input"
+                  type="number"
+                  min="0"
+                  placeholder="Wert größer gleich 0"
+                  onChange={handleEKL}
+                ></Input>
+              </InputSection>
+              <InputSection>
+                <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
+                <Input
+                  id="phz-input"
+                  type="number"
+                  min="0"
+                  placeholder="Wert größer gleich 0"
+                  onChange={handlePHZ}
+                ></Input>
+              </InputSection>
+              <InputSection>
+                <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
+                <Input
+                  id="pkl-input"
+                  type="number"
+                  min="0"
+                  placeholder="Wert größer gleich 0"
+                  onChange={handlePKL}
+                ></Input>
+              </InputSection>
+              <InputSection>
+                <label htmlFor="cop-wp-input">
+                  durchschnittliche Leistungszahl der Wärmepumpen (optional)
+                </label>
+                <Input
+                  id="cop-wp-input"
+                  type="number"
+                  min="0"
+                  placeholder="Wert größer gleich 0"
+                  onChange={handleCOPWP}
+                ></Input>
+              </InputSection>
+              {points.length >= 2 && (
+                <ButtonContainer>
+                  <Button onClick={handleGWWPCalculation}>
+                    Berechnung starten
+                  </Button>
+                </ButtonContainer>
+              )}
+            </>
+          )}
+        </CollapsibleContent>
+      </CollapsibleSection>
     </Menu>
   );
 });

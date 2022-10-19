@@ -1,6 +1,18 @@
 import React from "react";
 import styled from "styled-components";
 
+export const Warning = styled.p`
+  width: 100%;
+  white-space: normal;
+  word-break: normal;
+  background-color: #fffbd6;
+  color: #715100;
+  margin: 5px 0;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 10px;
+`;
+
 export const Content = styled.div`
   position: absolute;
   top: 100px;
@@ -69,12 +81,12 @@ export const Image = styled.img`
 
 export const Menu = styled.div`
   position: relative;
-  width: 100%;
+  width: ${(props) => props.width || "100%"};
+  height: fit-content;
   margin: 0px;
   border: none;
   color: #444444;
   background-color: white;
-  height: auto;
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
@@ -85,6 +97,7 @@ export const Menu = styled.div`
 export const ButtonContainer = styled.div`
   padding: 5px;
   width: 100%;
+  box-sizing: border-box;
 `;
 
 export const Button = styled.button`

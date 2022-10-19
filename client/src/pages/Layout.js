@@ -1,4 +1,4 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
 import styled from "styled-components";
 
 import Header from "../components/Header";
@@ -11,21 +11,11 @@ const Nav = styled.nav`
   padding-right: 300px;
 `;
 
-const NavLink = styled(Link)`
-  color: #808080;
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  padding: 0 1rem;
-  height: 100%;
-  cursor: pointer;
-  &:active {
-    color: #4d4dff;
-  }
-`;
-
 const NavMenu = styled.div`
   display: flex;
+  .current {
+    border-bottom: 2px solid black;
+  }
 `;
 
 const Title = styled.span`
@@ -40,17 +30,43 @@ const Title = styled.span`
 `;
 
 const Layout = () => {
+  let name = "nav-link";
   return (
     <>
       <Header>
         <Title>Geothermie Atlas</Title>
         <Nav>
           <NavMenu>
-            <NavLink to="/">Erdwärmesonden</NavLink>
-            <NavLink to="/gwwp">Thermische Grundwassernutzung</NavLink>
-            <NavLink to="/data">Daten</NavLink>
-            <NavLink to="/about">About</NavLink>
-            <NavLink to="/impressum">Impressum</NavLink>
+            <NavLink
+              to="/ews"
+              className={({ isActive }) => (isActive ? name + " active" : name)}
+            >
+              <span>Erdwärmesonden</span>
+            </NavLink>
+            <NavLink
+              to="/gwwp"
+              className={({ isActive }) => (isActive ? name + " active" : name)}
+            >
+              <span>Thermische Grundwassernutzung</span>
+            </NavLink>
+            <NavLink
+              to="/data"
+              className={({ isActive }) => (isActive ? name + " active" : name)}
+            >
+              <span>Daten</span>
+            </NavLink>
+            <NavLink
+              to="/about"
+              className={({ isActive }) => (isActive ? name + " active" : name)}
+            >
+              <span>About</span>
+            </NavLink>
+            <NavLink
+              to="/impressum"
+              className={({ isActive }) => (isActive ? name + " active" : name)}
+            >
+              <span>Impressum</span>
+            </NavLink>
           </NavMenu>
         </Nav>
       </Header>

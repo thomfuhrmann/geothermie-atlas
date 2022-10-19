@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "jspdf-autotable";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -19,12 +19,12 @@ import {
   TableRow,
   TableData,
   Placeholder,
-  Underline,
   Container,
   PDFButton,
   PDFButtonDiv,
   InfoPanelContent,
   Image,
+  Warning,
 } from "./CommonStyledElements";
 
 const textTemplates = {
@@ -70,8 +70,10 @@ const textTemplates = {
 };
 
 export default function InfoPanelGWWP() {
-  const sketchToolColor = useRef(null);
   const [address, setAddress] = useState(null);
+  const [closenessWarning, setClosenessWarning] = useState(false);
+  const [outsideWarning, setOutsideWarning] = useState(false);
+  const [scaleWarning, setScaleWarning] = useState(true);
 
   const dispatch = useDispatch();
 
@@ -88,7 +90,13 @@ export default function InfoPanelGWWP() {
 
   // initialize query handlers
   useEffect(() => {
-    initializeInfoPanelHandlers(setAddress, dispatch);
+    initializeInfoPanelHandlers(
+      setAddress,
+      dispatch,
+      setClosenessWarning,
+      setOutsideWarning,
+      setScaleWarning
+    );
 
     return () => {
       dispatch(updateEWSResources([]));
@@ -133,19 +141,6 @@ export default function InfoPanelGWWP() {
     }
   };
 
-  // mouse over event to highlight sketch tool
-  const handleMouseOver = () => {
-    const sketchTool = document.querySelector("div.esri-sketch__panel");
-    sketchToolColor.current = sketchTool.style.backgroundColor;
-    sketchTool.style.backgroundColor = "#ffdc01";
-  };
-
-  // mouse out event to de-highlight sketch tool
-  const handleMouseOut = () => {
-    document.querySelector("div.esri-sketch__panel").style.backgroundColor =
-      sketchToolColor.current;
-  };
-
   // register which tables are added to the report
   const setTables = (einschraenkungenAdded, hinweiseAdded) => {
     einschraenkungen = einschraenkungenAdded;
@@ -164,15 +159,9 @@ export default function InfoPanelGWWP() {
             <>
               <p>
                 Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
-                um Informationen abzufragen. Sie können nun mit dem{" "}
-                <Underline
-                  onMouseOver={handleMouseOver}
-                  onMouseOut={handleMouseOut}
-                >
-                  Zeichen-Werkzeug
-                </Underline>{" "}
-                zwei Punkte für ein Brunnenpaar setzen und die Berechnung
-                starten.
+                um Informationen abzufragen. Sie können nun mit dem
+                Zeichen-Werkzeug zwei Punkte für ein Brunnenpaar setzen und die
+                Berechnung starten.
               </p>
               <p>
                 Optional können sie im Menü "Parameter" gebäudespezifische
@@ -218,8 +207,33 @@ export default function InfoPanelGWWP() {
                   </tr>
                 </tbody>
               </Table>
-              <Placeholder></Placeholder>
+              {!scaleWarning && !outsideWarning && <Placeholder></Placeholder>}
             </>
+          )}
+          {scaleWarning && (
+            <Warning id="scale-warning">
+              Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
+              zu ermöglichen!
+            </Warning>
+          )}
+          {outsideWarning && (
+            <Table id="warnings-table">
+              <tbody>
+                <tr>
+                  <td>
+                    {outsideWarning && (
+                      <Warning>
+                        Achtung: Mindestens ein Punkt liegt außerhalb des
+                        Grundstücks!
+                      </Warning>
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td>{closenessWarning && <></>}</td>
+                </tr>
+              </tbody>
+            </Table>
           )}
           {resources.length > 0 && (
             <CollapsibleSection title="Ressourcen">
@@ -257,7 +271,7 @@ export default function InfoPanelGWWP() {
           )}
           {computationResult.length > 0 &&
             (computationResult.length === 1 ? (
-              <CollapsibleSection title="Berechnungsergebnis">
+              <CollapsibleSection title="Berechnungsergebnis" open={true}>
                 <Table id="calculations-output-table">
                   <thead>
                     <tr>
@@ -273,7 +287,7 @@ export default function InfoPanelGWWP() {
                 <Placeholder></Placeholder>
               </CollapsibleSection>
             ) : (
-              <CollapsibleSection title="Berechnungsergebnis">
+              <CollapsibleSection title="Berechnungsergebnis" open={true}>
                 <Table id="calculations-output-table">
                   <thead>
                     <tr>

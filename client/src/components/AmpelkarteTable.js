@@ -171,19 +171,6 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
 
   return (
     <>
-      {hinweise.length > 0 && (
-        <CollapsibleSection title="Hinweise">
-          <Table id={"hinweise-table"}>
-            <thead>
-              <tr>
-                <td></td>
-              </tr>
-            </thead>
-            <tbody>{hinweise}</tbody>
-          </Table>
-          <Placeholder></Placeholder>
-        </CollapsibleSection>
-      )}
       {einschraenkungen.length > 0 && (
         <CollapsibleSection title="Einschränkungen">
           <Table id={"einschraenkungen-table"}>
@@ -207,6 +194,19 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
                   }
                 )}
             </tbody>
+          </Table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
+      )}
+      {hinweise.length > 0 && (
+        <CollapsibleSection title="Hinweise">
+          <Table id={"hinweise-table"}>
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>{hinweise}</tbody>
           </Table>
           <Placeholder></Placeholder>
         </CollapsibleSection>

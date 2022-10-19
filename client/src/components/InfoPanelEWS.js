@@ -22,12 +22,12 @@ import {
   TableData,
   TableHeader,
   Placeholder,
-  Underline,
   Container,
   InfoPanelContent,
   PDFButton,
   PDFButtonDiv,
   Image,
+  Warning,
 } from "./CommonStyledElements";
 
 const textTemplates = {
@@ -63,11 +63,13 @@ const textTemplates = {
 };
 
 export default function InfoPanelEWS() {
-  const sketchToolColor = useRef(null);
   const image_bal = useRef(null);
   const image_unbal = useRef(null);
 
   const [address, setAddress] = useState(null);
+  const [closenessWarning, setClosenessWarning] = useState(false);
+  const [outsideWarning, setOutsideWarning] = useState(false);
+  const [scaleWarning, setScaleWarning] = useState(true);
 
   const resources = useSelector((store) => store.ewsResources.value);
   const ampelkarte = useSelector((store) => store.ampelkarte.value);
@@ -82,7 +84,13 @@ export default function InfoPanelEWS() {
 
   // initialize query handlers
   useEffect(() => {
-    initializeInfoPanelHandlers(setAddress, dispatch);
+    initializeInfoPanelHandlers(
+      setAddress,
+      dispatch,
+      setClosenessWarning,
+      setOutsideWarning,
+      setScaleWarning
+    );
 
     return () => {
       dispatch(updateEWSResources([]));
@@ -104,21 +112,9 @@ export default function InfoPanelEWS() {
       screenshot,
       image_bal,
       image_unbal,
-      cadastralData
+      cadastralData,
+      closenessWarning || outsideWarning ? true : false
     );
-  };
-
-  // mouse over event to highlight sketch tool
-  const handleMouseOver = () => {
-    const sketchTool = document.querySelector("div.esri-sketch__panel");
-    sketchToolColor.current = sketchTool.style.backgroundColor;
-    sketchTool.style.backgroundColor = "#ffdc01";
-  };
-
-  // mouse out event to de-highlight sketch tool
-  const handleMouseOut = () => {
-    document.querySelector("div.esri-sketch__panel").style.backgroundColor =
-      sketchToolColor.current;
   };
 
   // format values
@@ -155,16 +151,12 @@ export default function InfoPanelEWS() {
             <>
               <p>
                 Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
-                um Informationen abzufragen. Sie können nun einen
-                Erdwärmesondenraster zeichnen und die Berechnung starten.
+                um Informationen abzufragen, einen Erdwärmesonderaster zu
+                zeichnen und die Berechnnungen zu starten.
               </p>
               <p>
-                Benutzen Sie das{" "}
-                <span onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
-                  <Underline>Zeichen-Werkzeug</Underline>
-                </span>{" "}
-                um zusätzliche Sondenpunkte zu zeichnen oder bestehende Punkte
-                zu verschieben oder zu löschen.
+                Benutzen Sie das Zeichen-Werkzeug um zusätzliche Sondenpunkte zu
+                zeichnen oder bestehende Punkte zu verschieben oder zu löschen.
               </p>
               <p>
                 Optional können sie im Menü "Berechnungen" die Konfiguration der
@@ -215,8 +207,42 @@ export default function InfoPanelEWS() {
                   </tr>
                 </tbody>
               </Table>
-              <Placeholder></Placeholder>
+              {!scaleWarning && !closenessWarning && !outsideWarning && (
+                <Placeholder></Placeholder>
+              )}
             </>
+          )}
+          {scaleWarning && (
+            <Warning id="scale-warning">
+              Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
+              zu ermöglichen!
+            </Warning>
+          )}
+          {(closenessWarning || outsideWarning) && (
+            <Table id="warnings-table">
+              <tbody>
+                <tr>
+                  <td>
+                    {closenessWarning && (
+                      <Warning>
+                        Achtung: Mindestens ein Punkt liegt näher als fünf Meter
+                        zu einem anderen Punkt!
+                      </Warning>
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    {outsideWarning && (
+                      <Warning>
+                        Achtung: Mindestens ein Punkt liegt außerhalb der
+                        zugelassenen Grenzen!
+                      </Warning>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </Table>
           )}
           {resources.length > 0 && (
             <CollapsibleSection title="Ressourcen">
@@ -253,7 +279,7 @@ export default function InfoPanelEWS() {
             ></AmpelkarteTable>
           )}
           {Object.keys(computationResult).includes("error") && (
-            <CollapsibleSection title="Berechnungsergebnis">
+            <CollapsibleSection title="Berechnungsergebnis" open={true}>
               <Table id="calculations-output-table">
                 <thead>
                   <tr>
@@ -272,7 +298,7 @@ export default function InfoPanelEWS() {
             </CollapsibleSection>
           )}
           {Object.keys(computationResult).length > 1 && (
-            <CollapsibleSection title="Berechnungsergebnis">
+            <CollapsibleSection title="Berechnungsergebnis" open={true}>
               <Table id="calculations-output-table">
                 <thead>
                   <tr>
@@ -294,7 +320,7 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Sondentiefe: {computationResult.bohrtiefe} m
+                      Sondentiefe: {computationResult.boreDepth} m
                     </TableData>
                   </TableRow>
                   {computationResult.BS_HZ > 0 && (
@@ -307,7 +333,7 @@ export default function InfoPanelEWS() {
                   {computationResult.BS_KL > 0 && (
                     <TableRow>
                       <TableData>
-                        Betriebsstunden Heizen: {computationResult.BS_KL} h
+                        Betriebsstunden Kühlen: {computationResult.BS_KL} h
                       </TableData>
                     </TableRow>
                   )}
@@ -341,7 +367,7 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Kühlleistung: {-parseInt(computationResult.leistungKL)} kW
+                      Kühlleistung: {parseInt(computationResult.leistungKL)} kW
                     </TableData>
                   </TableRow>
                   <TableRow>
@@ -353,7 +379,7 @@ export default function InfoPanelEWS() {
                   <TableRow>
                     <TableData>
                       Jahresenergiemenge Kühlen:{" "}
-                      {-parseInt(computationResult.jahresEnergieMengeKL)} kWh/a
+                      {parseInt(computationResult.jahresEnergieMengeKL)} kWh/a
                     </TableData>
                   </TableRow>
                   {computationResult.cover > 0 && (
@@ -375,7 +401,10 @@ export default function InfoPanelEWS() {
             </CollapsibleSection>
           )}
           {Object.keys(computationResult).length > 1 && (
-            <CollapsibleSection title="Berechnungsergebnis (bilanzierter Betrieb)">
+            <CollapsibleSection
+              title="Berechnungsergebnis (bilanzierter Betrieb)"
+              open={true}
+            >
               <Table id="calculations-bal-output-table">
                 <thead>
                   <tr>
@@ -385,10 +414,26 @@ export default function InfoPanelEWS() {
                 <tbody>
                   <TableRow>
                     <TableData>
-                      Für einen bilanzierten Betrieb muss eine zusätzliche
-                      Quelle mit {parseInt(computationResult.differenz_PKL)} W/m
-                      über einen Zeitraum von{" "}
-                      {computationResult.differenz_BS_KL} Stunden betrieben
+                      Für einen bilanzierten Betrieb muss die Heizleistung um{" "}
+                      {Math.abs(computationResult.differenz_PHZ.toFixed(1))} W/m{" "}
+                      {parseInt(computationResult.differenz_PHZ) >= 0
+                        ? "erhöht"
+                        : "verringert"}{" "}
+                      werden. Die Betriebsstunden für Heizen müssen um{" "}
+                      {Math.abs(computationResult.differenz_BS_HZ)} Stunden{" "}
+                      {parseInt(computationResult.differenz_BS_HZ) >= 0
+                        ? "erhöht"
+                        : "verringert"}{" "}
+                      werden. Die Kühlleistung muss um{" "}
+                      {Math.abs(computationResult.differenz_PKL.toFixed(1))} W/m{" "}
+                      {parseInt(computationResult.differenz_PKL) >= 0
+                        ? "erhöht"
+                        : "verringert"}{" "}
+                      werden. Die Betriebsstunden für Kühlen müssen um{" "}
+                      {Math.abs(computationResult.differenz_BS_KL)} Stunden{" "}
+                      {parseInt(computationResult.differenz_BS_KL) >= 0
+                        ? "erhöht"
+                        : "verringert"}{" "}
                       werden. Bei bilanziertem Betrieb kann der Sondenabstand
                       auf bis zu 5 Meter reduziert werden.
                     </TableData>
@@ -412,7 +457,7 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Sondentiefe: {computationResult.bohrtiefe} m
+                      Sondentiefe: {computationResult.boreDepth} m
                     </TableData>
                   </TableRow>
                   {computationResult.BS_HZ > 0 && (
@@ -460,8 +505,8 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Kühlleistung:{" "}
-                      {-parseInt(computationResult.leistungKL_bal)} kW
+                      Kühlleistung: {parseInt(computationResult.leistungKL_bal)}{" "}
+                      kW
                     </TableData>
                   </TableRow>
                   <TableRow>
@@ -474,7 +519,7 @@ export default function InfoPanelEWS() {
                   <TableRow>
                     <TableData>
                       Jahresenergiemenge Kühlen:{" "}
-                      {-parseInt(computationResult.jahresEnergieMengeKL_bal)}{" "}
+                      {parseInt(computationResult.jahresEnergieMengeKL_bal)}{" "}
                       kWh/a
                     </TableData>
                   </TableRow>
