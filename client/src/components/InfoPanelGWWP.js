@@ -150,7 +150,9 @@ export default function InfoPanelGWWP() {
   return (
     <Container>
       <CollapsibleSection
-        title={!ampelkarte ? "Erklärung" : "Bericht"}
+        title={
+          !address ? "Der Weg zur thermischen Grundwassernutzung" : "Bericht"
+        }
         open={true}
         marginBottom="0px"
       >

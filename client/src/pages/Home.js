@@ -1,7 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-
 import styled from "styled-components";
+
+import { Placeholder } from "../components/CommonStyledElements";
 
 const Content = styled.div`
   position: absolute;
@@ -19,49 +20,42 @@ const Heading = styled.h1`
 `;
 
 const Paragraph = styled.p`
+  margin: 30px 0;
   width: 100%;
   white-space: normal;
   word-break: normal;
 `;
 
-const Nav = styled.nav`
-  height: 100%;
+const NavLinkContainer = styled.div`
   display: flex;
-  justify-content: space-between;
-  float: right;
-  padding-right: 300px;
-`;
-
-const NavMenu = styled.div`
-  display: flex;
-  .current {
-    border-bottom: 2px solid black;
-  }
+  margin: 20px;
 `;
 
 const Home = () => {
   let name = "nav-link";
   return (
     <Content>
+      <Placeholder></Placeholder>
       <Heading>Willkomen bei der Geothermie Atlas Applikation!</Heading>
-      <Paragraph>Wählen Sie hier Ihr gewünschtes Thema:</Paragraph>
-
-      <Nav>
-        <NavMenu>
+      <Paragraph>Wählen Sie Ihr gewünschtes Thema:</Paragraph>
+      <div>
+        <NavLinkContainer>
           <NavLink
             to="/ews"
             className={({ isActive }) => (isActive ? name + " active" : name)}
           >
             <span>Erdwärmesonden</span>
           </NavLink>
+        </NavLinkContainer>
+        <NavLinkContainer>
           <NavLink
             to="/gwwp"
             className={({ isActive }) => (isActive ? name + " active" : name)}
           >
             <span>Thermische Grundwassernutzung</span>
           </NavLink>
-        </NavMenu>
-      </Nav>
+        </NavLinkContainer>
+      </div>
     </Content>
   );
 };

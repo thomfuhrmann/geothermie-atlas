@@ -38,31 +38,38 @@ const Layout = () => {
         <Nav>
           <NavMenu>
             <NavLink
-              to="/ews"
+              to="/"
+              className={({ isActive }) => (isActive ? name + " active" : name)}
+              end
+            >
+              <span>Home</span>
+            </NavLink>
+            <NavLink
+              to="ews"
               className={({ isActive }) => (isActive ? name + " active" : name)}
             >
               <span>Erdwärmesonden</span>
             </NavLink>
             <NavLink
-              to="/gwwp"
+              to="gwwp"
               className={({ isActive }) => (isActive ? name + " active" : name)}
             >
               <span>Thermische Grundwassernutzung</span>
             </NavLink>
             <NavLink
-              to="/data"
+              to="data"
               className={({ isActive }) => (isActive ? name + " active" : name)}
             >
               <span>Daten</span>
             </NavLink>
             <NavLink
-              to="/about"
+              to="about"
               className={({ isActive }) => (isActive ? name + " active" : name)}
             >
               <span>About</span>
             </NavLink>
             <NavLink
-              to="/impressum"
+              to="impressum"
               className={({ isActive }) => (isActive ? name + " active" : name)}
             >
               <span>Impressum</span>

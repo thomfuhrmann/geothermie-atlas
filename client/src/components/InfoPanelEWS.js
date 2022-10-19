@@ -142,7 +142,7 @@ export default function InfoPanelEWS() {
   return (
     <Container>
       <CollapsibleSection
-        title={!address ? "Der Weg zu Ihrer Erdwärmesonde" : "Bericht"}
+        title={!address ? "Der Weg zur Erdwärmesonde" : "Bericht"}
         open={true}
         marginBottom="0px"
       >
