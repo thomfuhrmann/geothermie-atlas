@@ -158,7 +158,7 @@ export const print = (
   finalY = doc.lastAutoTable.finalY;
   let height = 0;
   let pageAdded = false;
-  if (image_unbal.current) {
+  if (image_unbal) {
     const imgProps = doc.getImageProperties(image_unbal.current);
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
@@ -179,7 +179,7 @@ export const print = (
   } else {
     startY = finalY + height + 10;
   }
-  if (computationResult && image_bal.current) {
+  if (computationResult && image_bal) {
     doc.autoTable({
       html: "#calculations-bal-output-table",
       rowPageBreak: "avoid",
@@ -209,7 +209,7 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   height = 0;
-  if (image_bal.current) {
+  if (image_bal) {
     const imgProps = doc.getImageProperties(image_bal.current);
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
