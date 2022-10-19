@@ -16,7 +16,9 @@ a.nav-link {
   cursor: pointer;
 }
 
-a.nav-link.active span {
+a.nav-link.active span,
+a.nav-link:active,
+a.nav-link:hover {
   text-underline-offset: 3px;
   text-decoration: solid underline #db7093;
 }

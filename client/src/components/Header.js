@@ -11,9 +11,5 @@ const StyledHeader = styled.div`
 `;
 
 export default function Header({ children }) {
-  return (
-    <StyledHeader>
-      {children}
-    </StyledHeader>
-  );
+  return <StyledHeader>{children}</StyledHeader>;
 }

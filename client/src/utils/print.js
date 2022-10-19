@@ -10,6 +10,8 @@ export const print = (
   cadastralData,
   warnings = false
 ) => {
+  let spaceBetween = 5;
+
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -104,7 +106,7 @@ export const print = (
       html: "#einschraenkungen-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: finalY + 10,
+      startY: 20,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Einschränkungen";
@@ -119,7 +121,7 @@ export const print = (
       html: "#hinweise-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: 20,
+      startY: einschraenkungen ? finalY + spaceBetween : 20,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Hinweise";
@@ -134,7 +136,7 @@ export const print = (
       html: "#calculations-output-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: finalY + 10,
+      startY: einschraenkungen || hinweise ? finalY + spaceBetween : 20,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Berechnungsergebnis";
@@ -241,7 +243,7 @@ export const print = (
     html: "#contact",
     rowPageBreak: "avoid",
     showHead: "firstPage",
-    startY: finalY + 10,
+    startY: finalY + spaceBetween,
     willDrawCell: function (data) {
       if (data.section === "head") {
         data.cell.text = "Kontakt";

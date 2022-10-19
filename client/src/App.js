@@ -12,6 +12,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
+          <Route index element={<Map theme="EWS" />}></Route>
           <Route path="ews" element={<Map theme="EWS" />} />
           <Route path="gwwp" element={<Map theme="GWWP" />} />
           <Route path="data" element={<Data />} />
