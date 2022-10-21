@@ -153,7 +153,7 @@ const computeGridLines = (point1, point2, points, gridSpacing) => {
   return lines;
 };
 
-export const calculateGrid = (polygon, gridSpacing = 10, setGridPoints) => {
+export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
   pointGraphicsLayer.removeAll();
 
   let offsetPolygon = geometryEngine.offset(
@@ -261,12 +261,12 @@ export const calculateGrid = (polygon, gridSpacing = 10, setGridPoints) => {
     });
 
     // filter points that are not on buildings
-    filterPointsByPixelAndDraw(filteredGridPoints, setGridPoints);
+    filterPointsByPixelAndDraw(filteredGridPoints, setPoints);
   }
 };
 
 // select points that are not on buildings
-const filterPointsByPixelAndDraw = (points, setGridPoints) => {
+const filterPointsByPixelAndDraw = (points, setPoints) => {
   cadastre.fetchImage(view.extent, view.width, view.height).then((image) => {
     const canvas = document.createElement("canvas");
     canvas.width = view.width;
@@ -295,6 +295,6 @@ const filterPointsByPixelAndDraw = (points, setGridPoints) => {
     selectedGridPoints.map((point) => drawPoint(point));
 
     // set grid points for the UI
-    setGridPoints(selectedGridPoints);
+    setPoints(selectedGridPoints.map((point) => [point.x, point.y]));
   });
 };

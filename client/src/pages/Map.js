@@ -11,10 +11,12 @@ import { initialize } from "../utils/view";
 
 const MapContainer = styled.div`
   position: absolute;
+  box-sizing: border-box;
   bottom: 0;
   padding: 0;
   margin: 0;
-  height: 95%;
+  top: 7%;
+  height: 93%;
   width: 100%;
 `;
 

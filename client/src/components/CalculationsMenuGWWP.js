@@ -52,7 +52,8 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
 
     const point1 = points[0];
     const point2 = points[1];
-    const brunnenabstand = distance([point1.x, point1.y], [point2.x, point2.y]);
+    // const brunnenabstand = distance([point1.x, point1.y], [point2.x, point2.y]);
+    const brunnenabstand = distance(point1, point2);
 
     const flurabstand = resources[2].feature.attributes["Pixel Value"];
     const gw_macht = resources[3].feature.attributes["Pixel Value"];
@@ -145,7 +146,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
   return (
     <Menu width="300px" ref={ref}>
       <CollapsibleSection
-        title="Berechnnungen"
+        title="Brunnenpaar berechnen"
         marginBottom="0px"
         open={polygon !== null}
       >
@@ -205,7 +206,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
                   onChange={handleCOPWP}
                 ></Input>
               </InputSection>
-              {points.length >= 2 && (
+              {points.length === 2 && (
                 <ButtonContainer>
                   <Button onClick={handleGWWPCalculation}>
                     Berechnung starten

@@ -15,7 +15,7 @@ export const Warning = styled.p`
 
 export const Content = styled.div`
   position: absolute;
-  top: 100px;
+  top: 7%;
   left: 10%;
   width: 60%;
 `;
@@ -41,7 +41,7 @@ export const Container = styled.div`
   overflow-y: auto;
   overflow-x: auto;
   padding: 0px;
-  background-color: white;
+  background-color: rgba(0, 0, 0, 0);
 `;
 
 export const InfoPanelContent = styled.div`
@@ -58,7 +58,7 @@ export const InfoPanelContent = styled.div`
 
 export const PDFButtonDiv = styled.div`
   float: right;
-  justify-content: center;
+  margin: 5px 0;
 `;
 
 export const PDFButton = styled.button`
@@ -80,18 +80,14 @@ export const Image = styled.img`
 `;
 
 export const Menu = styled.div`
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
   width: ${(props) => props.width || "100%"};
-  height: fit-content;
   margin: 0px;
   border: none;
   color: #444444;
   background-color: white;
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  flex-direcation: column;
 `;
 
 export const ButtonContainer = styled.div`

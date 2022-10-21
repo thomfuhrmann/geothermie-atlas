@@ -15,6 +15,7 @@ import Legend from "@arcgis/core/widgets/Legend";
 import LayerList from "@arcgis/core/widgets/LayerList";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
+import Point from "@arcgis/core/geometry/Point";
 
 import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
@@ -249,7 +250,7 @@ export function initialize(container, theme, calculationsMenu) {
         case "EWS":
           // add point to current list of points
           setPoints((storedPoints) => {
-            storedPoints.push(point);
+            storedPoints.push([point.x, point.y]);
             return storedPoints;
           });
 
@@ -293,19 +294,24 @@ export function initialize(container, theme, calculationsMenu) {
           // keep only the last two points
           let points;
           setPoints((current) => {
-            points = [...current.slice(-1), point];
+            points = [...current.slice(-1), [point.x, point.y]];
 
             // only draw last two points
             pointGraphicsLayer.removeAll();
 
-            points.map((point) =>
+            points.forEach((point) =>
               pointGraphicsLayer.add(
                 new Graphic({
-                  geometry: point,
+                  geometry: new Point({
+                    x: point[0],
+                    y: point[1],
+                    spatialReference: SRS,
+                  }),
                   symbol,
                 })
               )
             );
+
             return points;
           });
           break;
@@ -317,66 +323,77 @@ export function initialize(container, theme, calculationsMenu) {
 
   sketch.on("update", (event) => {
     // the points being updated
-    let points = event.graphics.map((graphic) => graphic.geometry);
-
-    // remove points being updated from list
-    if (event.state === "start") {
-      setPoints((storedPoints) =>
-        storedPoints.filter((point) => !points.includes(point))
-      );
-    }
+    // let points = event.graphics
+    //   .map((graphic) => graphic.geometry)
+    //   .map((point) => [point.x, point.y]);
 
     // add updated points to list
     if (event.state === "complete") {
-      setPoints((storedPoints) => {
-        storedPoints.push(...points);
-        return storedPoints;
-      });
-
-      let existingPoints = pointGraphicsLayer.graphics.map(
+      let allPoints = pointGraphicsLayer.graphics.map(
         (graphic) => graphic.geometry
       );
 
-      // check if all points are inside the boundary
-      let allPointsInside = true;
-      existingPoints.forEach((point) => {
-        if (
-          !geometryEngine.intersects(
-            point,
-            boundaryGraphicsLayer.graphics.at(0).geometry
-          )
-        ) {
-          allPointsInside = false;
-          return;
-        }
-      });
+      setPoints(allPoints.map((point) => [point.x, point.y]).toArray());
 
-      setOutsideWarning(!allPointsInside);
-
-      // check if points are too close
-      let tooClose = false;
-      existingPoints.forEach((firstPoint) => {
-        existingPoints.forEach((secondPoint) => {
-          if (secondPoint !== firstPoint) {
-            if (
-              geometryEngine.distance(firstPoint, secondPoint, "meters") <= 4.9
-            ) {
-              tooClose = true;
-              return;
-            }
+      if (theme === "EWS") {
+        // check if all points are inside the boundary
+        let allPointsInside = true;
+        allPoints.forEach((point) => {
+          if (
+            !geometryEngine.intersects(
+              point,
+              boundaryGraphicsLayer.graphics.at(0).geometry
+            )
+          ) {
+            allPointsInside = false;
+            return;
           }
         });
-      });
 
-      setClosenessWarning(tooClose);
+        setOutsideWarning(!allPointsInside);
+
+        // check if points are too close
+        let tooClose = false;
+        allPoints.forEach((firstPoint) => {
+          allPoints.forEach((secondPoint) => {
+            if (secondPoint !== firstPoint) {
+              if (
+                geometryEngine.distance(firstPoint, secondPoint, "meters") <=
+                4.9
+              ) {
+                tooClose = true;
+                return;
+              }
+            }
+          });
+        });
+
+        setClosenessWarning(tooClose);
+      } else {
+        // check if all points are inside the boundary
+        let allPointsInside = true;
+        allPoints.forEach((point) => {
+          if (
+            !geometryEngine.intersects(
+              point,
+              polygonGraphicsLayer.graphics.at(0).geometry
+            )
+          ) {
+            allPointsInside = false;
+            return;
+          }
+        });
+
+        setOutsideWarning(!allPointsInside);
+      }
     }
   });
 
   sketch.on("delete", (event) => {
-    let points = event.graphics.map((graphic) => graphic.geometry);
-    setPoints((storedPoints) =>
-      storedPoints.filter((point) => !points.includes(point))
-    );
+    // let points = event.graphics.map((graphic) => graphic.geometry);
+    // setPoints((storedPoints) =>
+    //   storedPoints.filter((point) => !points.includes(point))
+    // );
   });
 
   // register event handlers for mouse clicks

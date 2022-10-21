@@ -4,11 +4,13 @@ import {
   Paragraph,
   Content,
   Heading,
+  Placeholder,
 } from "../components/CommonStyledElements";
 
 const Impressum = () => {
   return (
     <Content>
+      <Placeholder></Placeholder>
       <Heading>Hinweise und Haftungsausschluss</Heading>
       <Paragraph>
         Eine Haftung oder Garantie für Aktualität, Richtigkeit und

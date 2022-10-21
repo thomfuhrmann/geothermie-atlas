@@ -6,6 +6,10 @@
   max-height: 300px;
 }
 
+.esri-ui-top-left.esri-ui-corner {
+  height: 95%;
+}
+
 a.nav-link {
   color: #808080;
   display: flex;

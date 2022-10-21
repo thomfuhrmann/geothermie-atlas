@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import styled from "styled-components";
+import { useMediaQuery } from "react-responsive";
+import { FaBars, FaTimes } from "react-icons/fa";
 
 import Header from "../components/Header";
 
@@ -8,7 +11,7 @@ const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
   float: right;
-  padding-right: 300px;
+  padding-right: 10%;
 `;
 
 const NavMenu = styled.div`
@@ -29,56 +32,135 @@ const Title = styled.span`
   color: #444444;
 `;
 
+const PageContent = styled.div`
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+`;
+
+const Toggle = styled.button`
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  color: #777777;
+  background: white;
+  padding: 0;
+  display: flex;
+  place-items: center;
+  font-size: 20px;
+  cursor: pointer;
+  border: 0px;
+  &:hover {
+  }
+`;
+
+const StyledMenu = styled.div`
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 70%;
+  background-color: #3a4251;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const CloseToggle = styled.button`
+  position: fixed;
+  top: 5%;
+  right: 4%;
+  background: #3a4251;
+  color: #fff;
+  padding: 0.75rem;
+  display: flex;
+  place-items: center;
+  font-size: 2rem;
+  cursor: pointer;
+  border: 0;
+`;
+
 const Layout = () => {
+  const [navToggled, setNavToggled] = useState(false);
+  const isMobile = useMediaQuery({ maxWidth: 480 });
+
   let name = "nav-link";
-  return (
+  const navLinks = (
     <>
+      <NavLink
+        to="/"
+        className={({ isActive }) => (isActive ? name + " active" : name)}
+        end
+      >
+        <span>Home</span>
+      </NavLink>
+      <NavLink
+        to="ews"
+        className={({ isActive }) => (isActive ? name + " active" : name)}
+      >
+        <span>Erdwärmesonden</span>
+      </NavLink>
+      <NavLink
+        to="gwwp"
+        className={({ isActive }) => (isActive ? name + " active" : name)}
+      >
+        <span>Thermische Grundwassernutzung</span>
+      </NavLink>
+      <NavLink
+        to="data"
+        className={({ isActive }) => (isActive ? name + " active" : name)}
+      >
+        <span>Daten</span>
+      </NavLink>
+      <NavLink
+        to="about"
+        className={({ isActive }) => (isActive ? name + " active" : name)}
+      >
+        <span>About</span>
+      </NavLink>
+      <NavLink
+        to="impressum"
+        className={({ isActive }) => (isActive ? name + " active" : name)}
+      >
+        <span>Impressum</span>
+      </NavLink>
+    </>
+  );
+
+  const handleNavToggle = () => {
+    setNavToggled(!navToggled);
+  };
+
+  return (
+    <PageContent>
       <Header>
         <Title>Geothermie Atlas</Title>
-        <Nav>
-          <NavMenu>
-            <NavLink
-              to="/"
-              className={({ isActive }) => (isActive ? name + " active" : name)}
-              end
-            >
-              <span>Home</span>
-            </NavLink>
-            <NavLink
-              to="ews"
-              className={({ isActive }) => (isActive ? name + " active" : name)}
-            >
-              <span>Erdwärmesonden</span>
-            </NavLink>
-            <NavLink
-              to="gwwp"
-              className={({ isActive }) => (isActive ? name + " active" : name)}
-            >
-              <span>Thermische Grundwassernutzung</span>
-            </NavLink>
-            <NavLink
-              to="data"
-              className={({ isActive }) => (isActive ? name + " active" : name)}
-            >
-              <span>Daten</span>
-            </NavLink>
-            <NavLink
-              to="about"
-              className={({ isActive }) => (isActive ? name + " active" : name)}
-            >
-              <span>About</span>
-            </NavLink>
-            <NavLink
-              to="impressum"
-              className={({ isActive }) => (isActive ? name + " active" : name)}
-            >
-              <span>Impressum</span>
-            </NavLink>
-          </NavMenu>
-        </Nav>
+        {!isMobile && (
+          <Nav>
+            <NavMenu>{navLinks}</NavMenu>
+          </Nav>
+        )}
+        {isMobile && (
+          <Toggle onClick={handleNavToggle}>
+            <FaBars />
+          </Toggle>
+        )}
       </Header>
+      {isMobile && navToggled && (
+        <StyledMenu>
+          <CloseToggle onClick={handleNavToggle}>
+            <FaTimes />
+          </CloseToggle>
+          {navLinks}
+        </StyledMenu>
+      )}
       <Outlet />
-    </>
+    </PageContent>
   );
 };
 

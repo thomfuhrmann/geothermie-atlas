@@ -151,7 +151,9 @@ export default function InfoPanelGWWP() {
     <Container>
       <CollapsibleSection
         title={
-          !address ? "Der Weg zur thermischen Grundwassernutzung" : "Bericht"
+          !address
+            ? "Der Weg zur thermischen Grundwassernutzung"
+            : "Standortbasierter Bericht"
         }
         open={true}
         marginBottom="0px"
@@ -162,22 +164,16 @@ export default function InfoPanelGWWP() {
               <p>
                 Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
                 um Informationen abzufragen. Sie können nun mit dem
-                Zeichen-Werkzeug zwei Punkte für ein Brunnenpaar setzen und die
-                Berechnung starten.
+                Zeichen-Werkzeug im Menü "Brunnenpaar berechnen" zwei Punkte für
+                ein Brunnenpaar setzen und die Berechnung starten.
               </p>
-              <p>
-                Optional können sie im Menü "Parameter" gebäudespezifische
-                Parameter festlegen.
-              </p>
+              <p>Optional können sie gebäudespezifische Parameter festlegen.</p>
             </>
           ) : (
             <>
-              <h3>
-                Standortbasierter Bericht
-                <PDFButtonDiv className="pdf-button-div">
-                  <PDFButton onClick={clickHandler}>PDF erstellen</PDFButton>
-                </PDFButtonDiv>
-              </h3>
+              <PDFButtonDiv className="pdf-button-div">
+                <PDFButton onClick={clickHandler}>PDF erstellen</PDFButton>
+              </PDFButtonDiv>
               <Image src={screenshot} id="screenshot"></Image>
             </>
           )}

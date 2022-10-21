@@ -2,22 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
-import { Placeholder } from "../components/CommonStyledElements";
-
-const Content = styled.div`
-  position: absolute;
-  top: 100px;
-  left: 10%;
-  margin: 0px;
-  width: 60%;
-  margin-left: auto;
-  margin-right: auto;
-`;
-
-const Heading = styled.h1`
-  margin: 0px;
-  color: #808080;
-`;
+import { Placeholder, Content } from "../components/CommonStyledElements";
 
 const Paragraph = styled.p`
   margin: 30px 0;
@@ -36,7 +21,6 @@ const Home = () => {
   return (
     <Content>
       <Placeholder></Placeholder>
-      <Heading>Willkomen bei der Geothermie Atlas Applikation!</Heading>
       <Paragraph>Wählen Sie Ihr gewünschtes Thema:</Paragraph>
       <div>
         <NavLinkContainer>

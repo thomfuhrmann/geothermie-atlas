@@ -4,11 +4,13 @@ import {
   Paragraph,
   Content,
   Heading,
+  Placeholder,
 } from "../components/CommonStyledElements";
 
 const About = () => {
   return (
     <Content>
+      <Placeholder></Placeholder>
       <Heading>Informationen über diese Applikation</Heading>
       <Paragraph>
         Diese Applikation ist als Unterstützung bei der Planung oberflächennaher

@@ -18,7 +18,6 @@ const InputSection = styled.div`
 `;
 
 const Input = styled.input`
-  font-family: inherit;
   font-size: 100%;
   box-sizing: border-box;
   width: 100%;
@@ -27,7 +26,9 @@ const Input = styled.input`
 `;
 
 const CollapsibleContent = styled.div`
+  box-sizing: border-box;
   padding: 15px 18px;
+  width: 100%;
 `;
 
 const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
@@ -54,9 +55,10 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
       isLoading(true);
       takeScreenshot(view, polygon.centroid, dispatch);
 
-      let pointsText = JSON.stringify(
-        points.map((point) => [point.x, point.y])
-      );
+      // let pointsText = JSON.stringify(
+      //   points.map((point) => [point.x, point.y])
+      // );
+      let pointsText = JSON.stringify(points);
 
       const BT = resources.find((result) => result.layerId === 4)?.feature
         ?.attributes["Pixel Value"];
@@ -245,7 +247,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
   return (
     <Menu width="300px" ref={ref}>
       <CollapsibleSection
-        title="Berechnnungen"
+        title="Sondennetz berechnen"
         marginBottom="0px"
         open={polygon !== null}
       >

@@ -25,15 +25,11 @@ const Span = styled.span`
 `;
 
 const Container = styled.div`
-  position: relative;
-  box-sizing: border-box;
-  width: 100%;
-  height: fit-content;
-  background-color: white;
+  margin-bottom: ${(props) => props.marginBottom};
 `;
 
 const CollapsibleContent = styled.div`
-  display: ${(props) => (props.isOpened === true ? "block" : "none")};
+  display: ${(props) => (props.isOpened === true ? "box" : "none")};
 `;
 
 export default function CollapsibleSection({
@@ -55,8 +51,8 @@ export default function CollapsibleSection({
   };
 
   return (
-    <Container>
-      <Button type="button" onClick={handleClick} marginBottom={marginBottom}>
+    <Container marginBottom={marginBottom}>
+      <Button type="button" onClick={handleClick}>
         {title} <Span>{opened ? "-" : "+"}</Span>
       </Button>
       <CollapsibleContent isOpened={opened}>{children}</CollapsibleContent>
