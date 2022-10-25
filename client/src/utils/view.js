@@ -55,7 +55,7 @@ let setPoints,
   setClosenessWarning,
   setOutsideWarning,
   setScaleWarning;
-export function initialize(container, theme, calculationsMenu) {
+export function initialize(container, theme, calculationsMenu, isMobile) {
   const scaleLimit = 1000;
 
   view = new MapView({
@@ -232,6 +232,7 @@ export function initialize(container, theme, calculationsMenu) {
       settingsMenu: false,
       undoRedoMenu: false,
     },
+    creationMode: "single",
   });
 
   sketch.on("create", (event) => {
@@ -322,17 +323,13 @@ export function initialize(container, theme, calculationsMenu) {
   });
 
   sketch.on("update", (event) => {
-    // the points being updated
-    // let points = event.graphics
-    //   .map((graphic) => graphic.geometry)
-    //   .map((point) => [point.x, point.y]);
-
-    // add updated points to list
     if (event.state === "complete") {
+      // list of updated points
       let allPoints = pointGraphicsLayer.graphics.map(
         (graphic) => graphic.geometry
       );
 
+      // update state of calculations menu
       setPoints(allPoints.map((point) => [point.x, point.y]).toArray());
 
       if (theme === "EWS") {
@@ -349,7 +346,6 @@ export function initialize(container, theme, calculationsMenu) {
             return;
           }
         });
-
         setOutsideWarning(!allPointsInside);
 
         // check if points are too close
@@ -367,7 +363,6 @@ export function initialize(container, theme, calculationsMenu) {
             }
           });
         });
-
         setClosenessWarning(tooClose);
       } else {
         // check if all points are inside the boundary
@@ -383,17 +378,9 @@ export function initialize(container, theme, calculationsMenu) {
             return;
           }
         });
-
         setOutsideWarning(!allPointsInside);
       }
     }
-  });
-
-  sketch.on("delete", (event) => {
-    // let points = event.graphics.map((graphic) => graphic.geometry);
-    // setPoints((storedPoints) =>
-    //   storedPoints.filter((point) => !points.includes(point))
-    // );
   });
 
   // register event handlers for mouse clicks
@@ -491,9 +478,9 @@ export function initialize(container, theme, calculationsMenu) {
 
         let label = document.createElement("label");
         if (theme === "GWWP") {
-          label.innerText = "Brunnenpaar setzen";
+          label.innerHTML = "Brunnenpaar setzen";
         } else {
-          label.innerText = "Sondenpunkte zeichnen";
+          label.innerHTML = "Sondenpunkte zeichnen";
         }
         sketchMenuContainer.appendChild(label);
       } else {
@@ -508,8 +495,13 @@ export function initialize(container, theme, calculationsMenu) {
 
   // add UI components
   view.ui.components = [];
-  view.ui.add([search, layerList, legend, calculationsMenu], "top-left");
-  view.ui.add(scaleBar, "bottom-left");
+  if (!isMobile) {
+    view.ui.add([search, layerList, legend, calculationsMenu], "top-left");
+    view.ui.add(scaleBar, "bottom-left");
+  } else {
+    view.ui.add([calculationsMenu], "bottom-right");
+  }
+
   view.container = container;
   return view;
 }

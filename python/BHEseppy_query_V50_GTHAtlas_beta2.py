@@ -349,7 +349,7 @@ def plotgraf2(pngname, x1, y1, x1_label, y1_label, x2, y2, x2_label, y2_label, T
     # fig.savefig(filename)
     # save figure to binary stream and encode it to base64 string
     binary_stream = io.BytesIO()
-    fig.savefig(binary_stream, format='png')
+    fig.savefig(binary_stream, format='png', dpi=120)
     binary_stream.seek(0)
     img_hash = base64.b64encode(binary_stream.read()).decode('utf-8')
 

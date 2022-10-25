@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import { useMediaQuery } from "react-responsive";
 
 import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
 import {
@@ -10,7 +11,7 @@ import {
 } from "../utils/view";
 import { calculateGrid } from "../utils/gridcomputer";
 import { takeScreenshot } from "../utils/screenshot";
-import { Menu, Button, ButtonContainer } from "./CommonStyledElements";
+import { Button, ButtonContainer } from "./CommonStyledElements";
 import CollapsibleSection from "./CollapsibleSection";
 
 const InputSection = styled.div`
@@ -48,6 +49,8 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
   const gridSpacingInputRef = useRef(null);
 
   const dispatch = useDispatch();
+
+  const isMobile = useMediaQuery({ maxWidth: 480 });
 
   // run python script with values from layers
   const handlePythonCalculation = () => {
@@ -245,99 +248,99 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
   };
 
   return (
-    <Menu width="300px" ref={ref}>
-      <CollapsibleSection
-        title="Sondennetz berechnen"
-        marginBottom="0px"
-        open={polygon !== null}
-      >
-        <CollapsibleContent id="collapsible-content">
-          {!polygon && <p>Bitte wählen Sie zuerst ein Grundstück aus!</p>}
-          {polygon && (
-            <>
-              <InputSection>
-                <label htmlFor="gridspacing-input">
-                  Sondenabstand in Meter
-                </label>
-                <Input
-                  id="gridspacing-input"
-                  type="number"
-                  min="5"
-                  max="15"
-                  placeholder="zwischen 5 und 15 m (default=10)"
-                  value={gridSpacing}
-                  onChange={handleGridSpacing}
-                  ref={gridSpacingInputRef}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="depth-input">Sondentiefe in Meter</label>
-                <Input
-                  id="depth-input"
-                  type="number"
-                  min="80"
-                  max="250"
-                  placeholder="zwischen 80 und 250 m (default=100)"
-                  value={boreDepth}
-                  onChange={handleDepth}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="bshz-input">
-                  Jahresbetriebsstunden Heizen (optional)
-                </label>
-                <Input
-                  id="bshz-input"
-                  type="number"
-                  min="0"
-                  max="4379"
-                  placeholder="zwischen 0 und 4379"
-                  onChange={handleBS_HZ}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="bskl-input">
-                  Jahresbetriebsstunden Kühlen (optional)
-                </label>
-                <Input
-                  id="bskl-input"
-                  type="number"
-                  min="0"
-                  max="4379"
-                  placeholder="zwischen 0 und 4379"
-                  onChange={handleBS_KL}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
-                <Input
-                  id="phz-input"
-                  type="number"
-                  min="0"
-                  placeholder="Wert größer 0"
-                  onChange={handleP_HZ}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
-                <Input
-                  id="pkl-input"
-                  type="number"
-                  min="0"
-                  placeholder="Wert größer 0"
-                  onChange={handleP_KL}
-                ></Input>
-              </InputSection>
-              <ButtonContainer>
-                <Button onClick={handlePythonCalculation}>
-                  Berechnung starten
-                </Button>
-              </ButtonContainer>
-            </>
-          )}
-        </CollapsibleContent>
-      </CollapsibleSection>
-    </Menu>
+    <CollapsibleSection
+      title="Sondennetz berechnen"
+      marginBottom="0px"
+      open={!isMobile && polygon !== null}
+      ref={ref}
+      width="300px"
+      isMobile={isMobile}
+      flex={true}
+    >
+      <CollapsibleContent id="collapsible-content">
+        {!polygon && <p>Bitte wählen Sie zuerst ein Grundstück aus!</p>}
+        {polygon && (
+          <>
+            <InputSection>
+              <label htmlFor="gridspacing-input">Sondenabstand in Meter</label>
+              <Input
+                id="gridspacing-input"
+                type="number"
+                min="5"
+                max="15"
+                placeholder="zwischen 5 und 15 m (default=10)"
+                value={gridSpacing}
+                onChange={handleGridSpacing}
+                ref={gridSpacingInputRef}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="depth-input">Sondentiefe in Meter</label>
+              <Input
+                id="depth-input"
+                type="number"
+                min="80"
+                max="250"
+                placeholder="zwischen 80 und 250 m (default=100)"
+                value={boreDepth}
+                onChange={handleDepth}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="bshz-input">
+                Jahresbetriebsstunden Heizen (optional)
+              </label>
+              <Input
+                id="bshz-input"
+                type="number"
+                min="0"
+                max="4379"
+                placeholder="zwischen 0 und 4379"
+                onChange={handleBS_HZ}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="bskl-input">
+                Jahresbetriebsstunden Kühlen (optional)
+              </label>
+              <Input
+                id="bskl-input"
+                type="number"
+                min="0"
+                max="4379"
+                placeholder="zwischen 0 und 4379"
+                onChange={handleBS_KL}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
+              <Input
+                id="phz-input"
+                type="number"
+                min="0"
+                placeholder="Wert größer 0"
+                onChange={handleP_HZ}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
+              <Input
+                id="pkl-input"
+                type="number"
+                min="0"
+                placeholder="Wert größer 0"
+                onChange={handleP_KL}
+              ></Input>
+            </InputSection>
+            <ButtonContainer>
+              <Button onClick={handlePythonCalculation}>
+                Berechnung starten
+              </Button>
+            </ButtonContainer>
+          </>
+        )}
+      </CollapsibleContent>
+    </CollapsibleSection>
   );
 });
 

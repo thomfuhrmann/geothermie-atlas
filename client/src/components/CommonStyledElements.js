@@ -32,32 +32,31 @@ export const Paragraph = styled.p`
 `;
 
 export const Container = styled.div`
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 23%;
-  height: fit-content;
-  max-height: 95%;
-  overflow-y: auto;
-  overflow-x: auto;
-  padding: 0px;
-  background-color: rgba(0, 0, 0, 0);
+  display: flex;
+  flex-flow: column;
+  position: relative;
+  top: 0px;
+  left: 0px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 54px;
 `;
 
 export const InfoPanelContent = styled.div`
+  display: flex;
+  flex-flow: column;
+  overflow-y: auto;
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  height: fit-content;
-  overflow-y: auto;
-  overflow-x: auto;
   padding: 10px 30px 30px;
   color: #444444;
   background-color: white;
 `;
 
 export const PDFButtonDiv = styled.div`
-  float: right;
+  display: flex;
+  align-self: end;
   margin: 5px 0;
 `;
 
@@ -76,12 +75,11 @@ export const PDFButton = styled.button`
 
 export const Image = styled.img`
   width: 100%;
-  height: 100%;
+  height: fit-content;
 `;
 
 export const Menu = styled.div`
-  display: flex;
-  flex-direction: column;
+  position: relative;
   box-sizing: border-box;
   width: ${(props) => props.width || "100%"};
   margin: 0px;

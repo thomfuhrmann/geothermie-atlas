@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "jspdf-autotable";
 import { useDispatch, useSelector } from "react-redux";
+import { useMediaQuery } from "react-responsive";
 
 import { updateScreenshot } from "../redux/screenshotSlice";
 import { updateEWSResources } from "../redux/ewsResourcesSlice";
@@ -19,12 +20,12 @@ import {
   TableRow,
   TableData,
   Placeholder,
-  Container,
   PDFButton,
   PDFButtonDiv,
   InfoPanelContent,
   Image,
   Warning,
+  Container,
 } from "./CommonStyledElements";
 
 const textTemplates = {
@@ -84,6 +85,8 @@ export default function InfoPanelGWWP() {
     (store) => store.gwwpComputations.value
   );
   const screenshot = useSelector((store) => store.screenshot.value);
+
+  const isMobile = useMediaQuery({ maxWidth: 480 });
 
   // record which tables should be printed
   let [einschraenkungen, hinweise] = [false, false];
@@ -149,211 +152,226 @@ export default function InfoPanelGWWP() {
 
   return (
     <Container>
-      <CollapsibleSection
-        title={
-          !address
-            ? "Der Weg zur thermischen Grundwassernutzung"
-            : "Standortbasierter Bericht"
-        }
-        open={true}
-        marginBottom="0px"
-      >
-        <InfoPanelContent>
-          {!address ? (
-            <>
-              <p>
-                Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
-                um Informationen abzufragen. Sie können nun mit dem
-                Zeichen-Werkzeug im Menü "Brunnenpaar berechnen" zwei Punkte für
-                ein Brunnenpaar setzen und die Berechnung starten.
-              </p>
-              <p>Optional können sie gebäudespezifische Parameter festlegen.</p>
-            </>
-          ) : (
+      {!isMobile && (
+        <CollapsibleSection
+          title="Anleitung"
+          open={!address}
+          marginBottom="5px"
+          flex={true}
+        >
+          <InfoPanelContent>
+            <p>
+              Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
+              um Informationen abzufragen. Sie können nun mit dem
+              Zeichen-Werkzeug im Menü "Brunnenpaar berechnen" zwei Punkte für
+              ein Brunnenpaar setzen und die Berechnung starten.
+            </p>
+            <p>Optional können sie gebäudespezifische Parameter festlegen.</p>
+            {!address && scaleWarning && (
+              <Warning id="scale-warning">
+                Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
+                zu ermöglichen!
+              </Warning>
+            )}
+          </InfoPanelContent>
+        </CollapsibleSection>
+      )}
+      {address && (
+        <CollapsibleSection
+          title="Standortbasierter Bericht"
+          open={!isMobile ? true : false}
+          marginBottom="0px"
+          flex={true}
+        >
+          <InfoPanelContent>
             <>
               <PDFButtonDiv className="pdf-button-div">
                 <PDFButton onClick={clickHandler}>PDF erstellen</PDFButton>
               </PDFButtonDiv>
               <Image src={screenshot} id="screenshot"></Image>
             </>
-          )}
-          {Object.keys(cadastralData).length > 0 && (
-            <>
-              <Table id="cadastral-data-table">
+
+            {Object.keys(cadastralData).length > 0 && (
+              <>
+                <Table id="cadastral-data-table">
+                  <tbody>
+                    <tr>
+                      <td>
+                        Katastralgemeinde: {cadastralData.KG}
+                        <br></br>
+                        Grundstücksnummer: {cadastralData.GNR}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </>
+            )}
+            {address && address.length > 0 && (
+              <>
+                <Table id="address-table">
+                  <tbody>
+                    <tr>
+                      <td>
+                        {address[0]}
+                        <br></br>
+                        {address[1]} {address[3]}
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
+                {!scaleWarning && !outsideWarning && (
+                  <Placeholder></Placeholder>
+                )}
+              </>
+            )}
+            {scaleWarning && (
+              <Warning id="scale-warning">
+                Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
+                zu ermöglichen!
+              </Warning>
+            )}
+            {outsideWarning && (
+              <Table id="warnings-table">
                 <tbody>
                   <tr>
                     <td>
-                      Katastralgemeinde: {cadastralData.KG}
-                      <br></br>
-                      Grundstücksnummer: {cadastralData.GNR}
+                      {outsideWarning && (
+                        <Warning>
+                          Achtung: Mindestens ein Punkt liegt außerhalb des
+                          Grundstücks!
+                        </Warning>
+                      )}
                     </td>
                   </tr>
-                </tbody>
-              </Table>
-            </>
-          )}
-          {address && address.length > 0 && (
-            <>
-              <Table id="address-table">
-                <tbody>
                   <tr>
-                    <td>
-                      {address[0]}
-                      <br></br>
-                      {address[1]} {address[3]}
-                    </td>
+                    <td>{closenessWarning && <></>}</td>
                   </tr>
                 </tbody>
               </Table>
-              {!scaleWarning && !outsideWarning && <Placeholder></Placeholder>}
-            </>
-          )}
-          {scaleWarning && (
-            <Warning id="scale-warning">
-              Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
-              zu ermöglichen!
-            </Warning>
-          )}
-          {outsideWarning && (
-            <Table id="warnings-table">
-              <tbody>
-                <tr>
-                  <td>
-                    {outsideWarning && (
-                      <Warning>
-                        Achtung: Mindestens ein Punkt liegt außerhalb des
-                        Grundstücks!
-                      </Warning>
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td>{closenessWarning && <></>}</td>
-                </tr>
-              </tbody>
-            </Table>
-          )}
-          {resources.length > 0 && (
-            <CollapsibleSection title="Ressourcen">
-              <Table id="resources-table">
-                <thead>
-                  <tr>
-                    <td></td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {resources.map((result) => {
-                    return (
-                      <TableRow key={result.layerId}>
-                        <TableData>
-                          {formatGWWP(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes["Pixel Value"]
-                          )}
-                        </TableData>
-                      </TableRow>
-                    );
-                  })}
-                </tbody>
-              </Table>
-              <Placeholder></Placeholder>
-            </CollapsibleSection>
-          )}
-          {ampelkarte.length > 0 && (
-            <AmpelkarteTable
-              results={ampelkarte}
-              setTables={setTables}
-              layerId={1}
-            ></AmpelkarteTable>
-          )}
-          {computationResult.length > 0 &&
-            (computationResult.length === 1 ? (
-              <CollapsibleSection title="Berechnungsergebnis" open={true}>
-                <Table id="calculations-output-table">
+            )}
+            {resources.length > 0 && (
+              <CollapsibleSection title="Ressourcen">
+                <Table id="resources-table">
                   <thead>
                     <tr>
                       <td></td>
                     </tr>
                   </thead>
                   <tbody>
-                    <TableRow>
-                      <TableData>{computationResult[0]}</TableData>
-                    </TableRow>
+                    {resources.map((result) => {
+                      return (
+                        <TableRow key={result.layerId}>
+                          <TableData>
+                            {formatGWWP(
+                              result.layerId,
+                              result.layerName,
+                              result.feature.attributes["Pixel Value"]
+                            )}
+                          </TableData>
+                        </TableRow>
+                      );
+                    })}
                   </tbody>
                 </Table>
                 <Placeholder></Placeholder>
               </CollapsibleSection>
-            ) : (
-              <CollapsibleSection title="Berechnungsergebnis" open={true}>
-                <Table id="calculations-output-table">
-                  <thead>
-                    <tr>
-                      <td></td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <TableRow>
-                      <TableData>
-                        Energieflächendichte im einseitigen Heizbetrieb:{" "}
-                        {computationResult[0]} kWh/m²/a
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Energieflächendichte im einseitigen Kühlbetrieb:{" "}
-                        {computationResult[1]} kWh/m²/a
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Energieflächendichte im Heiz- und Kühlbetrieb mit
-                        ausgeglichener Betriebsweise: {computationResult[2]}{" "}
-                        kWh/m²/a
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Energieflächendichte im Heiz- und Kühlbetrieb nach
-                        Energieverhältnis Heizen/Kühlen: {computationResult[3]}{" "}
-                        kWh/m²/a
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Leistung einer Brunnendublette mit 2R Brunnenabstand:{" "}
-                        {computationResult[4]} l/s
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Leistung einer Brunnendublette mit 2R Brunnenabstand:{" "}
-                        {computationResult[5]} kW
-                      </TableData>
-                    </TableRow>
-                    {computationResult[6] !== "-1" && (
+            )}
+            {ampelkarte.length > 0 && (
+              <AmpelkarteTable
+                results={ampelkarte}
+                setTables={setTables}
+                layerId={1}
+              ></AmpelkarteTable>
+            )}
+            {computationResult.length > 0 &&
+              (computationResult.length === 1 ? (
+                <CollapsibleSection title="Berechnungsergebnis" open={true}>
+                  <Table id="calculations-output-table">
+                    <thead>
+                      <tr>
+                        <td></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <TableRow>
+                        <TableData>{computationResult[0]}</TableData>
+                      </TableRow>
+                    </tbody>
+                  </Table>
+                  <Placeholder></Placeholder>
+                </CollapsibleSection>
+              ) : (
+                <CollapsibleSection title="Berechnungsergebnis" open={true}>
+                  <Table id="calculations-output-table">
+                    <thead>
+                      <tr>
+                        <td></td>
+                      </tr>
+                    </thead>
+                    <tbody>
                       <TableRow>
                         <TableData>
-                          Deckungsbeitrag der Leistung: {computationResult[6]} %
+                          Energieflächendichte im einseitigen Heizbetrieb:{" "}
+                          {computationResult[0]} kWh/m²/a
                         </TableData>
                       </TableRow>
-                    )}
-                    {computationResult[7] !== "-1.0" && (
                       <TableRow>
                         <TableData>
-                          Größe der thermischen Fahne in % der
-                          Grundstücksfläche: {computationResult[7]} %
+                          Energieflächendichte im einseitigen Kühlbetrieb:{" "}
+                          {computationResult[1]} kWh/m²/a
                         </TableData>
                       </TableRow>
-                    )}
-                  </tbody>
-                </Table>
-                <Placeholder></Placeholder>
-              </CollapsibleSection>
-            ))}
-          {address && <Footer></Footer>}
-        </InfoPanelContent>
-      </CollapsibleSection>
+                      <TableRow>
+                        <TableData>
+                          Energieflächendichte im Heiz- und Kühlbetrieb mit
+                          ausgeglichener Betriebsweise: {computationResult[2]}{" "}
+                          kWh/m²/a
+                        </TableData>
+                      </TableRow>
+                      <TableRow>
+                        <TableData>
+                          Energieflächendichte im Heiz- und Kühlbetrieb nach
+                          Energieverhältnis Heizen/Kühlen:{" "}
+                          {computationResult[3]} kWh/m²/a
+                        </TableData>
+                      </TableRow>
+                      <TableRow>
+                        <TableData>
+                          Leistung einer Brunnendublette mit 2R Brunnenabstand:{" "}
+                          {computationResult[4]} l/s
+                        </TableData>
+                      </TableRow>
+                      <TableRow>
+                        <TableData>
+                          Leistung einer Brunnendublette mit 2R Brunnenabstand:{" "}
+                          {computationResult[5]} kW
+                        </TableData>
+                      </TableRow>
+                      {computationResult[6] !== "-1" && (
+                        <TableRow>
+                          <TableData>
+                            Deckungsbeitrag der Leistung: {computationResult[6]}{" "}
+                            %
+                          </TableData>
+                        </TableRow>
+                      )}
+                      {computationResult[7] !== "-1.0" && (
+                        <TableRow>
+                          <TableData>
+                            Größe der thermischen Fahne in % der
+                            Grundstücksfläche: {computationResult[7]} %
+                          </TableData>
+                        </TableRow>
+                      )}
+                    </tbody>
+                  </Table>
+                  <Placeholder></Placeholder>
+                </CollapsibleSection>
+              ))}
+            {address && <Footer></Footer>}
+          </InfoPanelContent>
+        </CollapsibleSection>
+      )}
     </Container>
   );
 }

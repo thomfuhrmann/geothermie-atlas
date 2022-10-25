@@ -24,38 +24,55 @@ const Span = styled.span`
   float: right;
 `;
 
-const Container = styled.div`
+const CollapsibleContainer = styled.div`
+  display: ${(props) => (props.flex === true ? "flex" : "block")};
+  flex-flow: column;
   margin-bottom: ${(props) => props.marginBottom};
+  box-sizing: border-box;
+  min-height: 54px;
+  max-height: ${(props) => (props.isMobile ? "90%" : undefined)};
+  width: ${(props) => props.width || "100%"};
 `;
 
 const CollapsibleContent = styled.div`
-  display: ${(props) => (props.isOpened === true ? "box" : "none")};
+  display: ${(props) => (props.isOpened === true ? "block" : "none")};
+  overflow-y: auto;
+  width: 100%;
+  background-color: white;
 `;
 
-export default function CollapsibleSection({
-  title,
-  children,
-  open,
-  marginBottom = "1px",
-}) {
-  const [opened, setOpened] = useState(open);
-  const [previouslyOpened, setPreviouslyOpened] = useState();
+const CollapsibleSection = React.forwardRef(
+  (
+    { title, children, open, marginBottom = "1px", flex, width, isMobile },
+    ref
+  ) => {
+    const [opened, setOpened] = useState(open);
+    const [previouslyOpened, setPreviouslyOpened] = useState();
 
-  if (open !== previouslyOpened) {
-    setOpened(open);
-    setPreviouslyOpened(open);
+    if (open !== previouslyOpened) {
+      setOpened(open);
+      setPreviouslyOpened(open);
+    }
+
+    const handleClick = () => {
+      setOpened(!opened);
+    };
+
+    return (
+      <CollapsibleContainer
+        marginBottom={marginBottom}
+        flex={flex}
+        ref={ref}
+        width={width}
+        isMobile={isMobile}
+      >
+        <Button type="button" onClick={handleClick}>
+          {title} <Span>{opened ? "-" : "+"}</Span>
+        </Button>
+        <CollapsibleContent isOpened={opened}>{children}</CollapsibleContent>
+      </CollapsibleContainer>
+    );
   }
+);
 
-  const handleClick = () => {
-    setOpened(!opened);
-  };
-
-  return (
-    <Container marginBottom={marginBottom}>
-      <Button type="button" onClick={handleClick}>
-        {title} <Span>{opened ? "-" : "+"}</Span>
-      </Button>
-      <CollapsibleContent isOpened={opened}>{children}</CollapsibleContent>
-    </Container>
-  );
-}
+export default CollapsibleSection;

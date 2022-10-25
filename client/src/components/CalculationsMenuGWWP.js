@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import { useMediaQuery } from "react-responsive";
 
 import { distance } from "../utils/gridcomputer";
 import { compute } from "../utils/gwwpComputations";
@@ -9,7 +10,7 @@ import { initializeCalculationsMenuHandlers } from "../utils/view";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
 import { takeScreenshot } from "../utils/screenshot";
 import CollapsibleSection from "./CollapsibleSection";
-import { Menu, Button, ButtonContainer } from "./CommonStyledElements";
+import { Button, ButtonContainer } from "./CommonStyledElements";
 
 const CollapsibleContent = styled.div`
   padding: 15px 18px;
@@ -45,6 +46,8 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
   const bodentemperatur = useSelector((store) =>
     store.ewsResources.value.filter((resource) => resource.layerId === 4)
   );
+
+  const isMobile = useMediaQuery({ maxWidth: 480 });
 
   const handleGWWPCalculation = () => {
     isLoading(true);
@@ -144,80 +147,81 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
   };
 
   return (
-    <Menu width="300px" ref={ref}>
-      <CollapsibleSection
-        title="Brunnenpaar berechnen"
-        marginBottom="0px"
-        open={polygon !== null}
-      >
-        <CollapsibleContent id="collapsible-content">
-          {!polygon && <p>Bitte wählen Sie zuerst ein Grundstück aus!</p>}
-          {polygon && (
-            <>
-              <InputSection>
-                <label htmlFor="ehz-input">Jahresheizenergie (optional)</label>
-                <Input
-                  id="ehz-input"
-                  type="number"
-                  min="0"
-                  placeholder="Wert größer gleich 0"
-                  onChange={handleEHZ}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="ekl-input">Jahreskühlenergie (optional)</label>
-                <Input
-                  id="ekl-input"
-                  type="number"
-                  min="0"
-                  placeholder="Wert größer gleich 0"
-                  onChange={handleEKL}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
-                <Input
-                  id="phz-input"
-                  type="number"
-                  min="0"
-                  placeholder="Wert größer gleich 0"
-                  onChange={handlePHZ}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
-                <Input
-                  id="pkl-input"
-                  type="number"
-                  min="0"
-                  placeholder="Wert größer gleich 0"
-                  onChange={handlePKL}
-                ></Input>
-              </InputSection>
-              <InputSection>
-                <label htmlFor="cop-wp-input">
-                  durchschnittliche Leistungszahl der Wärmepumpen (optional)
-                </label>
-                <Input
-                  id="cop-wp-input"
-                  type="number"
-                  min="0"
-                  placeholder="Wert größer gleich 0"
-                  onChange={handleCOPWP}
-                ></Input>
-              </InputSection>
-              {points.length === 2 && (
-                <ButtonContainer>
-                  <Button onClick={handleGWWPCalculation}>
-                    Berechnung starten
-                  </Button>
-                </ButtonContainer>
-              )}
-            </>
-          )}
-        </CollapsibleContent>
-      </CollapsibleSection>
-    </Menu>
+    <CollapsibleSection
+      title="Brunnenpaar berechnen"
+      marginBottom="0px"
+      open={!isMobile && polygon !== null}
+      ref={ref}
+      width="300px"
+      isMobile={isMobile}
+    >
+      <CollapsibleContent id="collapsible-content">
+        {!polygon && <p>Bitte wählen Sie zuerst ein Grundstück aus!</p>}
+        {polygon && (
+          <>
+            <InputSection>
+              <label htmlFor="ehz-input">Jahresheizenergie (optional)</label>
+              <Input
+                id="ehz-input"
+                type="number"
+                min="0"
+                placeholder="Wert größer gleich 0"
+                onChange={handleEHZ}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="ekl-input">Jahreskühlenergie (optional)</label>
+              <Input
+                id="ekl-input"
+                type="number"
+                min="0"
+                placeholder="Wert größer gleich 0"
+                onChange={handleEKL}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
+              <Input
+                id="phz-input"
+                type="number"
+                min="0"
+                placeholder="Wert größer gleich 0"
+                onChange={handlePHZ}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
+              <Input
+                id="pkl-input"
+                type="number"
+                min="0"
+                placeholder="Wert größer gleich 0"
+                onChange={handlePKL}
+              ></Input>
+            </InputSection>
+            <InputSection>
+              <label htmlFor="cop-wp-input">
+                durchschnittliche Leistungszahl der Wärmepumpen (optional)
+              </label>
+              <Input
+                id="cop-wp-input"
+                type="number"
+                min="0"
+                placeholder="Wert größer gleich 0"
+                onChange={handleCOPWP}
+              ></Input>
+            </InputSection>
+            {points.length === 2 && (
+              <ButtonContainer>
+                <Button onClick={handleGWWPCalculation}>
+                  Berechnung starten
+                </Button>
+              </ButtonContainer>
+            )}
+          </>
+        )}
+      </CollapsibleContent>
+    </CollapsibleSection>
   );
 });
 

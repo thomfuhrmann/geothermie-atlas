@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
+import { useMediaQuery } from "react-responsive";
 
 import InfoPanelEWS from "../components/InfoPanelEWS";
 import InfoPanelGWWP from "../components/InfoPanelGWWP";
@@ -20,43 +21,72 @@ const MapContainer = styled.div`
   width: 100%;
 `;
 
+const MenuContainer = styled.div`
+  position: absolute;
+  display: flex;
+  flex-flow: column;
+  box-sizing: border-box;
+  top: 0px;
+  right: 0px;
+  margin: 15px;
+  width: ${(props) => props.width};
+  height: fit-content;
+  max-height: ${(props) => props.maxHeight};
+`;
+
 const Map = ({ theme }) => {
   const mapDiv = useRef(null);
   const calculationsMenuRef = useRef(null);
+  const isMobile = useMediaQuery({ maxWidth: 480 });
 
   const [loading, setLoading] = useState(null);
 
   useEffect(() => {
     // initialize the map interface
-    let view = initialize(mapDiv.current, theme, calculationsMenuRef.current);
+    let view = initialize(
+      mapDiv.current,
+      theme,
+      calculationsMenuRef.current,
+      isMobile
+    );
 
     return () => {
       if (view) {
         view.destroy();
       }
     };
-  }, [theme]);
+  }, [theme, isMobile]);
 
   switch (theme) {
     case "EWS":
       return (
         <MapContainer ref={mapDiv} key={theme}>
-          <InfoPanelEWS></InfoPanelEWS>
-          <CalculationsMenuEWS
-            ref={calculationsMenuRef}
-            isLoading={setLoading}
-          ></CalculationsMenuEWS>
+          <MenuContainer
+            width={isMobile ? "300px" : "23%"}
+            maxHeight={isMobile ? "80%" : "93%"}
+          >
+            <InfoPanelEWS></InfoPanelEWS>
+            <CalculationsMenuEWS
+              ref={calculationsMenuRef}
+              isLoading={setLoading}
+            ></CalculationsMenuEWS>
+          </MenuContainer>
           {loading && <LoadingSpinner></LoadingSpinner>}
         </MapContainer>
       );
     case "GWWP":
       return (
         <MapContainer ref={mapDiv} key={theme}>
-          <InfoPanelGWWP></InfoPanelGWWP>
-          <CalculationsMenuGWWP
-            ref={calculationsMenuRef}
-            isLoading={setLoading}
-          ></CalculationsMenuGWWP>
+          <MenuContainer
+            width={isMobile ? "300px" : "23%"}
+            maxHeight={isMobile ? "80%" : "93%"}
+          >
+            <InfoPanelGWWP></InfoPanelGWWP>
+            <CalculationsMenuGWWP
+              ref={calculationsMenuRef}
+              isLoading={setLoading}
+            ></CalculationsMenuGWWP>
+          </MenuContainer>
           {loading && <LoadingSpinner></LoadingSpinner>}
         </MapContainer>
       );

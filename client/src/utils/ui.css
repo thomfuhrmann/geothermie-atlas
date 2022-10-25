@@ -1,12 +1,16 @@
-.esri-component.esri-layer-list.esri-widget.esri-widget--panel {
+/* .esri-component.esri-layer-list.esri-widget.esri-widget--panel {
   max-height: 500px;
 }
 
 .esri-component.esri-legend.esri-widget.esri-widget--panel {
   max-height: 300px;
-}
+} */
 
 .esri-ui-top-left.esri-ui-corner {
+  height: 95%;
+}
+
+.esri-ui-bottom-right.esri-ui-corner {
   height: 95%;
 }
 

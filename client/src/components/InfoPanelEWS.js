@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import "jspdf-autotable";
 import { useDispatch, useSelector } from "react-redux";
+import { useMediaQuery } from "react-responsive";
 
 import { updateEWSResources } from "../redux/ewsResourcesSlice";
 import { updateGWWPResources } from "../redux/gwwpResourcesSlice";
@@ -79,6 +80,8 @@ export default function InfoPanelEWS() {
 
   const dispatch = useDispatch();
 
+  const isMobile = useMediaQuery({ maxWidth: 480 });
+
   // record which tables should be printed
   let [einschraenkungen, hinweise] = [false, false];
 
@@ -141,43 +144,47 @@ export default function InfoPanelEWS() {
 
   return (
     <Container>
-      <CollapsibleSection
-        title="Der Weg zur Erdwärmenutzung"
-        open={!address}
-        marginBottom="1px"
-      >
-        <InfoPanelContent>
-          <p>
-            Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück um
-            Informationen abzufragen, einen Erdwärmesondenraster zu zeichnen und
-            die Berechnnungen zu starten.
-          </p>
-          <p>
-            Optional können Sie im Menü "Sondennetz berechnen" die Konfiguration
-            des Erdwärmesondennnetzes verändern und gebäudespezifische Parameter
-            festlegen.
-          </p>
-          <p>
-            Benutzen Sie das Zeichen-Werkzeug um zusätzliche Sondenpunkte zu
-            zeichnen oder bestehende Punkte zu verschieben oder zu löschen.
-          </p>
-          <p>
-            Der gesetzliche Mindestabstand der Erdwärmesonden zur
-            Grundstücksgrenze beträgt zwei Meter.
-          </p>
-          {!address && scaleWarning && (
-            <Warning id="scale-warning">
-              Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
-              zu ermöglichen!
-            </Warning>
-          )}
-        </InfoPanelContent>
-      </CollapsibleSection>
+      {!isMobile && (
+        <CollapsibleSection
+          title="Anleitung"
+          open={!address}
+          marginBottom="5px"
+          flex={true}
+        >
+          <InfoPanelContent>
+            <p>
+              Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
+              um Informationen abzufragen, einen Erdwärmesondenraster zu
+              zeichnen und die Berechnnungen zu starten.
+            </p>
+            <p>
+              Optional können Sie im Menü "Sondennetz berechnen" die
+              Konfiguration des Erdwärmesondennnetzes verändern und
+              gebäudespezifische Parameter festlegen.
+            </p>
+            <p>
+              Benutzen Sie das Zeichen-Werkzeug um zusätzliche Sondenpunkte zu
+              zeichnen oder bestehende Punkte zu verschieben oder zu löschen.
+            </p>
+            <p>
+              Der gesetzliche Mindestabstand der Erdwärmesonden zur
+              Grundstücksgrenze beträgt zwei Meter.
+            </p>
+            {!address && scaleWarning && (
+              <Warning id="scale-warning">
+                Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
+                zu ermöglichen!
+              </Warning>
+            )}
+          </InfoPanelContent>
+        </CollapsibleSection>
+      )}
       {address && (
         <CollapsibleSection
           title="Standortbasierter Bericht"
-          open={true}
+          open={!isMobile ? true : false}
           marginBottom="0px"
+          flex={true}
         >
           <InfoPanelContent>
             {address && (
