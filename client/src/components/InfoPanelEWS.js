@@ -100,7 +100,7 @@ export default function InfoPanelEWS() {
       dispatch(updateGWWPResources([]));
       dispatch(updateCadastralData({}));
       dispatch(updateAmpelkarte([]));
-      dispatch(updateGWWPComputationResult([]));
+      dispatch(updateGWWPComputationResult({}));
       dispatch(updateEWSComputationResult({}));
       dispatch(updateScreenshot(""));
     };
@@ -144,422 +144,379 @@ export default function InfoPanelEWS() {
 
   return (
     <Container>
-      {!isMobile && (
-        <CollapsibleSection
-          title="Anleitung"
-          open={!address}
-          marginBottom="5px"
-          flex={true}
-        >
-          <InfoPanelContent>
-            <p>
-              Zoomen Sie hinein und klicken Sie auf Ihr gewünschtes Grundstück
-              um Informationen abzufragen, einen Erdwärmesondenraster zu
-              zeichnen und die Berechnnungen zu starten.
-            </p>
-            <p>
-              Optional können Sie im Menü "Sondennetz berechnen" die
-              Konfiguration des Erdwärmesondennnetzes verändern und
-              gebäudespezifische Parameter festlegen.
-            </p>
-            <p>
-              Benutzen Sie das Zeichen-Werkzeug um zusätzliche Sondenpunkte zu
-              zeichnen oder bestehende Punkte zu verschieben oder zu löschen.
-            </p>
-            <p>
-              Der gesetzliche Mindestabstand der Erdwärmesonden zur
-              Grundstücksgrenze beträgt zwei Meter.
-            </p>
-            {!address && scaleWarning && (
-              <Warning id="scale-warning">
-                Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
-                zu ermöglichen!
-              </Warning>
-            )}
-          </InfoPanelContent>
-        </CollapsibleSection>
-      )}
-      {address && (
-        <CollapsibleSection
-          title="Standortbasierter Bericht"
-          open={!isMobile ? true : false}
-          marginBottom="0px"
-          flex={true}
-        >
-          <InfoPanelContent>
-            {address && (
-              <>
-                <>
-                  <PDFButtonDiv className="pdf-button-div">
-                    <PDFButton onClick={clickHandler}>PDF erstellen</PDFButton>
-                  </PDFButtonDiv>
-                </>
-                <Image src={screenshot} id="screenshot"></Image>
-              </>
-            )}
-            {Object.keys(cadastralData).length > 0 && (
-              <>
-                <Table id="cadastral-data-table">
-                  <tbody>
-                    <tr>
-                      <td>
-                        Katastralgemeinde: {cadastralData.KG}
-                        <br></br>
-                        Grundstücksnummer: {cadastralData.GNR}
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </>
-            )}
-            {address && address.length > 0 && (
-              <>
-                <Table id="address-table">
-                  <tbody>
-                    <tr>
-                      <td>
-                        {address[0]}
-                        <br></br>
-                        {address[1]} {address[3]}
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-                {!scaleWarning && !closenessWarning && !outsideWarning && (
-                  <Placeholder></Placeholder>
-                )}
-              </>
-            )}
-            {scaleWarning && (
-              <Warning id="scale-warning">
-                Bitte zoomen Sie hinein um die grundstücksbezogenen Berechnungen
-                zu ermöglichen!
-              </Warning>
-            )}
-            {(closenessWarning || outsideWarning) && (
-              <Table id="warnings-table">
+      <CollapsibleSection
+        title="Standortbasierter Bericht"
+        open={!isMobile ? true : false}
+        marginBottom="0px"
+        flex={true}
+      >
+        <InfoPanelContent>
+          {address && (
+            <>
+              <PDFButtonDiv className="pdf-button-div">
+                <PDFButton onClick={clickHandler}>PDF erstellen</PDFButton>
+              </PDFButtonDiv>
+              <Image src={screenshot} id="screenshot"></Image>
+            </>
+          )}
+          {Object.keys(cadastralData).length > 0 && (
+            <>
+              <Table id="cadastral-data-table">
                 <tbody>
                   <tr>
                     <td>
-                      {closenessWarning && (
-                        <Warning>
-                          Achtung: Mindestens ein Punkt liegt näher als fünf
-                          Meter zu einem anderen Punkt!
-                        </Warning>
-                      )}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      {outsideWarning && (
-                        <Warning>
-                          Achtung: Mindestens ein Punkt liegt außerhalb der
-                          zugelassenen Grenzen!
-                        </Warning>
-                      )}
+                      Katastralgemeinde: {cadastralData.KG}
+                      <br></br>
+                      Grundstücksnummer: {cadastralData.GNR}
                     </td>
                   </tr>
                 </tbody>
               </Table>
-            )}
-            {resources.length > 0 && (
-              <CollapsibleSection title="Ressourcen">
-                <Table id="resources-table">
-                  <thead>
-                    <tr>
-                      <td></td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {resources.map((result) => {
-                      return (
-                        <TableRow key={result.layerId}>
-                          <TableData>
-                            {formatEWS(
-                              result.layerId,
-                              result.layerName,
-                              result.feature.attributes["Pixel Value"]
-                            )}
-                          </TableData>
-                        </TableRow>
-                      );
-                    })}
-                  </tbody>
-                </Table>
+            </>
+          )}
+          {address && address.length > 0 && (
+            <>
+              <Table id="address-table">
+                <tbody>
+                  <tr>
+                    <td>
+                      {address[0]}
+                      <br></br>
+                      {address[1]} {address[3]}
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+              {!scaleWarning && !closenessWarning && !outsideWarning && (
                 <Placeholder></Placeholder>
-              </CollapsibleSection>
-            )}
-            {ampelkarte && (
-              <AmpelkarteTable
-                results={ampelkarte}
-                setTables={setTables}
-                layerId={0}
-              ></AmpelkarteTable>
-            )}
-            {Object.keys(computationResult).includes("error") && (
-              <CollapsibleSection title="Berechnungsergebnis" open={true}>
-                <Table id="calculations-output-table">
-                  <thead>
-                    <tr>
-                      <td></td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <TableRow>
-                      <TableHeader textAlign="center">
-                        {computationResult.error}
-                      </TableHeader>
-                    </TableRow>
-                  </tbody>
-                </Table>
-                <Placeholder></Placeholder>
-              </CollapsibleSection>
-            )}
-            {Object.keys(computationResult).length > 1 && (
-              <CollapsibleSection title="Berechnungsergebnis" open={true}>
-                <Table id="calculations-output-table">
-                  <thead>
-                    <tr>
-                      <td></td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <TableRow>
-                      <TableHeader textAlign="center">
-                        Gewählte Parameter
-                      </TableHeader>
-                    </TableRow>
-                  </tbody>
-                  <tbody>
-                    <TableRow>
-                      <TableData>
-                        Sondenanzahl: {computationResult.points}
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Sondentiefe: {computationResult.boreDepth} m
-                      </TableData>
-                    </TableRow>
-                    {computationResult.BS_HZ > 0 && (
-                      <TableRow>
+              )}
+            </>
+          )}
+          {scaleWarning && (
+            <Warning id="scale-warning">
+              Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und
+              Berechnungen zu ermöglichen!
+            </Warning>
+          )}
+          {(closenessWarning || outsideWarning) && (
+            <Table id="warnings-table">
+              <tbody>
+                <tr>
+                  <td>
+                    {closenessWarning && (
+                      <Warning>
+                        Achtung: Mindestens ein Punkt liegt näher als fünf Meter
+                        zu einem anderen Punkt!
+                      </Warning>
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    {outsideWarning && (
+                      <Warning>
+                        Achtung: Mindestens ein Punkt liegt außerhalb der
+                        zugelassenen Grenzen!
+                      </Warning>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </Table>
+          )}
+          {resources.length > 0 && (
+            <CollapsibleSection title="Ressourcen">
+              <Table id="resources-table">
+                <thead>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {resources.map((result) => {
+                    return (
+                      <TableRow key={result.layerId}>
                         <TableData>
-                          Betriebsstunden Heizen: {computationResult.BS_HZ} h
+                          {formatEWS(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes["Pixel Value"]
+                          )}
                         </TableData>
                       </TableRow>
-                    )}
-                    {computationResult.BS_KL > 0 && (
-                      <TableRow>
-                        <TableData>
-                          Betriebsstunden Kühlen: {computationResult.BS_KL} h
-                        </TableData>
-                      </TableRow>
-                    )}
-                    {computationResult.P_HZ > 0 && (
-                      <TableRow>
-                        <TableData>
-                          Heizleistung: {computationResult.P_HZ} kW
-                        </TableData>
-                      </TableRow>
-                    )}
-                    {computationResult.P_KL > 0 && (
-                      <TableRow>
-                        <TableData>
-                          Kühlleistung: {computationResult.P_KL} kW
-                        </TableData>
-                      </TableRow>
-                    )}
-                  </tbody>
-                  <tbody>
-                    <TableRow>
-                      <TableHeader textAlign="center">
-                        Berechnungsergebnis
-                      </TableHeader>
-                    </TableRow>
-                  </tbody>
-                  <tbody>
-                    <TableRow>
-                      <TableData>
-                        Heizleistung: {parseInt(computationResult.leistungHZ)}{" "}
-                        kW
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Kühlleistung: {parseInt(computationResult.leistungKL)}{" "}
-                        kW
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Jahresenergiemenge Heizen:{" "}
-                        {parseInt(computationResult.jahresEnergieMengeHZ)} kWh/a
-                      </TableData>
-                    </TableRow>
-                    <TableRow>
-                      <TableData>
-                        Jahresenergiemenge Kühlen:{" "}
-                        {parseInt(computationResult.jahresEnergieMengeKL)} kWh/a
-                      </TableData>
-                    </TableRow>
-                    {computationResult.cover > 0 && (
-                      <TableRow>
-                        <TableData>
-                          Deckungsgrad: {parseInt(computationResult.cover)} %
-                        </TableData>
-                      </TableRow>
-                    )}
-                  </tbody>
-                </Table>
-                <Placeholder></Placeholder>
-                <Image
-                  src={computationResult.imagehash}
-                  alt="Grafik mit Berechnungsergebnissen"
-                  ref={image_unbal}
-                ></Image>
-                <Placeholder></Placeholder>
-              </CollapsibleSection>
-            )}
-            {Object.keys(computationResult).length > 1 && (
-              <CollapsibleSection
-                title="Berechnungsergebnis (bilanzierter Betrieb)"
-                open={true}
-              >
-                <Table id="calculations-bal-output-table">
-                  <thead>
-                    <tr>
-                      <td></td>
-                    </tr>
-                  </thead>
-                  <tbody>
+                    );
+                  })}
+                </tbody>
+              </Table>
+              <Placeholder></Placeholder>
+            </CollapsibleSection>
+          )}
+          {ampelkarte && (
+            <AmpelkarteTable
+              results={ampelkarte}
+              setTables={setTables}
+              layerId={0}
+            ></AmpelkarteTable>
+          )}
+          {Object.keys(computationResult).includes("error") && (
+            <CollapsibleSection title="Berechnungsergebnis" open={true}>
+              <Table id="calculations-output-table">
+                <thead>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      {computationResult.error}
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+              </Table>
+              <Placeholder></Placeholder>
+            </CollapsibleSection>
+          )}
+          {Object.keys(computationResult).length > 1 && (
+            <CollapsibleSection title="Berechnungsergebnis" open={true}>
+              <Table id="calculations-output-table">
+                <thead>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Gewählte Parameter
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableData>
+                      Sondenanzahl: {computationResult.points}
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Sondentiefe: {computationResult.boreDepth} m
+                    </TableData>
+                  </TableRow>
+                  {computationResult.BS_HZ > 0 && (
                     <TableRow>
                       <TableData>
-                        Für einen bilanzierten Betrieb muss die Heizleistung um{" "}
-                        {Math.abs(computationResult.differenz_PHZ.toFixed(1))}{" "}
-                        W/m{" "}
-                        {parseInt(computationResult.differenz_PHZ) >= 0
-                          ? "erhöht"
-                          : "verringert"}{" "}
-                        werden. Die Betriebsstunden für Heizen müssen um{" "}
-                        {Math.abs(computationResult.differenz_BS_HZ)} Stunden{" "}
-                        {parseInt(computationResult.differenz_BS_HZ) >= 0
-                          ? "erhöht"
-                          : "verringert"}{" "}
-                        werden. Die Kühlleistung muss um{" "}
-                        {Math.abs(computationResult.differenz_PKL.toFixed(1))}{" "}
-                        W/m{" "}
-                        {parseInt(computationResult.differenz_PKL) >= 0
-                          ? "erhöht"
-                          : "verringert"}{" "}
-                        werden. Die Betriebsstunden für Kühlen müssen um{" "}
-                        {Math.abs(computationResult.differenz_BS_KL)} Stunden{" "}
-                        {parseInt(computationResult.differenz_BS_KL) >= 0
-                          ? "erhöht"
-                          : "verringert"}{" "}
-                        werden. Bei bilanziertem Betrieb kann der Sondenabstand
-                        auf bis zu 5 Meter reduziert werden.
+                        Betriebsstunden Heizen: {computationResult.BS_HZ} h
                       </TableData>
                     </TableRow>
-                    <tr>
-                      <td></td>
-                    </tr>
-                  </tbody>
-                  <tbody>
-                    <TableRow>
-                      <TableHeader textAlign="center">
-                        Gewählte Parameter
-                      </TableHeader>
-                    </TableRow>
-                  </tbody>
-                  <tbody>
+                  )}
+                  {computationResult.BS_KL > 0 && (
                     <TableRow>
                       <TableData>
-                        Sondenanzahl: {computationResult.points}
+                        Betriebsstunden Kühlen: {computationResult.BS_KL} h
                       </TableData>
                     </TableRow>
+                  )}
+                  {computationResult.P_HZ > 0 && (
                     <TableRow>
                       <TableData>
-                        Sondentiefe: {computationResult.boreDepth} m
+                        Heizleistung: {computationResult.P_HZ} kW
                       </TableData>
                     </TableRow>
-                    {computationResult.BS_HZ > 0 && (
-                      <TableRow>
-                        <TableData>
-                          Betriebsstunden Heizen: {computationResult.BS_HZ} h
-                        </TableData>
-                      </TableRow>
-                    )}
-                    {computationResult.BS_KL > 0 && (
-                      <TableRow>
-                        <TableData>
-                          Betriebsstunden Kühlen: {computationResult.BS_KL} h
-                        </TableData>
-                      </TableRow>
-                    )}
-                    {computationResult.P_HZ > 0 && (
-                      <TableRow>
-                        <TableData>
-                          Heizleistung: {computationResult.P_HZ} kW
-                        </TableData>
-                      </TableRow>
-                    )}
-                    {computationResult.P_KL > 0 && (
-                      <TableRow>
-                        <TableData>
-                          Kühlleistung: {computationResult.P_KL} kW
-                        </TableData>
-                      </TableRow>
-                    )}
-                  </tbody>
-                  <tbody>
-                    <TableRow>
-                      <TableHeader textAlign="center">
-                        Berechnungsergebnis
-                      </TableHeader>
-                    </TableRow>
-                  </tbody>
-                  <tbody>
+                  )}
+                  {computationResult.P_KL > 0 && (
                     <TableRow>
                       <TableData>
-                        Heizleistung:{" "}
-                        {parseInt(computationResult.leistungHZ_bal)} kW
+                        Kühlleistung: {computationResult.P_KL} kW
                       </TableData>
                     </TableRow>
+                  )}
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Berechnungsergebnis
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableData>
+                      Heizleistung: {parseInt(computationResult.leistungHZ)} kW
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Kühlleistung: {parseInt(computationResult.leistungKL)} kW
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Jahresenergiemenge Heizen:{" "}
+                      {parseInt(computationResult.jahresEnergieMengeHZ)} kWh/a
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Jahresenergiemenge Kühlen:{" "}
+                      {parseInt(computationResult.jahresEnergieMengeKL)} kWh/a
+                    </TableData>
+                  </TableRow>
+                  {computationResult.cover > 0 && (
                     <TableRow>
                       <TableData>
-                        Kühlleistung:{" "}
-                        {parseInt(computationResult.leistungKL_bal)} kW
+                        Deckungsgrad: {parseInt(computationResult.cover)} %
                       </TableData>
                     </TableRow>
+                  )}
+                </tbody>
+              </Table>
+              <Placeholder></Placeholder>
+              <Image
+                src={computationResult.imagehash}
+                alt="Grafik mit Berechnungsergebnissen"
+                ref={image_unbal}
+              ></Image>
+              <Placeholder></Placeholder>
+            </CollapsibleSection>
+          )}
+          {Object.keys(computationResult).length > 1 && (
+            <CollapsibleSection
+              title="Berechnungsergebnis (bilanzierter Betrieb)"
+              open={true}
+            >
+              <Table id="calculations-bal-output-table">
+                <thead>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRow>
+                    <TableData>
+                      Für einen bilanzierten Betrieb muss die Heizleistung um{" "}
+                      {Math.abs(computationResult.differenz_PHZ.toFixed(1))} W/m{" "}
+                      {parseInt(computationResult.differenz_PHZ) >= 0
+                        ? "erhöht"
+                        : "verringert"}{" "}
+                      werden. Die Betriebsstunden für Heizen müssen um{" "}
+                      {Math.abs(computationResult.differenz_BS_HZ)} Stunden{" "}
+                      {parseInt(computationResult.differenz_BS_HZ) >= 0
+                        ? "erhöht"
+                        : "verringert"}{" "}
+                      werden. Die Kühlleistung muss um{" "}
+                      {Math.abs(computationResult.differenz_PKL.toFixed(1))} W/m{" "}
+                      {parseInt(computationResult.differenz_PKL) >= 0
+                        ? "erhöht"
+                        : "verringert"}{" "}
+                      werden. Die Betriebsstunden für Kühlen müssen um{" "}
+                      {Math.abs(computationResult.differenz_BS_KL)} Stunden{" "}
+                      {parseInt(computationResult.differenz_BS_KL) >= 0
+                        ? "erhöht"
+                        : "verringert"}{" "}
+                      werden. Bei bilanziertem Betrieb kann der Sondenabstand
+                      auf bis zu 5 Meter reduziert werden.
+                    </TableData>
+                  </TableRow>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Gewählte Parameter
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableData>
+                      Sondenanzahl: {computationResult.points}
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Sondentiefe: {computationResult.boreDepth} m
+                    </TableData>
+                  </TableRow>
+                  {computationResult.BS_HZ > 0 && (
                     <TableRow>
                       <TableData>
-                        Jahresenergiemenge Heizen:{" "}
-                        {parseInt(computationResult.jahresEnergieMengeHZ_bal)}{" "}
-                        kWh/a
+                        Betriebsstunden Heizen: {computationResult.BS_HZ} h
                       </TableData>
                     </TableRow>
+                  )}
+                  {computationResult.BS_KL > 0 && (
                     <TableRow>
                       <TableData>
-                        Jahresenergiemenge Kühlen:{" "}
-                        {parseInt(computationResult.jahresEnergieMengeKL_bal)}{" "}
-                        kWh/a
+                        Betriebsstunden Kühlen: {computationResult.BS_KL} h
                       </TableData>
                     </TableRow>
-                  </tbody>
-                </Table>
-                <Placeholder></Placeholder>
-                <Image
-                  src={computationResult.imagehash_bal}
-                  alt="Grafik mit bilanzierten Berechnungsergebnissen"
-                  ref={image_bal}
-                ></Image>
-                <Placeholder></Placeholder>
-              </CollapsibleSection>
-            )}
-            {address && <Footer></Footer>}
-          </InfoPanelContent>
-        </CollapsibleSection>
-      )}
+                  )}
+                  {computationResult.P_HZ > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Heizleistung: {computationResult.P_HZ} kW
+                      </TableData>
+                    </TableRow>
+                  )}
+                  {computationResult.P_KL > 0 && (
+                    <TableRow>
+                      <TableData>
+                        Kühlleistung: {computationResult.P_KL} kW
+                      </TableData>
+                    </TableRow>
+                  )}
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Berechnungsergebnis
+                    </TableHeader>
+                  </TableRow>
+                </tbody>
+                <tbody>
+                  <TableRow>
+                    <TableData>
+                      Heizleistung: {parseInt(computationResult.leistungHZ_bal)}{" "}
+                      kW
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Kühlleistung: {parseInt(computationResult.leistungKL_bal)}{" "}
+                      kW
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Jahresenergiemenge Heizen:{" "}
+                      {parseInt(computationResult.jahresEnergieMengeHZ_bal)}{" "}
+                      kWh/a
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Jahresenergiemenge Kühlen:{" "}
+                      {parseInt(computationResult.jahresEnergieMengeKL_bal)}{" "}
+                      kWh/a
+                    </TableData>
+                  </TableRow>
+                </tbody>
+              </Table>
+              <Placeholder></Placeholder>
+              <Image
+                src={computationResult.imagehash_bal}
+                alt="Grafik mit bilanzierten Berechnungsergebnissen"
+                ref={image_bal}
+              ></Image>
+              <Placeholder></Placeholder>
+            </CollapsibleSection>
+          )}
+          {address && <Footer></Footer>}
+        </InfoPanelContent>
+      </CollapsibleSection>
     </Container>
   );
 }

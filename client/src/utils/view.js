@@ -51,7 +51,7 @@ let setPoints,
   polygonGraphicsLayer,
   dispatch,
   setAddress,
-  gridSpacing,
+  gridSpacing = 10,
   setClosenessWarning,
   setOutsideWarning,
   setScaleWarning;
@@ -247,12 +247,13 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
       pointGraphicsLayer.remove(event.graphic);
 
       let point = event.graphic.geometry;
+      let points;
       switch (theme) {
         case "EWS":
           // add point to current list of points
-          setPoints((storedPoints) => {
-            storedPoints.push([point.x, point.y]);
-            return storedPoints;
+          setPoints((currentPoints) => {
+            points = [...currentPoints, [point.x, point.y]];
+            return points;
           });
 
           // check if point is too close to any other point
@@ -293,9 +294,8 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
 
           // add point to current list of points
           // keep only the last two points
-          let points;
-          setPoints((current) => {
-            points = [...current.slice(-1), [point.x, point.y]];
+          setPoints((currentPoints) => {
+            points = [...currentPoints.slice(-1), [point.x, point.y]];
 
             // only draw last two points
             pointGraphicsLayer.removeAll();
@@ -434,7 +434,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
         dispatch(updateEWSComputationResult({}));
         break;
       case "GWWP":
-        dispatch(updateGWWPComputationResult([]));
+        dispatch(updateGWWPComputationResult({}));
         break;
       default:
         break;

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
 
 const Button = styled.button`
   box-sizing: border-box;
@@ -43,7 +45,16 @@ const CollapsibleContent = styled.div`
 
 const CollapsibleSection = React.forwardRef(
   (
-    { title, children, open, marginBottom = "1px", flex, width, isMobile },
+    {
+      title,
+      children,
+      open,
+      marginBottom = "1px",
+      flex,
+      width,
+      isMobile,
+      tooltip,
+    },
     ref
   ) => {
     const [opened, setOpened] = useState(open);
@@ -66,9 +77,18 @@ const CollapsibleSection = React.forwardRef(
         width={width}
         isMobile={isMobile}
       >
-        <Button type="button" onClick={handleClick}>
-          {title} <Span>{opened ? "-" : "+"}</Span>
-        </Button>
+        {tooltip ? (
+          <Tippy content={tooltip}>
+            <Button type="button" onClick={handleClick}>
+              {title} <Span>{opened ? "-" : "+"}</Span>
+            </Button>
+          </Tippy>
+        ) : (
+          <Button type="button" onClick={handleClick}>
+            {title} <Span>{opened ? "-" : "+"}</Span>
+          </Button>
+        )}
+
         <CollapsibleContent isOpened={opened}>{children}</CollapsibleContent>
       </CollapsibleContainer>
     );

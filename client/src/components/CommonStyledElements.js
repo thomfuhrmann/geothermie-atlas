@@ -49,7 +49,7 @@ export const InfoPanelContent = styled.div`
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  padding: 10px 30px 30px;
+  padding: 15px 30px;
   color: #444444;
   background-color: white;
 `;

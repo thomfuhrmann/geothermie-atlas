@@ -4,11 +4,7 @@ import styled from "styled-components";
 import { useMediaQuery } from "react-responsive";
 
 import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
-import {
-  view,
-  initializeCalculationsMenuHandlers,
-  updateGridSpacing,
-} from "../utils/view";
+import { view, initializeCalculationsMenuHandlers } from "../utils/view";
 import { calculateGrid } from "../utils/gridcomputer";
 import { takeScreenshot } from "../utils/screenshot";
 import { Button, ButtonContainer } from "./CommonStyledElements";
@@ -185,15 +181,20 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
     }
   };
 
+  // initialize callback functions
   useEffect(() => {
     initializeCalculationsMenuHandlers(setPoints, setPolygon);
   }, []);
 
-  // update current value of grid spacing
-  // used when user clicks on a new parcel
+  // reset state
   useEffect(() => {
-    updateGridSpacing(gridSpacing);
-  }, [gridSpacing]);
+    setGridSpacing(10);
+    setBoreDepth(100);
+    setBS_HZ(0);
+    setBS_KL(0);
+    setP_HZ(0);
+    setP_KL(0);
+  }, [polygon]);
 
   const handleGridSpacing = (event) => {
     if (event.target.value < 5) {
@@ -332,11 +333,13 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
                 onChange={handleP_KL}
               ></Input>
             </InputSection>
-            <ButtonContainer>
-              <Button onClick={handlePythonCalculation}>
-                Berechnung starten
-              </Button>
-            </ButtonContainer>
+            {points.length > 0 && (
+              <ButtonContainer>
+                <Button onClick={handlePythonCalculation}>
+                  Berechnung starten
+                </Button>
+              </ButtonContainer>
+            )}
           </>
         )}
       </CollapsibleContent>

@@ -132,11 +132,14 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   if (computationResult) {
+    if (hinweise) {
+      doc.addPage();
+    }
     doc.autoTable({
       html: "#calculations-output-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: einschraenkungen || hinweise ? finalY + spaceBetween : 20,
+      startY: hinweise ? 20 : finalY + spaceBetween,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Berechnungsergebnis";
@@ -157,15 +160,13 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   let height = 0;
-  let pageAdded = false;
   if (image_unbal) {
     const imgProps = doc.getImageProperties(image_unbal.current);
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
     height = (imgProps.height * width) / imgProps.width;
-    if (height > totalHeight - finalY) {
+    if (height > totalHeight - finalY - 10) {
       doc.addPage();
-      pageAdded = true;
       doc.addImage(image_unbal.current, "PNG", 30, 20, width, height);
     } else {
       doc.addImage(image_unbal.current, "PNG", 30, finalY + 5, width, height);
@@ -174,17 +175,18 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   let startY = 0;
-  if (pageAdded) {
-    startY = height + 30;
-  } else {
-    startY = finalY + height + 10;
-  }
+  // if (pageAdded) {
+  //   startY = height + 30;
+  // } else {
+  //   startY = finalY + height + 10;
+  // }
   if (computationResult && image_bal) {
+    doc.addPage();
     doc.autoTable({
       html: "#calculations-bal-output-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: startY,
+      startY: startY + 20,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Berechnungsergebnis (bilanzierter Betrieb)";
@@ -214,7 +216,7 @@ export const print = (
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
     height = (imgProps.height * width) / imgProps.width;
-    if (height > totalHeight - finalY) {
+    if (height > totalHeight - finalY - 10) {
       doc.addPage();
       doc.addImage(image_bal.current, "PNG", 30, 20, width, height);
     } else {

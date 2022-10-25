@@ -80,9 +80,10 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
       LST === "NoData"
     ) {
       dispatch(
-        updateGWWPComputationResult([
-          "Aufgrund fehlender Daten ist für dieses Grundstück keine Berechnung möglich.",
-        ])
+        updateGWWPComputationResult({
+          error:
+            "Aufgrund fehlender Daten ist für dieses Grundstück keine Berechnung möglich.",
+        })
       );
     } else {
       const result = compute({
@@ -101,15 +102,27 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
         LST,
       });
 
-      dispatch(updateGWWPComputationResult(result));
+      dispatch(
+        updateGWWPComputationResult({ eHZ, eKL, pHZ, pKL, copWP, result })
+      );
     }
 
     isLoading(false);
   };
 
+  // initialize callback functions
   useEffect(() => {
     initializeCalculationsMenuHandlers(setPoints, setPolygon);
   }, []);
+
+  // reset state
+  useEffect(() => {
+    setEHZ(0);
+    setEKL(0);
+    setPHZ(0);
+    setPKL(0);
+    setCOPWP(0);
+  }, [polygon]);
 
   const handleEHZ = (event) => {
     if (event.target.value < 0) {
@@ -160,7 +173,9 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
         {polygon && (
           <>
             <InputSection>
-              <label htmlFor="ehz-input">Jahresheizenergie (optional)</label>
+              <label htmlFor="ehz-input">
+                Jahresheizenergie in MWh (optional)
+              </label>
               <Input
                 id="ehz-input"
                 type="number"
@@ -170,7 +185,9 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
               ></Input>
             </InputSection>
             <InputSection>
-              <label htmlFor="ekl-input">Jahreskühlenergie (optional)</label>
+              <label htmlFor="ekl-input">
+                Jahreskühlenergie in MWh (optional)
+              </label>
               <Input
                 id="ekl-input"
                 type="number"
@@ -201,7 +218,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
             </InputSection>
             <InputSection>
               <label htmlFor="cop-wp-input">
-                durchschnittliche Leistungszahl der Wärmepumpen (optional)
+                Leistungszahl der Wärmepumpe (optional)
               </label>
               <Input
                 id="cop-wp-input"
