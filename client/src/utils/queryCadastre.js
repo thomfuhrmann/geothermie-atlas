@@ -5,6 +5,7 @@ import Graphic from "@arcgis/core/Graphic";
 
 import { updateCadastralData } from "../redux/cadastreSlice";
 import { calculateGrid } from "./gridcomputer";
+import { calculateWells } from "./wellPairComputer";
 
 export const queryCadastre = (
   view,
@@ -76,6 +77,8 @@ export const queryCadastre = (
 
       if (theme === "EWS") {
         calculateGrid(polygon, gridSpacing, setPoints);
+      } else if (theme === "GWWP") {
+        calculateWells(polygon, setPoints);
       }
 
       setPolygon(polygon);

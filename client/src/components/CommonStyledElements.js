@@ -1,12 +1,40 @@
 import React from "react";
 import styled from "styled-components";
 
+export const Line = styled.span`
+  display: inline-block;
+  width: 80%;
+  height: 0;
+  border: 1px solid ${(props) => props.color};
+  margin: 12px 0;
+`;
+
+export const GridContainer = styled.div`
+  display: grid;
+  box-sizing: border-box;
+  grid-template-columns: auto auto;
+  grid-template-rows: min-content min-content;
+  margin: 5px 0;
+`;
+
 export const Warning = styled.p`
   width: 100%;
   white-space: normal;
   word-break: normal;
   background-color: #fffbd6;
   color: #715100;
+  margin: 5px 0;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 10px;
+`;
+
+export const Clearance = styled.p`
+  width: 100%;
+  white-space: normal;
+  word-break: normal;
+  background-color: #aded8d;
+  color: #009045;
   margin: 5px 0;
   padding: 10px;
   box-sizing: border-box;
@@ -31,14 +59,9 @@ export const Paragraph = styled.p`
   word-break: normal;
 `;
 
-export const Container = styled.div`
+export const InfoPanelContainer = styled.div`
   display: flex;
   flex-flow: column;
-  position: relative;
-  top: 0px;
-  left: 0px;
-  box-sizing: border-box;
-  width: 100%;
   min-height: 54px;
 `;
 

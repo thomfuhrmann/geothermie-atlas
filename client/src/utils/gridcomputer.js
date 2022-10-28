@@ -162,15 +162,15 @@ export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
     "meters"
   );
 
-  // draw only outer polygon and ignore inner rings
-  drawPolygon(
-    new Polygon({
-      rings: offsetPolygon.rings[0],
-      spatialReference: view.spatialReference,
-    })
-  );
-
   if (offsetPolygon) {
+    // draw only outer polygon and ignore inner rings
+    drawPolygon(
+      new Polygon({
+        rings: offsetPolygon.rings[0],
+        spatialReference: view.spatialReference,
+      })
+    );
+
     const points = offsetPolygon.rings[0];
 
     // search for most perpendicular corner

@@ -198,6 +198,23 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
           <Placeholder></Placeholder>
         </CollapsibleSection>
       )}
+      {einschraenkungen.length === 0 && (
+        <CollapsibleSection title="Einschränkungen">
+          <Table id={"einschraenkungen-table"}>
+            <thead>
+              <tr>
+                <td></td>
+              </tr>
+            </thead>
+            <tbody>
+              <TableRow>
+                <TableData>Keine Einschränkungen bekannt</TableData>
+              </TableRow>
+            </tbody>
+          </Table>
+          <Placeholder></Placeholder>
+        </CollapsibleSection>
+      )}
       {hinweise.length > 0 && (
         <CollapsibleSection title="Hinweise">
           <Table id={"hinweise-table"}>

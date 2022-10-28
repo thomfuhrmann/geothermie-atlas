@@ -26,7 +26,10 @@ import {
   InfoPanelContent,
   Image,
   Warning,
-  Container,
+  InfoPanelContainer,
+  Clearance,
+  Line,
+  GridContainer,
 } from "./CommonStyledElements";
 
 const textTemplates = {
@@ -103,6 +106,7 @@ export default function InfoPanelGWWP() {
     );
 
     return () => {
+      setAddress(null);
       dispatch(updateEWSResources([]));
       dispatch(updateGWWPResources([]));
       dispatch(updateCadastralData({}));
@@ -118,7 +122,7 @@ export default function InfoPanelGWWP() {
     print(
       einschraenkungen,
       hinweise,
-      computationResult.result.length > 0,
+      computationResult.result?.length > 0,
       screenshot,
       null,
       null,
@@ -152,7 +156,7 @@ export default function InfoPanelGWWP() {
   };
 
   return (
-    <Container>
+    <InfoPanelContainer>
       <CollapsibleSection
         title="Standortbasierter Bericht"
         open={!isMobile ? true : false}
@@ -196,14 +200,23 @@ export default function InfoPanelGWWP() {
                   </tr>
                 </tbody>
               </Table>
-              {!scaleWarning && !outsideWarning && <Placeholder></Placeholder>}
+              {/* {!scaleWarning && !outsideWarning && <Placeholder></Placeholder>} */}
             </>
+          )}
+          {address && (
+            <GridContainer>
+              <Line color="blue"></Line>
+              <span>Grundstücksgrenze</span>
+            </GridContainer>
           )}
           {scaleWarning && (
             <Warning id="scale-warning">
               Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und
               Berechnungen zu ermöglichen!
             </Warning>
+          )}
+          {!scaleWarning && !address && (
+            <Clearance>Sie können jetzt ein Grundstück auswählen.</Clearance>
           )}
           {outsideWarning && (
             <Table id="warnings-table">
@@ -406,6 +419,6 @@ export default function InfoPanelGWWP() {
           {address && <Footer></Footer>}
         </InfoPanelContent>
       </CollapsibleSection>
-    </Container>
+    </InfoPanelContainer>
   );
 }

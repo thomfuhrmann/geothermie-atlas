@@ -29,7 +29,13 @@ app.get("/api", ({ query }, res) => {
       query.points,
     ],
   };
-  runPythonShell(res, options);
+  if (options.args.every((option) => option !== undefined)) {
+    runPythonShell(res, options);
+  } else {
+    res.status(500).send({
+      error: "Sie haben einen ungültigen Query-String eingegeben.",
+    });
+  }
 });
 
 app.get("*", (_, res) => {

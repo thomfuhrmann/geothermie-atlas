@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import Tippy from "@tippyjs/react";
+// import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 
 const Button = styled.button`
@@ -32,29 +32,20 @@ const CollapsibleContainer = styled.div`
   margin-bottom: ${(props) => props.marginBottom};
   box-sizing: border-box;
   min-height: 54px;
-  max-height: ${(props) => (props.isMobile ? "90%" : undefined)};
+  max-height: ${(props) => (!props.isMobile ? "50%" : "35%")};
   width: ${(props) => props.width || "100%"};
 `;
 
 const CollapsibleContent = styled.div`
   display: ${(props) => (props.isOpened === true ? "block" : "none")};
   overflow-y: auto;
-  width: 100%;
+  max-height: 100%;
   background-color: white;
 `;
 
 const CollapsibleSection = React.forwardRef(
   (
-    {
-      title,
-      children,
-      open,
-      marginBottom = "1px",
-      flex,
-      width,
-      isMobile,
-      tooltip,
-    },
+    { title, children, open, marginBottom = "1px", flex, width, isMobile },
     ref
   ) => {
     const [opened, setOpened] = useState(open);
@@ -76,19 +67,11 @@ const CollapsibleSection = React.forwardRef(
         ref={ref}
         width={width}
         isMobile={isMobile}
+        isOpened={opened}
       >
-        {tooltip ? (
-          <Tippy content={tooltip}>
-            <Button type="button" onClick={handleClick}>
-              {title} <Span>{opened ? "-" : "+"}</Span>
-            </Button>
-          </Tippy>
-        ) : (
-          <Button type="button" onClick={handleClick}>
-            {title} <Span>{opened ? "-" : "+"}</Span>
-          </Button>
-        )}
-
+        <Button type="button" onClick={handleClick}>
+          {title} <Span>{opened ? "-" : "+"}</Span>
+        </Button>
         <CollapsibleContent isOpened={opened}>{children}</CollapsibleContent>
       </CollapsibleContainer>
     );

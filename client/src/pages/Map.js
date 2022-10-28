@@ -11,14 +11,14 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { initialize } from "../utils/view";
 
 const MapContainer = styled.div`
-  position: absolute;
   box-sizing: border-box;
-  bottom: 0;
-  padding: 0;
-  margin: 0;
+  position: absolute;
   top: 7%;
+  bottom: 0;
   height: 93%;
   width: 100%;
+  padding: 0;
+  margin: 0;
 `;
 
 const MenuContainer = styled.div`
@@ -37,22 +37,26 @@ const MenuContainer = styled.div`
 const Map = ({ theme }) => {
   const mapDiv = useRef(null);
   const calculationsMenuRef = useRef(null);
+
   const isMobile = useMediaQuery({ maxWidth: 480 });
 
   const [loading, setLoading] = useState(null);
 
   useEffect(() => {
     // initialize the map interface
-    let view = initialize(
+    let calculationsMenu = calculationsMenuRef.current;
+    let { mapView, sketch } = initialize(
       mapDiv.current,
       theme,
-      calculationsMenuRef.current,
+      calculationsMenu,
       isMobile
     );
 
     return () => {
-      if (view) {
-        view.destroy();
+      // destroy map view when component gets unmounted
+      if (mapView && sketch) {
+        sketch.destroy();
+        mapView.destroy();
       }
     };
   }, [theme, isMobile]);

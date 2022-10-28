@@ -27,7 +27,7 @@ import { getAddress } from "./getAddress";
 import "./ui.css";
 
 // spatial reference WKID
-const SRS = 31256;
+export const SRS = 31256;
 
 // layer urls
 const ampelkarte_url =
@@ -94,6 +94,11 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
     listMode: "hide",
   });
 
+  let highlightGraphicsLayer = new GraphicsLayer({
+    title: "Grundstücksgrenze",
+    listMode: "hide",
+  });
+
   // instantiate layers
   const ampelkarte = new MapImageLayer({
     url: ampelkarte_url,
@@ -103,14 +108,14 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
   });
 
   const ews = new MapImageLayer({
-    title: "Erdwärmesonden",
+    title: "Geothermische Ressourcen für Erdwärmesonden",
     url: ews_url,
     visible: false,
     listMode: theme === "EWS" ? "show" : "hide",
   });
 
   const gwwp = new MapImageLayer({
-    title: "Grundwasserwärmepumpen",
+    title: "Geothermische Ressourcen für Grundwasserwärmepumpen",
     url: gwwp_url,
     visible: false,
     listMode: theme === "GWWP" ? "show" : "hide",
@@ -179,6 +184,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
           pointGraphicsLayer,
           boundaryGraphicsLayer,
           polygonGraphicsLayer,
+          highlightGraphicsLayer,
         ],
       });
       break;
@@ -199,6 +205,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
           cadastreOverlay,
           pointGraphicsLayer,
           polygonGraphicsLayer,
+          highlightGraphicsLayer,
         ],
       });
       break;
@@ -384,7 +391,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
   });
 
   // register event handlers for mouse clicks
-  view.on("click", async ({ mapPoint }) => {
+  view.on("click", ({ mapPoint }) => {
     // at application start
     if (polygonGraphicsLayer.graphics.length === 0) {
       startNewQuery(mapPoint);
@@ -413,17 +420,51 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
     }
   });
 
+  // listen to move event
+  view.on("pointer-move", (event) => {
+    let mapPoint = view.toMap({ x: event.x, y: event.y });
+    view
+      .hitTest(view.toScreen(mapPoint), {
+        include: pointGraphicsLayer,
+      })
+      .then(({ results }) => {
+        // if users hovers over a point
+        if (results.length > 0 && event.buttons === 0) {
+          let graphic = results.at(0).graphic;
+          sketch.update(graphic);
+          let pointGraphic = new Graphic({
+            geometry: graphic.geometry,
+            symbol: {
+              type: "simple-marker",
+              size: "30px",
+              color: null,
+              outline: { color: "#45be49" },
+            },
+          });
+          highlightGraphicsLayer.add(pointGraphic);
+          document.body.style.cursor = "pointer";
+        } else {
+          highlightGraphicsLayer.removeAll();
+          document.body.style.cursor = "default";
+        }
+      });
+  });
+
   const startNewQuery = (mapPoint) => {
+    // clear all
     polygonGraphicsLayer.removeAll();
     boundaryGraphicsLayer.removeAll();
     pointGraphicsLayer.removeAll();
     setClosenessWarning(false);
     setOutsideWarning(false);
     setPolygon(null);
+    setPoints([]);
 
+    // hide sketch menu if user starts new query
     let sketchMenuContainer = calculationsMenu.querySelector(
       "#sketch-menu-container"
     );
+
     if (sketchMenuContainer) {
       sketchMenuContainer.style.display = "none";
     }
@@ -440,9 +481,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
         break;
     }
 
-    // initialize points
-    setPoints([]);
-
+    // start new queries
     identifyAllLayers(view, mapPoint, dispatch);
     getAddress(mapPoint, setAddress);
 
@@ -453,7 +492,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
       // take screenshot
       setTimeout(() => takeScreenshot(view, mapPoint, dispatch), 0);
 
-      // query
+      // query cadastral data
       queryCadastre(
         view,
         polygonGraphicsLayer,
@@ -466,26 +505,29 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
       );
     }
 
-    // add sketch menu to calculations menu
+    // add sketch menu to calculations menu if below scale limit
     if (view.scale < scaleLimit) {
-      const collapsibleContent = calculationsMenu.querySelector(
-        "#collapsible-content"
-      );
       if (!sketchMenuContainer) {
+        // add menu elements
+        const collapsibleContent = calculationsMenu.querySelector(
+          "#collapsible-content"
+        );
         sketchMenuContainer = document.createElement("div");
         sketchMenuContainer.id = "sketch-menu-container";
         collapsibleContent.appendChild(sketchMenuContainer);
 
         let label = document.createElement("label");
         if (theme === "GWWP") {
-          label.innerHTML = "Brunnenpaar setzen";
+          label.innerHTML = "neuen Brunnenpunkt setzen";
         } else {
-          label.innerHTML = "Sondenpunkte zeichnen";
+          label.innerHTML = "neuen Sondenpunkt setzen";
         }
         sketchMenuContainer.appendChild(label);
       } else {
+        // set to block mode if container already exists
         sketchMenuContainer.style.display = "block";
       }
+
       sketch.container = sketchMenuContainer;
     }
   };
@@ -502,8 +544,9 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
     view.ui.add([calculationsMenu], "bottom-right");
   }
 
+  // set container of mapview
   view.container = container;
-  return view;
+  return { view, sketch };
 }
 
 // initialize callback functions
@@ -521,14 +564,11 @@ export function initializeInfoPanelHandlers(
   setScaleWarning = setScaleWarningCallback;
 }
 
+// initialize calculatoins menu callback functions
 export function initializeCalculationsMenuHandlers(
   setPointsCallback,
   setPolygonCallback
 ) {
   setPoints = setPointsCallback;
   setPolygon = setPolygonCallback;
-}
-
-export function updateGridSpacing(currentGridSpacing) {
-  gridSpacing = currentGridSpacing;
 }

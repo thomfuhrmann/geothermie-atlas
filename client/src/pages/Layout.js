@@ -7,15 +7,17 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import Header from "../components/Header";
 
 const Nav = styled.nav`
-  height: 100%;
-  display: flex;
-  justify-content: space-between;
-  float: right;
-  padding-right: 10%;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  padding-right: 5%;
 `;
 
 const NavMenu = styled.div`
   display: flex;
+  justify-content: space-between;
   .current {
     border-bottom: 2px solid black;
   }
@@ -27,8 +29,7 @@ const Title = styled.span`
   top: 50%;
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  width: auto;
-  font-size: x-large;
+  font-size: ${(props) => (props.isMobile ? "medium" : "x-large")};
   color: #444444;
 `;
 
@@ -139,7 +140,7 @@ const Layout = () => {
   return (
     <PageContent>
       <Header>
-        <Title>Geothermie Atlas</Title>
+        <Title isMobile={isMobile}>Geothermie Atlas</Title>
         {!isMobile && (
           <Nav>
             <NavMenu>{navLinks}</NavMenu>

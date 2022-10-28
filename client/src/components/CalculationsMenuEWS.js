@@ -15,7 +15,6 @@ const InputSection = styled.div`
 `;
 
 const Input = styled.input`
-  font-size: 100%;
   box-sizing: border-box;
   width: 100%;
   padding: 0;
@@ -24,8 +23,7 @@ const Input = styled.input`
 
 const CollapsibleContent = styled.div`
   box-sizing: border-box;
-  padding: 15px 18px;
-  width: 100%;
+  padding: 15px 15px;
 `;
 
 const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
@@ -43,6 +41,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
   const betriebsstunden = useSelector((store) => store.betriebsstunden.value);
 
   const gridSpacingInputRef = useRef(null);
+  const collapsibleContentRef = useRef(null);
 
   const dispatch = useDispatch();
 
@@ -184,7 +183,23 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
   // initialize callback functions
   useEffect(() => {
     initializeCalculationsMenuHandlers(setPoints, setPolygon);
-  }, []);
+    let collapsibleContent = collapsibleContentRef.current;
+
+    // cleanup
+    return () => {
+      // set polygon to null when user switches to mobile
+      // show only initial menu content
+      setPolygon(null);
+
+      // remove sketch widget from calculations menu
+      if (collapsibleContent) {
+        let sketchMenuContainer = collapsibleContent.querySelector(
+          "#sketch-menu-container"
+        );
+        sketchMenuContainer && sketchMenuContainer.remove();
+      }
+    };
+  }, [isMobile]);
 
   // reset state
   useEffect(() => {
@@ -250,16 +265,15 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
 
   return (
     <CollapsibleSection
-      title="Sondennetz berechnen"
+      title="Berechnungsmenü"
       marginBottom="0px"
       open={!isMobile && polygon !== null}
       ref={ref}
       width="300px"
       isMobile={isMobile}
-      flex={true}
     >
-      <CollapsibleContent id="collapsible-content">
-        {!polygon && <p>Bitte wählen Sie zuerst ein Grundstück aus!</p>}
+      <CollapsibleContent id="collapsible-content" ref={collapsibleContentRef}>
+        {!polygon && "Bitte wählen Sie zuerst ein Grundstück aus!"}
         {polygon && (
           <>
             <InputSection>

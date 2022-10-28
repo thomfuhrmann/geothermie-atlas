@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { useMediaQuery } from "react-responsive";
@@ -31,6 +31,7 @@ const Input = styled.input`
 
 const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
   const dispatch = useDispatch();
+  const collapsibleContentRef = useRef(null);
 
   const [points, setPoints] = useState([]);
   const [polygon, setPolygon] = useState(null);
@@ -113,7 +114,23 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
   // initialize callback functions
   useEffect(() => {
     initializeCalculationsMenuHandlers(setPoints, setPolygon);
-  }, []);
+    let collapsibleContent = collapsibleContentRef.current;
+
+    // cleanup
+    return () => {
+      // set polygon to null when user switches to mobile
+      // show only initial menu content
+      setPolygon(null);
+
+      // remove sketch widget from calculations menu
+      if (collapsibleContent) {
+        let sketchMenuContainer = collapsibleContent.querySelector(
+          "#sketch-menu-container"
+        );
+        sketchMenuContainer && sketchMenuContainer.remove();
+      }
+    };
+  }, [isMobile]);
 
   // reset state
   useEffect(() => {
@@ -161,15 +178,15 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
 
   return (
     <CollapsibleSection
-      title="Brunnenpaar berechnen"
+      title="Berechnungsmenü"
       marginBottom="0px"
       open={!isMobile && polygon !== null}
       ref={ref}
       width="300px"
       isMobile={isMobile}
     >
-      <CollapsibleContent id="collapsible-content">
-        {!polygon && <p>Bitte wählen Sie zuerst ein Grundstück aus!</p>}
+      <CollapsibleContent id="collapsible-content" ref={collapsibleContentRef}>
+        {!polygon && "Bitte wählen Sie zuerst ein Grundstück aus!"}
         {polygon && (
           <>
             <InputSection>

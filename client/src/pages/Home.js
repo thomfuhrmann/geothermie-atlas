@@ -1,45 +1,101 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
-import { Placeholder, Content } from "../components/CommonStyledElements";
+import graphicEWS from "../assets/images/EWS.jpg";
+import graphicGWWP from "../assets/images/GWWP.jpg";
 
-const Paragraph = styled.p`
-  margin: 30px 0;
+const Content = styled.div`
+  bos-sizing: border-box;
+  margin: 0;
+  position: absolute;
+  top: 7%;
+  bottom: 0;
   width: 100%;
-  white-space: normal;
-  word-break: normal;
 `;
 
-const NavLinkContainer = styled.div`
+const ImageContainer = styled.div`
   display: flex;
-  margin: 20px;
+  height: 100%;
+  justify-content: center;
+`;
+
+const ImageFrame = styled.div`
+  position: relative;
+  border-left: ${(props) => props.borderLeft} solid white;
+  border-right: ${(props) => props.borderRight} solit white;
+`;
+
+const Image = styled.img`
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  padding: 0;
+  margin: 0;
+  float: ${(props) => props.float};
+`;
+
+const OverlayComponent = ({ className, children }) => {
+  const [mouseOver, setMouseOver] = useState(false);
+
+  const handleMouseOver = () => {
+    setMouseOver(true);
+  };
+
+  const handleMouseOut = () => {
+    setMouseOver(false);
+  };
+
+  return (
+    <div
+      className={className}
+      onMouseOver={handleMouseOver}
+      onMouseOut={handleMouseOut}
+    >
+      {mouseOver && <div>Hallo!</div>}
+    </div>
+  );
+};
+
+const Overlay = styled(OverlayComponent)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(100, 100, 100, 0.3);
+  &:hover {
+    background-color: rgba(255, 255, 255, 0);
+  }
 `;
 
 const Home = () => {
-  let name = "nav-link";
   return (
     <Content>
-      <Placeholder></Placeholder>
-      <Paragraph>Wählen Sie Ihr gewünschtes Thema:</Paragraph>
-      <div>
-        <NavLinkContainer>
-          <NavLink
-            to="/ews"
-            className={({ isActive }) => (isActive ? name + " active" : name)}
-          >
-            <span>Erdwärmesonden</span>
+      <ImageContainer>
+        <ImageFrame>
+          <NavLink to="/ews">
+            <Image
+              src={graphicEWS}
+              alt="Erdwärmesonden"
+              float="right"
+              borderRight="0.5px"
+            ></Image>
+            <Overlay></Overlay>
           </NavLink>
-        </NavLinkContainer>
-        <NavLinkContainer>
-          <NavLink
-            to="/gwwp"
-            className={({ isActive }) => (isActive ? name + " active" : name)}
-          >
-            <span>Thermische Grundwassernutzung</span>
+        </ImageFrame>
+        <ImageFrame>
+          <NavLink to="/gwwp">
+            <Image
+              src={graphicGWWP}
+              alt="Grundwasserwärmepumpen"
+              float="left"
+              borderLeft="0.5px"
+            ></Image>
+            <Overlay></Overlay>
           </NavLink>
-        </NavLinkContainer>
-      </div>
+        </ImageFrame>
+      </ImageContainer>
     </Content>
   );
 };

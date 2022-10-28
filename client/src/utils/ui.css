@@ -1,10 +1,10 @@
-/* .esri-component.esri-layer-list.esri-widget.esri-widget--panel {
-  max-height: 500px;
+.esri-component.esri-layer-list.esri-widget.esri-widget--panel {
+  max-height: 25%;
 }
 
 .esri-component.esri-legend.esri-widget.esri-widget--panel {
-  max-height: 300px;
-} */
+  max-height: 25%;
+}
 
 .esri-ui-top-left.esri-ui-corner {
   height: 95%;
@@ -30,9 +30,3 @@ a.nav-link:hover {
   text-underline-offset: 3px;
   text-decoration: solid underline #db7093;
 }
-
-/* .esri-sketch.esri-widget {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-} */

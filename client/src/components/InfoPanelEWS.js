@@ -23,12 +23,15 @@ import {
   TableData,
   TableHeader,
   Placeholder,
-  Container,
+  InfoPanelContainer,
   InfoPanelContent,
   PDFButton,
   PDFButtonDiv,
   Image,
   Warning,
+  Clearance,
+  Line,
+  GridContainer,
 } from "./CommonStyledElements";
 
 const textTemplates = {
@@ -96,6 +99,7 @@ export default function InfoPanelEWS() {
     );
 
     return () => {
+      setAddress(null);
       dispatch(updateEWSResources([]));
       dispatch(updateGWWPResources([]));
       dispatch(updateCadastralData({}));
@@ -104,7 +108,7 @@ export default function InfoPanelEWS() {
       dispatch(updateEWSComputationResult({}));
       dispatch(updateScreenshot(""));
     };
-  }, [dispatch]);
+  }, [dispatch, isMobile]);
 
   // print pdf report
   const clickHandler = () => {
@@ -143,7 +147,7 @@ export default function InfoPanelEWS() {
   };
 
   return (
-    <Container>
+    <InfoPanelContainer>
       <CollapsibleSection
         title="Standortbasierter Bericht"
         open={!isMobile ? true : false}
@@ -165,9 +169,9 @@ export default function InfoPanelEWS() {
                 <tbody>
                   <tr>
                     <td>
-                      Katastralgemeinde: {cadastralData.KG}
+                      Katastralgemeinde {cadastralData.KG}
                       <br></br>
-                      Grundstücksnummer: {cadastralData.GNR}
+                      Grundstücksnummer {cadastralData.GNR}
                     </td>
                   </tr>
                 </tbody>
@@ -187,16 +191,27 @@ export default function InfoPanelEWS() {
                   </tr>
                 </tbody>
               </Table>
-              {!scaleWarning && !closenessWarning && !outsideWarning && (
+              {/* {!scaleWarning && !closenessWarning && !outsideWarning && (
                 <Placeholder></Placeholder>
-              )}
+              )} */}
             </>
+          )}
+          {address && (
+            <GridContainer>
+              <Line color="blue"></Line>
+              <span>Grundstücksgrenze</span>
+              <Line color="red"></Line>
+              <span>Zwei-Meter-Abstand zur Grundstücksgrenze</span>
+            </GridContainer>
           )}
           {scaleWarning && (
             <Warning id="scale-warning">
               Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und
               Berechnungen zu ermöglichen!
             </Warning>
+          )}
+          {!scaleWarning && !address && (
+            <Clearance>Sie können jetzt ein Grundstück auswählen.</Clearance>
           )}
           {(closenessWarning || outsideWarning) && (
             <Table id="warnings-table">
@@ -251,7 +266,7 @@ export default function InfoPanelEWS() {
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {ampelkarte && (
+          {address && ampelkarte && (
             <AmpelkarteTable
               results={ampelkarte}
               setTables={setTables}
@@ -517,6 +532,6 @@ export default function InfoPanelEWS() {
           {address && <Footer></Footer>}
         </InfoPanelContent>
       </CollapsibleSection>
-    </Container>
+    </InfoPanelContainer>
   );
 }
