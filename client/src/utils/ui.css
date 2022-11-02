@@ -30,3 +30,17 @@ a.nav-link:hover {
   text-underline-offset: 3px;
   text-decoration: solid underline #db7093;
 }
+
+div.esri-sketch__panel {
+  justify-content: start;
+}
+
+calcite-action[label="Select feature"] {
+  display: none;
+}
+
+calcite-icon {
+  color: #a31010;
+  width: 16px;
+  height: 16px;
+}

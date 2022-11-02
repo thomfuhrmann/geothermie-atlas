@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
+import * as ReactDOM from "react-dom/client";
 import styled from "styled-components";
 import { useMediaQuery } from "react-responsive";
+import { useSelector } from "react-redux";
 
 import InfoPanelEWS from "../components/InfoPanelEWS";
 import InfoPanelGWWP from "../components/InfoPanelGWWP";
@@ -9,6 +11,9 @@ import CalculationsMenuGWWP from "../components/CalculationsMenuGWWP";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 import { initialize } from "../utils/view";
+
+import { Provider } from "react-redux";
+import { store } from "../redux/store";
 
 const MapContainer = styled.div`
   box-sizing: border-box;
@@ -37,43 +42,73 @@ const MenuContainer = styled.div`
 const Map = ({ theme }) => {
   const mapDiv = useRef(null);
   const calculationsMenuRef = useRef(null);
+  const mapViewRef = useRef(null);
+  const calcMenuContainerRef = useRef(null);
 
   const isMobile = useMediaQuery({ maxWidth: 480 });
+
+  const cadastralData = useSelector((store) => store.cadastre.value);
 
   const [loading, setLoading] = useState(null);
 
   useEffect(() => {
     // initialize the map interface
-    let calculationsMenu = calculationsMenuRef.current;
-    let { mapView, sketch } = initialize(
-      mapDiv.current,
-      theme,
-      calculationsMenu,
-      isMobile
-    );
+    let obj = initialize(mapDiv.current, theme, isMobile);
+    mapViewRef.current = obj.view;
+    let sketch = obj.sketch;
+
+    // render calculations menu
+    let calculationsMenu;
+    if (theme === "EWS") {
+      calculationsMenu = (
+        <CalculationsMenuEWS
+          ref={calculationsMenuRef}
+          isLoading={setLoading}
+          sketch={sketch}
+        ></CalculationsMenuEWS>
+      );
+    } else {
+      calculationsMenu = (
+        <CalculationsMenuGWWP
+          ref={calculationsMenuRef}
+          isLoading={setLoading}
+        ></CalculationsMenuGWWP>
+      );
+    }
+
+    calcMenuContainerRef.current = document.createElement("div");
+    const root = ReactDOM.createRoot(calcMenuContainerRef.current);
+    root.render(<Provider store={store}>{calculationsMenu}</Provider>);
 
     return () => {
       // destroy map view when component gets unmounted
-      if (mapView && sketch) {
-        sketch.destroy();
-        mapView.destroy();
+      if (mapViewRef.current) {
+        mapViewRef.current.destroy();
       }
     };
   }, [theme, isMobile]);
+
+  useEffect(() => {
+    if (Object.keys(cadastralData).length > 0) {
+      if (isMobile) {
+        mapViewRef.current.ui.add(calcMenuContainerRef.current, "bottom-right");
+      } else {
+        mapViewRef.current.ui.add(calcMenuContainerRef.current, "top-left");
+      }
+    } else {
+      mapViewRef.current.ui.remove(calcMenuContainerRef.current);
+    }
+  }, [cadastralData, isMobile]);
 
   switch (theme) {
     case "EWS":
       return (
         <MapContainer ref={mapDiv} key={theme}>
           <MenuContainer
-            width={isMobile ? "300px" : "23%"}
+            width={isMobile ? "300px" : "25%"}
             maxHeight={isMobile ? "80%" : "93%"}
           >
             <InfoPanelEWS></InfoPanelEWS>
-            <CalculationsMenuEWS
-              ref={calculationsMenuRef}
-              isLoading={setLoading}
-            ></CalculationsMenuEWS>
           </MenuContainer>
           {loading && <LoadingSpinner></LoadingSpinner>}
         </MapContainer>
@@ -82,14 +117,10 @@ const Map = ({ theme }) => {
       return (
         <MapContainer ref={mapDiv} key={theme}>
           <MenuContainer
-            width={isMobile ? "300px" : "23%"}
+            width={isMobile ? "300px" : "25%"}
             maxHeight={isMobile ? "80%" : "93%"}
           >
             <InfoPanelGWWP></InfoPanelGWWP>
-            <CalculationsMenuGWWP
-              ref={calculationsMenuRef}
-              isLoading={setLoading}
-            ></CalculationsMenuGWWP>
           </MenuContainer>
           {loading && <LoadingSpinner></LoadingSpinner>}
         </MapContainer>

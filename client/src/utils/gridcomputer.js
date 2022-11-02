@@ -32,7 +32,7 @@ const drawPolygon = (polygon) => {
       symbol: {
         type: "simple-fill",
         color: [0, 0, 0, 0],
-        outline: { color: "red", width: "1px" },
+        outline: { color: "#00890c", width: "2px" },
       },
     })
   );

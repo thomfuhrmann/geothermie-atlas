@@ -35,6 +35,18 @@ const Image = styled.img`
   float: ${(props) => props.float};
 `;
 
+const Card = styled.div`
+  position: absolute;
+  box-sizing: border-box;
+  bottom: 0;
+  height: 8%;
+  width: 100%;
+  padding: 15px 60px;
+  color: #89e9ff;
+  font-size: xxx-large;
+  text-align: ${(props) => props.textAlign};
+`;
+
 const OverlayComponent = ({ className, children }) => {
   const [mouseOver, setMouseOver] = useState(false);
 
@@ -52,7 +64,7 @@ const OverlayComponent = ({ className, children }) => {
       onMouseOver={handleMouseOver}
       onMouseOut={handleMouseOut}
     >
-      {mouseOver && <div>Hallo!</div>}
+      {mouseOver && children}
     </div>
   );
 };
@@ -63,7 +75,7 @@ const Overlay = styled(OverlayComponent)`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(100, 100, 100, 0.3);
+  background-color: rgba(255, 255, 255, 0.5);
   &:hover {
     background-color: rgba(255, 255, 255, 0);
   }
@@ -79,9 +91,11 @@ const Home = () => {
               src={graphicEWS}
               alt="Erdwärmesonden"
               float="right"
-              borderRight="0.5px"
+              borderRight="1px"
             ></Image>
-            <Overlay></Overlay>
+            <Overlay>
+              <Card textAlign="right">Erdwärmesonden</Card>
+            </Overlay>
           </NavLink>
         </ImageFrame>
         <ImageFrame>
@@ -90,9 +104,11 @@ const Home = () => {
               src={graphicGWWP}
               alt="Grundwasserwärmepumpen"
               float="left"
-              borderLeft="0.5px"
+              borderLeft="1px"
             ></Image>
-            <Overlay></Overlay>
+            <Overlay>
+              <Card textAlign="left">Grundwasserwärmepumpen</Card>
+            </Overlay>
           </NavLink>
         </ImageFrame>
       </ImageContainer>

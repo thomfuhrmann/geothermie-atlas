@@ -203,7 +203,7 @@ export default function InfoPanelGWWP() {
               {/* {!scaleWarning && !outsideWarning && <Placeholder></Placeholder>} */}
             </>
           )}
-          {address && (
+          {Object.keys(cadastralData).length > 0 && (
             <GridContainer>
               <Line color="blue"></Line>
               <span>Grundstücksgrenze</span>

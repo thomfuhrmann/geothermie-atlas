@@ -180,80 +180,77 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
     <CollapsibleSection
       title="Berechnungsmenü"
       marginBottom="0px"
-      open={!isMobile && polygon !== null}
+      open={!isMobile}
       ref={ref}
       width="300px"
       isMobile={isMobile}
     >
       <CollapsibleContent id="collapsible-content" ref={collapsibleContentRef}>
-        {!polygon && "Bitte wählen Sie zuerst ein Grundstück aus!"}
-        {polygon && (
-          <>
-            <InputSection>
-              <label htmlFor="ehz-input">
-                Jahresheizenergie in MWh (optional)
-              </label>
-              <Input
-                id="ehz-input"
-                type="number"
-                min="0"
-                placeholder="Wert größer gleich 0"
-                onChange={handleEHZ}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="ekl-input">
-                Jahreskühlenergie in MWh (optional)
-              </label>
-              <Input
-                id="ekl-input"
-                type="number"
-                min="0"
-                placeholder="Wert größer gleich 0"
-                onChange={handleEKL}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
-              <Input
-                id="phz-input"
-                type="number"
-                min="0"
-                placeholder="Wert größer gleich 0"
-                onChange={handlePHZ}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
-              <Input
-                id="pkl-input"
-                type="number"
-                min="0"
-                placeholder="Wert größer gleich 0"
-                onChange={handlePKL}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="cop-wp-input">
-                Leistungszahl der Wärmepumpe (optional)
-              </label>
-              <Input
-                id="cop-wp-input"
-                type="number"
-                min="0"
-                placeholder="Wert größer gleich 0"
-                onChange={handleCOPWP}
-              ></Input>
-            </InputSection>
-            {points.length === 2 && (
-              <ButtonContainer>
-                <Button onClick={handleGWWPCalculation}>
-                  Berechnung starten
-                </Button>
-              </ButtonContainer>
-            )}
-          </>
-        )}
+        <>
+          <InputSection>
+            <label htmlFor="ehz-input">
+              Jahresheizenergie in MWh (optional)
+            </label>
+            <Input
+              id="ehz-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer gleich 0"
+              onChange={handleEHZ}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="ekl-input">
+              Jahreskühlenergie in MWh (optional)
+            </label>
+            <Input
+              id="ekl-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer gleich 0"
+              onChange={handleEKL}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
+            <Input
+              id="phz-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer gleich 0"
+              onChange={handlePHZ}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
+            <Input
+              id="pkl-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer gleich 0"
+              onChange={handlePKL}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="cop-wp-input">
+              Leistungszahl der Wärmepumpe (optional)
+            </label>
+            <Input
+              id="cop-wp-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer gleich 0"
+              onChange={handleCOPWP}
+            ></Input>
+          </InputSection>
+          {points.length === 2 && (
+            <ButtonContainer>
+              <Button onClick={handleGWWPCalculation}>
+                Berechnung starten
+              </Button>
+            </ButtonContainer>
+          )}
+        </>
       </CollapsibleContent>
     </CollapsibleSection>
   );

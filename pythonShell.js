@@ -3,7 +3,7 @@ const { PythonShell } = require("python-shell");
 const fs = require("fs");
 const path = require("path");
 
-const scriptFile = "./python/BHEseppy_query_V50_GTHAtlas_beta2.py";
+const scriptFile = "./python/BHEseppy_query_V50_MWP_beta5.py";
 
 const runPythonShell = (res, options) => {
   PythonShell.run(scriptFile, options, function (err, results) {

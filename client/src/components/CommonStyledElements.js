@@ -14,7 +14,7 @@ export const GridContainer = styled.div`
   box-sizing: border-box;
   grid-template-columns: auto auto;
   grid-template-rows: min-content min-content;
-  margin: 5px 0;
+  margin: 5px 0px 10px 0;
 `;
 
 export const Warning = styled.p`
@@ -141,6 +141,7 @@ const TablePadding = `padding: 10px;`;
 export const Table = styled.table`
   table-layout: fixed;
   width: 100%;
+  margin: ${(props) => props.margin || "0px"};
 `;
 
 export const TableData = styled.td`

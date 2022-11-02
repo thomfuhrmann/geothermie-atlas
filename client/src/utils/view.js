@@ -25,6 +25,7 @@ import { takeScreenshot } from "./screenshot";
 import { getAddress } from "./getAddress";
 
 import "./ui.css";
+import { updateCadastralData } from "../redux/cadastreSlice";
 
 // spatial reference WKID
 export const SRS = 31256;
@@ -55,7 +56,7 @@ let setPoints,
   setClosenessWarning,
   setOutsideWarning,
   setScaleWarning;
-export function initialize(container, theme, calculationsMenu, isMobile) {
+export function initialize(container, theme, isMobile) {
   const scaleLimit = 1000;
 
   view = new MapView({
@@ -110,14 +111,14 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
   const ews = new MapImageLayer({
     title: "Geothermische Ressourcen für Erdwärmesonden",
     url: ews_url,
-    visible: false,
+    visible: true,
     listMode: theme === "EWS" ? "show" : "hide",
   });
 
   const gwwp = new MapImageLayer({
     title: "Geothermische Ressourcen für Grundwasserwärmepumpen",
     url: gwwp_url,
-    visible: false,
+    visible: true,
     listMode: theme === "GWWP" ? "show" : "hide",
   });
 
@@ -149,6 +150,24 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
     cadastreOverlay.findSublayerByName("DKM_GST").legendEnabled = false;
     cadastreOverlay.findSublayerByName("KAT_DKM_GST-NFL").legendEnabled = false;
     cadastreOverlay.findSublayerByName("KAT_DKM_GST-NFL").visible = false;
+  });
+
+  gwwp.when(() => {
+    const bundeslandGrenzen = gwwp.findSublayerById(10);
+    if (bundeslandGrenzen) {
+      bundeslandGrenzen.visible = false;
+      bundeslandGrenzen.legendEnabled = false;
+    }
+    gwwp.findSublayerById(0).visible = false;
+  });
+
+  ews.when(() => {
+    const bundeslandGrenzen = ews.findSublayerById(7);
+    if (bundeslandGrenzen) {
+      bundeslandGrenzen.visible = false;
+      bundeslandGrenzen.legendEnabled = false;
+    }
+    ews.findSublayerById(0).visible = false;
   });
 
   // basemap in Viennese coordinate system due to tranformation inaccuracies from MGI to in WGS84
@@ -230,7 +249,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
   const sketch = new Sketch({
     layer: pointGraphicsLayer,
     view: view,
-    availableCreateTools: ["point"],
+    availableCreateTools: [theme === "EWS" ? "point" : undefined],
     visibleElements: {
       selectionTools: {
         "lasso-selection": false,
@@ -392,7 +411,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
 
   // register event handlers for mouse clicks
   view.on("click", ({ mapPoint }) => {
-    // at application start
+    // at application start if no polygon is drawn yet
     if (polygonGraphicsLayer.graphics.length === 0) {
       startNewQuery(mapPoint);
     } else {
@@ -438,7 +457,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
               type: "simple-marker",
               size: "30px",
               color: null,
-              outline: { color: "#45be49" },
+              outline: { color: "#00ffff" },
             },
           });
           highlightGraphicsLayer.add(pointGraphic);
@@ -452,6 +471,7 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
 
   const startNewQuery = (mapPoint) => {
     // clear all
+    dispatch(updateCadastralData({}));
     polygonGraphicsLayer.removeAll();
     boundaryGraphicsLayer.removeAll();
     pointGraphicsLayer.removeAll();
@@ -461,13 +481,13 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
     setPoints([]);
 
     // hide sketch menu if user starts new query
-    let sketchMenuContainer = calculationsMenu.querySelector(
-      "#sketch-menu-container"
-    );
+    // let sketchMenuContainer = calculationsMenu.querySelector(
+    //   "#sketch-menu-container"
+    // );
 
-    if (sketchMenuContainer) {
-      sketchMenuContainer.style.display = "none";
-    }
+    // if (sketchMenuContainer) {
+    //   sketchMenuContainer.style.display = "none";
+    // }
 
     // initialize store in case there was a previous computation
     switch (theme) {
@@ -506,30 +526,31 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
     }
 
     // add sketch menu to calculations menu if below scale limit
-    if (view.scale < scaleLimit) {
-      if (!sketchMenuContainer) {
-        // add menu elements
-        const collapsibleContent = calculationsMenu.querySelector(
-          "#collapsible-content"
-        );
-        sketchMenuContainer = document.createElement("div");
-        sketchMenuContainer.id = "sketch-menu-container";
-        collapsibleContent.appendChild(sketchMenuContainer);
+    // if (theme === "EWS" && view.scale < scaleLimit) {
+    //   if (!sketchMenuContainer) {
+    //     // add menu elements
+    //     const collapsibleContent = calculationsMenu.querySelector(
+    //       "#collapsible-content"
+    //     );
+    //     sketchMenuContainer = document.createElement("div");
+    //     sketchMenuContainer.id = "sketch-menu-container";
+    //     sketchMenuContainer.style.fontFamily = `-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif`;
+    //     sketchMenuContainer.style.textRendering = "optimizelegibility";
+    //     sketchMenuContainer.style.lineHeight = "normal";
+    //     sketchMenuContainer.style.boxSizing = "content-box";
+    //     sketchMenuContainer.style.display = "inline";
+    //     collapsibleContent.appendChild(sketchMenuContainer);
 
-        let label = document.createElement("label");
-        if (theme === "GWWP") {
-          label.innerHTML = "neuen Brunnenpunkt setzen";
-        } else {
-          label.innerHTML = "neuen Sondenpunkt setzen";
-        }
-        sketchMenuContainer.appendChild(label);
-      } else {
-        // set to block mode if container already exists
-        sketchMenuContainer.style.display = "block";
-      }
+    //     let label = document.createElement("label");
+    //     label.innerHTML = "Sondenpunkte auswählen oder zeichnen";
+    //     sketchMenuContainer.appendChild(label);
+    //   } else {
+    //     // set to block mode if container already exists
+    //     sketchMenuContainer.style.display = "block";
+    //   }
 
-      sketch.container = sketchMenuContainer;
-    }
+    //   sketch.container = sketchMenuContainer;
+    // }
   };
 
   // add map to view
@@ -538,14 +559,14 @@ export function initialize(container, theme, calculationsMenu, isMobile) {
   // add UI components
   view.ui.components = [];
   if (!isMobile) {
-    view.ui.add([search, layerList, legend, calculationsMenu], "top-left");
+    view.ui.add([search, layerList, legend], "top-left");
     view.ui.add(scaleBar, "bottom-left");
-  } else {
-    view.ui.add([calculationsMenu], "bottom-right");
   }
 
   // set container of mapview
   view.container = container;
+
+  // return map view and sketch widget
   return { view, sketch };
 }
 

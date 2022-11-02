@@ -7,7 +7,7 @@ import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
 import { view, initializeCalculationsMenuHandlers } from "../utils/view";
 import { calculateGrid } from "../utils/gridcomputer";
 import { takeScreenshot } from "../utils/screenshot";
-import { Button, ButtonContainer } from "./CommonStyledElements";
+import { Button, ButtonContainer, Warning } from "./CommonStyledElements";
 import CollapsibleSection from "./CollapsibleSection";
 
 const InputSection = styled.div`
@@ -26,7 +26,7 @@ const CollapsibleContent = styled.div`
   padding: 15px 15px;
 `;
 
-const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
+const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   const [polygon, setPolygon] = useState(null);
   const [gridSpacing, setGridSpacing] = useState(10);
   const [boreDepth, setBoreDepth] = useState(100);
@@ -41,7 +41,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
   const betriebsstunden = useSelector((store) => store.betriebsstunden.value);
 
   const gridSpacingInputRef = useRef(null);
-  const collapsibleContentRef = useRef(null);
+  const sketchContainerRef = useRef(null);
 
   const dispatch = useDispatch();
 
@@ -65,10 +65,14 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
       const WLF = resources.find((result) => result.layerId === 6)?.feature
         ?.attributes["Pixel Value"];
 
-      const BS_KL_Norm = betriebsstunden.find((result) => result.layerId === 0)
-        ?.feature?.attributes["Pixel Value"];
-      const BS_HZ_Norm = betriebsstunden.find((result) => result.layerId === 1)
-        ?.feature?.attributes["Pixel Value"];
+      const BS_KL_Norm = parseInt(
+        betriebsstunden.find((result) => result.layerId === 0)?.feature
+          ?.attributes["Pixel Value"]
+      );
+      const BS_HZ_Norm = parseInt(
+        betriebsstunden.find((result) => result.layerId === 1)?.feature
+          ?.attributes["Pixel Value"]
+      );
 
       let url = "/api";
       url +=
@@ -93,73 +97,73 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
         fetch(url)
           .then((res) => res.json())
           .then((data) => {
-            const PHZ_L3 = parseFloat(data[11]);
-            const PKL_L3 = Math.abs(parseFloat(data[12]));
-            const BS_HZ_L3 = parseFloat(data[13]);
-            const BS_KL_L3 = parseFloat(data[14]);
-            // const BB_L3 = parseInt(data[15])
-            const cover = parseFloat(data[16]);
+            const meanBoreholeSpacing = gridSpacing;
 
-            const PHZ_L3_bal = parseFloat(data[17]);
-            const PKL_L3_bal = Math.abs(parseFloat(data[18]));
-            const BS_HZ_bal = parseFloat(data[19]);
-            const BS_KL_bal = parseFloat(data[20]);
+            const calculationMode = data[11];
+            const heizleistung = parseFloat(data[12]).toFixed(1);
+            const kuehlleistung = -parseFloat(data[13]).toFixed(1);
+            const strombedarf = parseFloat(data[17]).toFixed(1);
+            const heizarbeit = (parseFloat(data[14]) / 1000).toFixed(1);
+            const kuehlarbeit = -(parseFloat(data[15]) / 1000).toFixed(1);
+            const energiefaktor = parseFloat(data[25]).toFixed(1);
+            const energiebedarf = (parseFloat(data[19]) / 1000).toFixed(1);
+            const cover = parseInt(data[16]);
+            const imagehash = "data:image/png;base64," + data[26];
+            const imagehashSondenfeld = "data:image/png;base64," + data[27];
 
-            const imagehash = "data:image/png;base64," + data[21];
-            const imagehash_bal = "data:image/png;base64," + data[22];
-
-            const leistungHZ = (points.length * boreDepth * PHZ_L3) / 1000;
-            const jahresEnergieMengeHZ = leistungHZ * BS_HZ_L3;
-
-            const leistungKL = (points.length * boreDepth * PKL_L3) / 1000;
-            const jahresEnergieMengeKL = leistungKL * BS_KL_L3;
-
-            const leistungHZ_bal =
-              (points.length * boreDepth * PHZ_L3_bal) / 1000;
-            const jahresEnergieMengeHZ_bal = leistungHZ_bal * BS_HZ_bal;
-
-            const leistungKL_bal =
-              (points.length * boreDepth * PKL_L3_bal) / 1000;
-            const jahresEnergieMengeKL_bal = leistungKL_bal * BS_KL_L3;
-
-            const differenz_PHZ = PHZ_L3_bal - PHZ_L3;
-            const differenz_BS_HZ = BS_HZ_bal - BS_HZ_L3;
-
-            const differenz_PKL = PKL_L3_bal - PKL_L3;
-            const differenz_BS_KL = BS_KL_bal - BS_KL_L3;
+            const balanced = parseInt(data[28]);
+            const heizleistung_bal = parseFloat(data[29]).toFixed(1);
+            const kuehlleistung_bal = -parseFloat(data[30]).toFixed(1);
+            const strombedarf_bal = parseFloat(data[34]).toFixed(1);
+            const heizarbeit_bal = (parseFloat(data[31]) / 1000).toFixed(1);
+            const kuehlarbeit_bal = -(parseFloat(data[32]) / 1000).toFixed(1);
+            const energiefaktor_bal = parseFloat(data[42]).toFixed(1);
+            const energiebedarf_bal = (parseFloat(data[36]) / 1000).toFixed(1);
+            const cover_bal = parseInt(data[33]);
+            const imagehash_bal = "data:image/png;base64," + data[43];
 
             dispatch(
               updateEWSComputationResult({
-                KG: cadastralData.KG,
-                GNR: cadastralData.GNR,
-                FF: cadastralData.FF,
+                calculationMode,
                 points: points.length,
+                meanBoreholeSpacing,
                 boreDepth,
-                leistungHZ,
-                jahresEnergieMengeHZ,
-                leistungKL,
-                jahresEnergieMengeKL,
-                cover,
-                leistungHZ_bal,
-                jahresEnergieMengeHZ_bal,
-                leistungKL_bal,
-                jahresEnergieMengeKL_bal,
-                differenz_PHZ,
-                differenz_BS_HZ,
-                differenz_PKL,
-                differenz_BS_KL,
-                imagehash,
-                imagehash_bal,
-                BS_HZ,
-                BS_KL,
                 P_HZ,
                 P_KL,
+                BS_HZ,
+                BS_KL,
+                BS_HZ_Norm,
+                BS_KL_Norm,
+                heizleistung,
+                kuehlleistung,
+                strombedarf,
+                heizarbeit,
+                kuehlarbeit,
+                energiefaktor,
+                energiebedarf,
+                cover,
+                imagehash,
+                imagehashSondenfeld,
+                balanced,
+                heizleistung_bal,
+                kuehlleistung_bal,
+                strombedarf_bal,
+                heizarbeit_bal,
+                kuehlarbeit_bal,
+                energiefaktor_bal,
+                energiebedarf_bal,
+                cover_bal,
+                imagehash_bal,
               })
             );
             isLoading(false);
           })
           .catch((err) => {
-            console.log(err);
+            dispatch(
+              updateEWSComputationResult({
+                error: err,
+              })
+            );
           });
       } else if (points.length === 0) {
         dispatch(
@@ -180,26 +184,19 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
     }
   };
 
-  // initialize callback functions
   useEffect(() => {
+    // initialize callback functions
     initializeCalculationsMenuHandlers(setPoints, setPolygon);
-    let collapsibleContent = collapsibleContentRef.current;
+
+    // add sketch widget to calculations menu
+    sketch.container = sketchContainerRef.current;
 
     // cleanup
     return () => {
       // set polygon to null when user switches to mobile
-      // show only initial menu content
       setPolygon(null);
-
-      // remove sketch widget from calculations menu
-      if (collapsibleContent) {
-        let sketchMenuContainer = collapsibleContent.querySelector(
-          "#sketch-menu-container"
-        );
-        sketchMenuContainer && sketchMenuContainer.remove();
-      }
     };
-  }, [isMobile]);
+  }, [isMobile, sketch]);
 
   // reset state
   useEffect(() => {
@@ -267,95 +264,96 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading }, ref) => {
     <CollapsibleSection
       title="Berechnungsmenü"
       marginBottom="0px"
-      open={!isMobile && polygon !== null}
+      open={!isMobile}
       ref={ref}
       width="300px"
       isMobile={isMobile}
     >
-      <CollapsibleContent id="collapsible-content" ref={collapsibleContentRef}>
-        {!polygon && "Bitte wählen Sie zuerst ein Grundstück aus!"}
-        {polygon && (
-          <>
-            <InputSection>
-              <label htmlFor="gridspacing-input">Sondenabstand in Meter</label>
-              <Input
-                id="gridspacing-input"
-                type="number"
-                min="5"
-                max="15"
-                placeholder="zwischen 5 und 15 m (default=10)"
-                value={gridSpacing}
-                onChange={handleGridSpacing}
-                ref={gridSpacingInputRef}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="depth-input">Sondentiefe in Meter</label>
-              <Input
-                id="depth-input"
-                type="number"
-                min="80"
-                max="250"
-                placeholder="zwischen 80 und 250 m (default=100)"
-                value={boreDepth}
-                onChange={handleDepth}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="bshz-input">
-                Jahresbetriebsstunden Heizen (optional)
-              </label>
-              <Input
-                id="bshz-input"
-                type="number"
-                min="0"
-                max="4379"
-                placeholder="zwischen 0 und 4379"
-                onChange={handleBS_HZ}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="bskl-input">
-                Jahresbetriebsstunden Kühlen (optional)
-              </label>
-              <Input
-                id="bskl-input"
-                type="number"
-                min="0"
-                max="4379"
-                placeholder="zwischen 0 und 4379"
-                onChange={handleBS_KL}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
-              <Input
-                id="phz-input"
-                type="number"
-                min="0"
-                placeholder="Wert größer 0"
-                onChange={handleP_HZ}
-              ></Input>
-            </InputSection>
-            <InputSection>
-              <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
-              <Input
-                id="pkl-input"
-                type="number"
-                min="0"
-                placeholder="Wert größer 0"
-                onChange={handleP_KL}
-              ></Input>
-            </InputSection>
-            {points.length > 0 && (
-              <ButtonContainer>
-                <Button onClick={handlePythonCalculation}>
-                  Berechnung starten
-                </Button>
-              </ButtonContainer>
-            )}
-          </>
-        )}
+      <CollapsibleContent id="collapsible-content">
+        <>
+          <label>Sondenpunkte auswählen oder zeichnen</label>
+          <div ref={sketchContainerRef}></div>
+          <InputSection>
+            <label htmlFor="gridspacing-input">Sondenabstand in Meter</label>
+            <Input
+              id="gridspacing-input"
+              type="number"
+              min="5"
+              max="15"
+              placeholder="Wert zwischen 5 und 15 m (default=10)"
+              value={gridSpacing}
+              onChange={handleGridSpacing}
+              ref={gridSpacingInputRef}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="depth-input">Sondentiefe in Meter</label>
+            <Input
+              id="depth-input"
+              type="number"
+              min="80"
+              max="250"
+              placeholder="Wert zwischen 80 und 250 m (default=100)"
+              value={boreDepth}
+              onChange={handleDepth}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="bshz-input">
+              Volllaststunden Heizen (optional)
+            </label>
+            <Input
+              id="bshz-input"
+              type="number"
+              min="0"
+              max="4379"
+              placeholder="Wert zwischen 0 und 4379"
+              onChange={handleBS_HZ}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="bskl-input">
+              Volllaststunden Kühlen (optional)
+            </label>
+            <Input
+              id="bskl-input"
+              type="number"
+              min="0"
+              max="4379"
+              placeholder="Wert zwischen 0 und 4379"
+              onChange={handleBS_KL}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
+            <Input
+              id="phz-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer 0"
+              onChange={handleP_HZ}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
+            <Input
+              id="pkl-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer 0"
+              onChange={handleP_KL}
+            ></Input>
+          </InputSection>
+          {points.length > 0 ? (
+            <ButtonContainer>
+              <Button onClick={handlePythonCalculation}>
+                Berechnung starten
+              </Button>
+            </ButtonContainer>
+          ) : (
+            <Warning>Bitte zeichnen Sie mindestens einen Punkt!</Warning>
+          )}
+        </>
       </CollapsibleContent>
     </CollapsibleSection>
   );

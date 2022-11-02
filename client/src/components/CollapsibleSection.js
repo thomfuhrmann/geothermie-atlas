@@ -32,7 +32,7 @@ const CollapsibleContainer = styled.div`
   margin-bottom: ${(props) => props.marginBottom};
   box-sizing: border-box;
   min-height: 54px;
-  max-height: ${(props) => (!props.isMobile ? "50%" : "35%")};
+  max-height: ${(props) => (!props.isMobile ? "60%" : "35%")};
   width: ${(props) => props.width || "100%"};
 `;
 
@@ -45,7 +45,16 @@ const CollapsibleContent = styled.div`
 
 const CollapsibleSection = React.forwardRef(
   (
-    { title, children, open, marginBottom = "1px", flex, width, isMobile },
+    {
+      title,
+      children,
+      open,
+      marginBottom = "1px",
+      flex,
+      width,
+      isMobile,
+      display,
+    },
     ref
   ) => {
     const [opened, setOpened] = useState(open);

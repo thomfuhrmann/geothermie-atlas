@@ -8,7 +8,9 @@ export const print = (
   image_bal,
   image_unbal,
   cadastralData,
-  warnings = false
+  warnings = false,
+  image_borefield,
+  calculationMode
 ) => {
   let spaceBetween = 5;
 
@@ -27,6 +29,8 @@ export const print = (
   });
 
   doc.addImage(screenshot, "PNG", 20, 30, 170, 85);
+
+  doc.setFillColor(255, 255, 255);
 
   if (cadastralData) {
     doc.autoTable({
@@ -135,22 +139,81 @@ export const print = (
     if (hinweise) {
       doc.addPage();
     }
+
     doc.autoTable({
-      html: "#calculations-output-table",
+      html: "#calculations-input-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
       startY: hinweise ? 20 : finalY + spaceBetween,
       willDrawCell: function (data) {
         if (data.section === "head") {
-          data.cell.text = "Berechnungsergebnis";
+          let title = "Ressourcen aus Berechnung mit Benutzervorgabe";
+          if (calculationMode === "norm") {
+            title += " und Normbetriebsstunden";
+          }
+          data.cell.text[0] = title;
         }
 
-        if (data.cell.text[0] === "Gewählte Parameter") {
+        if (data.cell.text[0].startsWith("Die Berechnung")) {
+          doc.setFillColor(255, 255, 255);
+        }
+
+        if (
+          data.cell.text[0].startsWith("Das Energie- und Leistungsverhältnis")
+        ) {
+          doc.setFillColor(255, 255, 255);
+        }
+
+        if (data.cell.text[0] === "Benutzerdefinierte Vorgaben") {
+          doc.setFillColor(255, 255, 255);
+          data.cell.styles.halign = "center";
+        }
+      },
+    });
+  }
+
+  finalY = doc.lastAutoTable.finalY;
+  if (image_borefield) {
+    const imgProps = doc.getImageProperties(image_borefield.current);
+    const width = doc.internal.pageSize.getWidth() - 60;
+    const totalHeight = doc.internal.pageSize.getHeight();
+    let height = (imgProps.height * width) / imgProps.width;
+    if (height > totalHeight - finalY - 10) {
+      doc.addPage();
+      doc.addImage(image_borefield.current, "PNG", 30, 20, width, height);
+    } else {
+      doc.addImage(
+        image_borefield.current,
+        "PNG",
+        30,
+        finalY + 5,
+        width,
+        height
+      );
+    }
+  }
+
+  // finalY = doc.lastAutoTable.finalY;
+  doc.addPage();
+  if (computationResult) {
+    doc.autoTable({
+      html: "#calculations-output-table",
+      rowPageBreak: "avoid",
+      showHead: "firstPage",
+      startY: 20,
+      willDrawCell: function (data) {
+        if (
+          data.cell.text[0].startsWith("Das Energie- und Leistungsverhältnis")
+        ) {
+          doc.setFillColor(255, 255, 255);
+        }
+
+        if (data.cell.text[0] === "Benutzerdefinierte Vorgaben") {
           doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }
 
-        if (data.cell.text[0] === "Berechnungsergebnis") {
+        if (data.cell.text[0] === "Berechnungsergebnisse") {
           doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }
@@ -175,11 +238,6 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   let startY = 0;
-  // if (pageAdded) {
-  //   startY = height + 30;
-  // } else {
-  //   startY = finalY + height + 10;
-  // }
   if (computationResult && image_bal) {
     doc.addPage();
     doc.autoTable({
@@ -189,19 +247,19 @@ export const print = (
       startY: startY + 20,
       willDrawCell: function (data) {
         if (data.section === "head") {
-          data.cell.text = "Berechnungsergebnis (bilanzierter Betrieb)";
+          data.cell.text[0] =
+            "Berechnungsergebnisse mit automatischer Vorgabe im Speicherbetrieb";
         }
 
-        if (data.cell.text[0].startsWith("Für einen bilanzierten")) {
+        if (data.cell.text[0].startsWith("Diese Berechnung")) {
           doc.setFillColor(255, 255, 255);
         }
 
-        if (data.cell.text[0] === "Gewählte Parameter") {
+        if (data.cell.text[0].startsWith("Hinweis")) {
           doc.setFillColor(255, 255, 255);
-          data.cell.styles.halign = "center";
         }
 
-        if (data.cell.text[0] === "Berechnungsergebnis") {
+        if (data.cell.text[0] === "Berechnungsergebnisse") {
           doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }

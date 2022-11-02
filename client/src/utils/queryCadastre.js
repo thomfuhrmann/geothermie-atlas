@@ -62,7 +62,7 @@ export const queryCadastre = (
         style: "solid",
         outline: {
           color: "blue",
-          width: 1,
+          width: "2px",
         },
       };
 
