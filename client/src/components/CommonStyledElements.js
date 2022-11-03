@@ -98,7 +98,8 @@ export const PDFButton = styled.button`
 
 export const Image = styled.img`
   width: 100%;
-  height: fit-content;
+  height: auto;
+  object-fit: cover;
 `;
 
 export const Menu = styled.div`

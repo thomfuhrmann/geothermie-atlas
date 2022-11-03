@@ -9,24 +9,25 @@ const app = express();
 const port = 5000;
 
 app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "client/build")));
 
-app.get("/api", ({ query }, res) => {
+app.post("/api", ({ body }, res) => {
   let options = {
     args: [
-      query.EZ,
-      query.BT,
-      query.GT,
-      query.WLF,
-      query.BS_HZ_Norm,
-      query.BS_KL_Norm,
-      query.BS_HZ,
-      query.BS_KL,
-      query.P_HZ,
-      query.P_KL,
-      query.FF,
-      query.boreDepth,
-      query.points,
+      body.EZ,
+      body.BT,
+      body.GT,
+      body.WLF,
+      body.BS_HZ_Norm,
+      body.BS_KL_Norm,
+      body.BS_HZ,
+      body.BS_KL,
+      body.P_HZ,
+      body.P_KL,
+      body.FF,
+      body.boreDepth,
+      body.points,
     ],
   };
   if (options.args.every((option) => option !== undefined)) {

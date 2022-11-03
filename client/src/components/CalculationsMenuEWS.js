@@ -74,26 +74,48 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
       );
 
       let url = "/api";
-      url +=
-        "?" +
-        new URLSearchParams({
-          EZ: cadastralData.GNR,
-          BT,
-          GT,
-          WLF,
-          BS_HZ_Norm,
-          BS_KL_Norm,
-          BS_HZ: BS_HZ,
-          BS_KL: BS_KL,
-          P_HZ: P_HZ,
-          P_KL: P_KL,
-          FF: cadastralData.FF,
-          boreDepth,
-          points: pointsText,
-        }).toString();
+      // url +=
+      //   "?" +
+      //   new URLSearchParams({
+      //     EZ: cadastralData.GNR,
+      //     BT,
+      //     GT,
+      //     WLF,
+      //     BS_HZ_Norm,
+      //     BS_KL_Norm,
+      //     BS_HZ: BS_HZ,
+      //     BS_KL: BS_KL,
+      //     P_HZ: P_HZ,
+      //     P_KL: P_KL,
+      //     FF: cadastralData.FF,
+      //     boreDepth,
+      //     points: pointsText,
+      //   }).toString();
+
+      const data = {
+        EZ: cadastralData.GNR,
+        BT,
+        GT,
+        WLF,
+        BS_HZ_Norm,
+        BS_KL_Norm,
+        BS_HZ: BS_HZ,
+        BS_KL: BS_KL,
+        P_HZ: P_HZ,
+        P_KL: P_KL,
+        FF: cadastralData.FF,
+        boreDepth,
+        points: pointsText,
+      };
 
       if (BT !== "NoData" && points.length !== 0 && pointsText !== undefined) {
-        fetch(url)
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
           .then((res) => res.json())
           .then((data) => {
             const meanBoreholeSpacing = gridSpacing;
