@@ -105,7 +105,7 @@ const Map = ({ theme }) => {
       return (
         <MapContainer ref={mapDiv} key={theme}>
           <MenuContainer
-            width={isMobile ? "300px" : "25%"}
+            width={isMobile ? "300px" : "23%"}
             maxHeight={isMobile ? "80%" : "93%"}
           >
             <InfoPanelEWS></InfoPanelEWS>
@@ -117,7 +117,7 @@ const Map = ({ theme }) => {
       return (
         <MapContainer ref={mapDiv} key={theme}>
           <MenuContainer
-            width={isMobile ? "300px" : "25%"}
+            width={isMobile ? "300px" : "23%"}
             maxHeight={isMobile ? "80%" : "93%"}
           >
             <InfoPanelGWWP></InfoPanelGWWP>
