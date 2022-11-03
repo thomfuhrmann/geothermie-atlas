@@ -39,11 +39,11 @@ const Card = styled.div`
   position: absolute;
   box-sizing: border-box;
   bottom: 0;
-  height: 8%;
+  height: 7%;
   width: 100%;
   padding: 15px 60px;
   color: #89e9ff;
-  font-size: xxx-large;
+  font-size: xx-large;
   text-align: ${(props) => props.textAlign};
 `;
 
@@ -94,7 +94,9 @@ const Home = () => {
               borderRight="1px"
             ></Image>
             <Overlay>
-              <Card textAlign="right">Erdwärmesonden</Card>
+              <Card textAlign="right">
+                Erfahren Sie mehr über Erdwärmesonden
+              </Card>
             </Overlay>
           </NavLink>
         </ImageFrame>
@@ -107,7 +109,9 @@ const Home = () => {
               borderLeft="1px"
             ></Image>
             <Overlay>
-              <Card textAlign="left">Grundwasserwärmepumpen</Card>
+              <Card textAlign="left">
+                Erfahren Sie mehr über Grundwasserwärmepumpen
+              </Card>
             </Overlay>
           </NavLink>
         </ImageFrame>

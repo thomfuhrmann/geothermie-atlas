@@ -122,7 +122,8 @@ export default function InfoPanelEWS() {
       cadastralData,
       closenessWarning || outsideWarning ? true : false,
       image_borefield,
-      computationResult.calculationMode
+      computationResult.calculationMode,
+      "EWS"
     );
   };
 
@@ -273,7 +274,7 @@ export default function InfoPanelEWS() {
             ></AmpelkarteTable>
           )}
           {Object.keys(computationResult).includes("error") && (
-            <CollapsibleSection title="Berechnungsergebnis" open={true}>
+            <CollapsibleSection title="Berechnungsergebnisse" open={true}>
               <Table id="calculations-output-table">
                 <thead>
                   <tr>
@@ -292,7 +293,10 @@ export default function InfoPanelEWS() {
             </CollapsibleSection>
           )}
           {Object.keys(computationResult).length > 1 && (
-            <CollapsibleSection title="Berechnungsergebnisse" open={true}>
+            <CollapsibleSection
+              title="Berechnungsergebnisse mit Benutzervorgabe"
+              open={true}
+            >
               <Table id="calculations-input-table">
                 <thead>
                   <tr>
@@ -527,7 +531,7 @@ export default function InfoPanelEWS() {
           {Object.keys(computationResult).length > 1 &&
             computationResult.balanced === 1 && (
               <CollapsibleSection
-                title="Berechnungsergebnisse mit automatischer Vorgabe im Speicherbetrieb"
+                title="Berechnungsergebnisse mit automatischer Vorgabe"
                 open={true}
               >
                 <Table id="calculations-bal-output-table">

@@ -10,7 +10,8 @@ export const print = (
   cadastralData,
   warnings = false,
   image_borefield,
-  calculationMode
+  calculationMode,
+  theme
 ) => {
   let spaceBetween = 5;
 
@@ -193,14 +194,16 @@ export const print = (
     }
   }
 
-  // finalY = doc.lastAutoTable.finalY;
-  doc.addPage();
+  if (theme === "EWS") {
+    doc.addPage();
+  }
+  finalY = doc.lastAutoTable.finalY;
   if (computationResult) {
     doc.autoTable({
       html: "#calculations-output-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: 20,
+      startY: theme === "EWS" ? 20 : finalY + spaceBetween,
       willDrawCell: function (data) {
         if (
           data.cell.text[0].startsWith("Das Energie- und Leistungsverhältnis")

@@ -133,13 +133,13 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
   }, [isMobile]);
 
   // reset state
-  useEffect(() => {
-    setEHZ(0);
-    setEKL(0);
-    setPHZ(0);
-    setPKL(0);
-    setCOPWP(0);
-  }, [polygon]);
+  // useEffect(() => {
+  //   setEHZ(0);
+  //   setEKL(0);
+  //   setPHZ(0);
+  //   setPKL(0);
+  //   setCOPWP(0);
+  // }, [polygon]);
 
   const handleEHZ = (event) => {
     if (event.target.value < 0) {
@@ -197,6 +197,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
               min="0"
               placeholder="Wert größer gleich 0"
               onChange={handleEHZ}
+              value={eHZ}
             ></Input>
           </InputSection>
           <InputSection>
@@ -209,6 +210,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
               min="0"
               placeholder="Wert größer gleich 0"
               onChange={handleEKL}
+              value={eKL}
             ></Input>
           </InputSection>
           <InputSection>
@@ -219,6 +221,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
               min="0"
               placeholder="Wert größer gleich 0"
               onChange={handlePHZ}
+              value={pHZ}
             ></Input>
           </InputSection>
           <InputSection>
@@ -229,6 +232,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
               min="0"
               placeholder="Wert größer gleich 0"
               onChange={handlePKL}
+              value={pKL}
             ></Input>
           </InputSection>
           <InputSection>
@@ -241,6 +245,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
               min="0"
               placeholder="Wert größer gleich 0"
               onChange={handleCOPWP}
+              value={copWP}
             ></Input>
           </InputSection>
           {points.length === 2 && (

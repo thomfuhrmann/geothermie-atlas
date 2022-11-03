@@ -126,7 +126,8 @@ export default function InfoPanelGWWP() {
       screenshot,
       null,
       null,
-      cadastralData
+      cadastralData,
+      "GWWP"
     );
   };
 
@@ -290,7 +291,7 @@ export default function InfoPanelGWWP() {
           )}
           {computationResult.result && (
             <CollapsibleSection title="Berechnungsergebnis" open={true}>
-              <Table id="calculations-output-table">
+              <Table id="calculations-input-table">
                 <thead>
                   <tr>
                     <td></td>
@@ -305,11 +306,12 @@ export default function InfoPanelGWWP() {
                     <tbody>
                       <TableRow>
                         <TableHeader textAlign="center">
-                          Gewählte Parameter
+                          Benutzerdefinierte Vorgaben
                         </TableHeader>
                       </TableRow>
-                    </tbody>
-                    <tbody>
+                      <tr>
+                        <td></td>
+                      </tr>
                       {computationResult.eHZ > 0 && (
                         <TableRow>
                           <TableData>
@@ -349,14 +351,17 @@ export default function InfoPanelGWWP() {
                     </tbody>
                   </>
                 )}
+              </Table>
+              <Table id="calculations-output-table">
                 <tbody>
                   <TableRow>
                     <TableHeader textAlign="center">
-                      Berechnungsergebnis
+                      Berechnungsergebnisse
                     </TableHeader>
                   </TableRow>
-                </tbody>
-                <tbody>
+                  <tr>
+                    <td></td>
+                  </tr>
                   <TableRow>
                     <TableData>
                       Energieflächendichte im einseitigen Heizbetrieb:{" "}
@@ -395,7 +400,7 @@ export default function InfoPanelGWWP() {
                       {computationResult.result[5]} kW
                     </TableData>
                   </TableRow>
-                  {computationResult.result[6] !== "-1" && (
+                  {computationResult.result[6] !== null && (
                     <TableRow>
                       <TableData>
                         Deckungsbeitrag der Leistung:{" "}
@@ -403,7 +408,7 @@ export default function InfoPanelGWWP() {
                       </TableData>
                     </TableRow>
                   )}
-                  {computationResult.result[7] !== "-1.0" && (
+                  {computationResult.result[7] !== null && (
                     <TableRow>
                       <TableData>
                         Größe der thermischen Fahne in % der Grundstücksfläche:{" "}

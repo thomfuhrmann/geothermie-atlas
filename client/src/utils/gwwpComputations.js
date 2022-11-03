@@ -129,19 +129,23 @@ export const compute = ({
 
   let PPEAK = Math.min(ΔTBAL, ΔT) * QPEAK * cvW;
 
-  let Deck_GW = -1;
+  let Deck_GW = null;
   if (E_HZ * P_HZ + E_KL * P_KL > 0) {
     if (P_HZ >= P_KL) {
-      Deck_GW = (PPEAK / (P_HZ * (1 - 1 / COP_WP))) * 100;
+      if (COP_WP > 0) {
+        Deck_GW = (PPEAK / (P_HZ * (1 - 1 / COP_WP))) * 100;
+      }
     } else {
       Deck_GW = (PPEAK / P_KL) * 100;
     }
   }
 
-  let Fahne = -1;
+  let Fahne = null;
   if (E_HZ + E_KL > 0) {
     if (E_HZ >= E_KL) {
-      Fahne = (100 / EBI) * ((E_HZ * 1000 * (1 - 1 / COP_WP)) / gst_flaeche);
+      if (COP_WP > 0) {
+        Fahne = (100 / EBI) * ((E_HZ * 1000 * (1 - 1 / COP_WP)) / gst_flaeche);
+      }
     } else {
       Fahne = (E_KL * 1000) / gst_flaeche;
     }
@@ -154,7 +158,7 @@ export const compute = ({
     EBI.toFixed(1),
     QPEAK.toFixed(1),
     PPEAK.toFixed(1),
-    Deck_GW.toFixed(0),
-    Fahne.toFixed(1),
+    Deck_GW !== null ? Deck_GW.toFixed(0) : null,
+    Fahne !== null ? Fahne.toFixed(1) : null,
   ];
 };

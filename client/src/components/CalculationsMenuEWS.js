@@ -199,14 +199,14 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   }, [isMobile, sketch]);
 
   // reset state
-  useEffect(() => {
-    setGridSpacing(10);
-    setBoreDepth(100);
-    setBS_HZ(0);
-    setBS_KL(0);
-    setP_HZ(0);
-    setP_KL(0);
-  }, [polygon]);
+  // useEffect(() => {
+  //   setGridSpacing(10);
+  //   setBoreDepth(100);
+  //   setBS_HZ(0);
+  //   setBS_KL(0);
+  //   setP_HZ(0);
+  //   setP_KL(0);
+  // }, [polygon]);
 
   const handleGridSpacing = (event) => {
     if (event.target.value < 5) {
@@ -299,6 +299,28 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
             ></Input>
           </InputSection>
           <InputSection>
+            <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
+            <Input
+              id="phz-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer 0"
+              onChange={handleP_HZ}
+              value={P_HZ}
+            ></Input>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
+            <Input
+              id="pkl-input"
+              type="number"
+              min="0"
+              placeholder="Wert größer 0"
+              onChange={handleP_KL}
+              value={P_KL}
+            ></Input>
+          </InputSection>
+          <InputSection>
             <label htmlFor="bshz-input">
               Volllaststunden Heizen (optional)
             </label>
@@ -309,6 +331,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
               max="4379"
               placeholder="Wert zwischen 0 und 4379"
               onChange={handleBS_HZ}
+              value={BS_HZ}
             ></Input>
           </InputSection>
           <InputSection>
@@ -322,26 +345,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
               max="4379"
               placeholder="Wert zwischen 0 und 4379"
               onChange={handleBS_KL}
-            ></Input>
-          </InputSection>
-          <InputSection>
-            <label htmlFor="phz-input">Heizleistung in kW (optional)</label>
-            <Input
-              id="phz-input"
-              type="number"
-              min="0"
-              placeholder="Wert größer 0"
-              onChange={handleP_HZ}
-            ></Input>
-          </InputSection>
-          <InputSection>
-            <label htmlFor="pkl-input">Kühlleistung in kW (optional)</label>
-            <Input
-              id="pkl-input"
-              type="number"
-              min="0"
-              placeholder="Wert größer 0"
-              onChange={handleP_KL}
+              value={BS_KL}
             ></Input>
           </InputSection>
           {points.length > 0 ? (
