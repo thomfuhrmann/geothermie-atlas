@@ -40,7 +40,6 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   const resources = useSelector((store) => store.ewsResources.value);
   const betriebsstunden = useSelector((store) => store.betriebsstunden.value);
 
-  const gridSpacingInputRef = useRef(null);
   const sketchContainerRef = useRef(null);
 
   const dispatch = useDispatch();
@@ -260,6 +259,10 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
     setP_KL(parseInt(event.target.value));
   };
 
+  const handleKeyDown = (event) => {
+    event.preventDefault();
+  };
+
   return (
     <CollapsibleSection
       title="Berechnungsmenü"
@@ -283,7 +286,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
               placeholder="Wert zwischen 5 und 15 m (default=10)"
               value={gridSpacing}
               onChange={handleGridSpacing}
-              ref={gridSpacingInputRef}
+              onKeyDown={handleKeyDown}
             ></Input>
           </InputSection>
           <InputSection>
@@ -296,6 +299,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
               placeholder="Wert zwischen 80 und 250 m (default=100)"
               value={boreDepth}
               onChange={handleDepth}
+              onKeyDown={handleKeyDown}
             ></Input>
           </InputSection>
           <InputSection>
