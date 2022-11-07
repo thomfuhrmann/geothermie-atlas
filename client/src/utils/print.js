@@ -6,12 +6,13 @@ export const print = (
   computationResult,
   screenshot,
   image_bal,
-  image_unbal,
+  image_userdefined,
   cadastralData,
   warnings = false,
   image_borefield,
   calculationMode,
-  theme
+  theme,
+  resources
 ) => {
   let spaceBetween = 5;
 
@@ -92,21 +93,25 @@ export const print = (
     });
   }
 
-  finalY = doc.lastAutoTable.finalY;
-  doc.autoTable({
-    html: "#resources-table",
-    rowPageBreak: "avoid",
-    showHead: "firstPage",
-    startY: finalY + 5,
-    willDrawCell: function (data) {
-      if (data.section === "head") {
-        data.cell.text = "Ressourcen";
-      }
-    },
-  });
+  if (resources) {
+    finalY = doc.lastAutoTable.finalY;
+    doc.autoTable({
+      html: "#resources-table",
+      rowPageBreak: "avoid",
+      showHead: "firstPage",
+      startY: finalY + 5,
+      willDrawCell: function (data) {
+        if (data.section === "head") {
+          data.cell.text = "Ressourcen";
+        }
+      },
+    });
+  }
 
-  doc.addPage();
   if (einschraenkungen) {
+    // start at second page
+    doc.addPage();
+
     doc.autoTable({
       html: "#einschraenkungen-table",
       rowPageBreak: "avoid",
@@ -174,7 +179,7 @@ export const print = (
   }
 
   finalY = doc.lastAutoTable.finalY;
-  if (image_borefield) {
+  if (computationResult && image_borefield) {
     const imgProps = doc.getImageProperties(image_borefield.current);
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
@@ -194,7 +199,9 @@ export const print = (
     }
   }
 
-  if (theme === "EWS") {
+  // start new page if theme is EWS
+  // user input table is longer than for GWWP
+  if (computationResult && theme === "EWS") {
     doc.addPage();
   }
   finalY = doc.lastAutoTable.finalY;
@@ -226,28 +233,34 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   let height = 0;
-  if (image_unbal) {
-    const imgProps = doc.getImageProperties(image_unbal.current);
+  if (computationResult && image_userdefined) {
+    const imgProps = doc.getImageProperties(image_userdefined.current);
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
     height = (imgProps.height * width) / imgProps.width;
     if (height > totalHeight - finalY - 10) {
       doc.addPage();
-      doc.addImage(image_unbal.current, "PNG", 30, 20, width, height);
+      doc.addImage(image_userdefined.current, "PNG", 30, 20, width, height);
     } else {
-      doc.addImage(image_unbal.current, "PNG", 30, finalY + 5, width, height);
+      doc.addImage(
+        image_userdefined.current,
+        "PNG",
+        30,
+        finalY + 5,
+        width,
+        height
+      );
     }
   }
 
   finalY = doc.lastAutoTable.finalY;
-  let startY = 0;
   if (computationResult && image_bal) {
     doc.addPage();
     doc.autoTable({
       html: "#calculations-bal-output-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: startY + 20,
+      startY: 20,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text[0] =
@@ -272,7 +285,7 @@ export const print = (
 
   finalY = doc.lastAutoTable.finalY;
   height = 0;
-  if (image_bal) {
+  if (computationResult && image_bal) {
     const imgProps = doc.getImageProperties(image_bal.current);
     const width = doc.internal.pageSize.getWidth() - 60;
     const totalHeight = doc.internal.pageSize.getHeight();
@@ -317,7 +330,7 @@ export const print = (
     },
   });
 
-  // print the page number and the total pages
+  // print page numbers and number of total pages
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     // go to page i

@@ -122,12 +122,16 @@ export default function InfoPanelGWWP() {
     print(
       einschraenkungen,
       hinweise,
-      computationResult.result?.length > 0,
+      Object.keys(computationResult).length > 0,
       screenshot,
       null,
       null,
-      cadastralData,
-      "GWWP"
+      Object.keys(cadastralData).length > 0,
+      closenessWarning || outsideWarning ? true : false,
+      null,
+      null,
+      "GWWP",
+      Object.keys(resources).length > 0
     );
   };
 
@@ -159,7 +163,7 @@ export default function InfoPanelGWWP() {
   return (
     <InfoPanelContainer>
       <CollapsibleSection
-        title="Standortbasierter Bericht"
+        title="Grundstücksabfrage"
         open={!isMobile ? true : false}
         marginBottom="0px"
         flex={true}
@@ -175,7 +179,7 @@ export default function InfoPanelGWWP() {
           )}
           {Object.keys(cadastralData).length > 0 && (
             <>
-              <Table id="cadastral-data-table">
+              <Table id="cadastral-data-table" margin="10px 0px 0px 0px">
                 <tbody>
                   <tr>
                     <td>
@@ -190,7 +194,7 @@ export default function InfoPanelGWWP() {
           )}
           {address && address.length > 0 && (
             <>
-              <Table id="address-table">
+              <Table id="address-table" margin="10px 0px">
                 <tbody>
                   <tr>
                     <td>
@@ -201,7 +205,6 @@ export default function InfoPanelGWWP() {
                   </tr>
                 </tbody>
               </Table>
-              {/* {!scaleWarning && !outsideWarning && <Placeholder></Placeholder>} */}
             </>
           )}
           {Object.keys(cadastralData).length > 0 && (
@@ -213,7 +216,8 @@ export default function InfoPanelGWWP() {
           {scaleWarning && (
             <Warning id="scale-warning">
               Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und
-              Berechnungen zu ermöglichen!
+              Berechnungen des geothermischen Potentials zu ermöglichen. Mit
+              Klick auf ein Grundstück starten Sie die Abfrage.
             </Warning>
           )}
           {!scaleWarning && !address && (
@@ -238,7 +242,7 @@ export default function InfoPanelGWWP() {
               </tbody>
             </Table>
           )}
-          {resources.length > 0 && (
+          {Object.keys(resources).length > 0 && (
             <CollapsibleSection title="Ressourcen">
               <Table id="resources-table">
                 <thead>
@@ -247,31 +251,71 @@ export default function InfoPanelGWWP() {
                   </tr>
                 </thead>
                 <tbody>
-                  {resources.map((result) => {
-                    return (
-                      <TableRow key={result.layerId}>
-                        <TableData>
-                          {formatGWWP(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes["Pixel Value"]
-                          )}
-                        </TableData>
-                      </TableRow>
-                    );
-                  })}
+                  {!resources.error ? (
+                    resources.map((result) => {
+                      return (
+                        <TableRow key={result.layerId}>
+                          <TableData>
+                            {formatGWWP(
+                              result.layerId,
+                              result.layerName,
+                              result.feature.attributes["Pixel Value"]
+                            )}
+                          </TableData>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableData>{resources.error}</TableData>
+                    </TableRow>
+                  )}
                 </tbody>
               </Table>
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {ampelkarte.length > 0 && (
-            <AmpelkarteTable
-              results={ampelkarte}
-              setTables={setTables}
-              layerId={1}
-            ></AmpelkarteTable>
-          )}
+          {Object.keys(ampelkarte).length > 0 &&
+            (!ampelkarte.error ? (
+              <AmpelkarteTable
+                results={ampelkarte}
+                setTables={setTables}
+                layerId={1}
+              ></AmpelkarteTable>
+            ) : (
+              <>
+                <CollapsibleSection title="Einschränkungen">
+                  <Table id={"einschraenkungen-table"}>
+                    <thead>
+                      <tr>
+                        <td></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <TableRow>
+                        <TableData>{ampelkarte.error}</TableData>
+                      </TableRow>
+                    </tbody>
+                  </Table>
+                  <Placeholder></Placeholder>
+                </CollapsibleSection>
+                <CollapsibleSection title="Einschränkungen">
+                  <Table id={"hinweise-table"}>
+                    <thead>
+                      <tr>
+                        <td></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <TableRow>
+                        <TableData>{ampelkarte.error}</TableData>
+                      </TableRow>
+                    </tbody>
+                  </Table>
+                  <Placeholder></Placeholder>
+                </CollapsibleSection>
+              </>
+            ))}
           {computationResult.error && (
             <CollapsibleSection title="Berechnungsergebnis" open={true}>
               <Table id="calculations-output-table">

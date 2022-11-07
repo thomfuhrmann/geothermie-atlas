@@ -48,13 +48,10 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
 
   // run python script with values from layers
   const handlePythonCalculation = () => {
-    if (cadastralData && resources) {
+    if (cadastralData && resources && points.length <= 300) {
       isLoading(true);
       takeScreenshot(view, polygon.centroid, dispatch);
 
-      // let pointsText = JSON.stringify(
-      //   points.map((point) => [point.x, point.y])
-      // );
       let pointsText = JSON.stringify(points);
 
       const BT = resources.find((result) => result.layerId === 4)?.feature
@@ -74,23 +71,6 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
       );
 
       let url = "/api";
-      // url +=
-      //   "?" +
-      //   new URLSearchParams({
-      //     EZ: cadastralData.GNR,
-      //     BT,
-      //     GT,
-      //     WLF,
-      //     BS_HZ_Norm,
-      //     BS_KL_Norm,
-      //     BS_HZ: BS_HZ,
-      //     BS_KL: BS_KL,
-      //     P_HZ: P_HZ,
-      //     P_KL: P_KL,
-      //     FF: cadastralData.FF,
-      //     boreDepth,
-      //     points: pointsText,
-      //   }).toString();
 
       const data = {
         EZ: cadastralData.GNR,
@@ -182,7 +162,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
           .catch((err) => {
             dispatch(
               updateEWSComputationResult({
-                error: err,
+                error: JSON.stringify(err),
               })
             );
           });
@@ -202,6 +182,13 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         );
         isLoading(false);
       }
+    } else if (points.length > 300) {
+      dispatch(
+        updateEWSComputationResult({
+          error: "Es sind maximal 300 Punkte möglich.",
+        })
+      );
+      isLoading(false);
     }
   };
 
@@ -220,14 +207,14 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   }, [isMobile, sketch]);
 
   // reset state
-  // useEffect(() => {
-  //   setGridSpacing(10);
-  //   setBoreDepth(100);
-  //   setBS_HZ(0);
-  //   setBS_KL(0);
-  //   setP_HZ(0);
-  //   setP_KL(0);
-  // }, [polygon]);
+  useEffect(() => {
+    setGridSpacing(10);
+    // setBoreDepth(100);
+    // setBS_HZ(0);
+    // setBS_KL(0);
+    // setP_HZ(0);
+    // setP_KL(0);
+  }, [polygon]);
 
   const handleGridSpacing = (event) => {
     if (event.target.value < 5) {

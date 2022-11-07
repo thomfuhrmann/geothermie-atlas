@@ -5,19 +5,11 @@ import { updateAmpelkarte } from "../redux/ampelkarteSlice";
 import { updateGWWPResources } from "../redux/gwwpResourcesSlice";
 import { updateEWSResources } from "../redux/ewsResourcesSlice";
 import { updateBetriebsstunden } from "../redux/betriebsstundenSlice";
-
-// layer urls
-const ampelkarte_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Ampelkarte_Wien/MapServer";
-const gwwp_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_thermischeGrundwassernutzung_GWP_Wien_TEST/MapServer";
-const ews_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Erdwaermesonden_EWS_Wien_TEST/MapServer";
-const betriebsstunden_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BetriebsStd_Wien_TEST/MapServer";
+import { ampelkarte_url, ews_url, gwwp_url, betriebsstunden_url } from "./view";
 
 // query layers
 export const identifyAllLayers = (view, mapPoint, dispatch) => {
+  // define query parameters
   const params = new IdentifyParameters();
   params.geometry = mapPoint;
   params.tolerance = 0;
@@ -26,47 +18,83 @@ export const identifyAllLayers = (view, mapPoint, dispatch) => {
   params.height = view.height;
   params.mapExtent = view.extent;
 
-  identify.identify(ews_url, params).then((res) => {
-    const results = res.results.map((result) => {
-      return {
-        layerId: result.layerId,
-        layerName: result.layerName,
-        feature: { attributes: result.feature.attributes },
-      };
+  identify
+    .identify(ews_url, params)
+    .then((res) => {
+      const results = res.results.map((result) => {
+        return {
+          layerId: result.layerId,
+          layerName: result.layerName,
+          feature: { attributes: result.feature.attributes },
+        };
+      });
+      dispatch(updateEWSResources(results));
+    })
+    .catch((err) => {
+      dispatch(
+        updateEWSResources({
+          error: JSON.stringify(err),
+        })
+      );
     });
-    dispatch(updateEWSResources(results));
-  });
 
-  identify.identify(betriebsstunden_url, params).then((res) => {
-    const results = res.results.map((result) => {
-      return {
-        layerId: result.layerId,
-        layerName: result.layerName,
-        feature: { attributes: result.feature.attributes },
-      };
+  identify
+    .identify(betriebsstunden_url, params)
+    .then((res) => {
+      const results = res.results.map((result) => {
+        return {
+          layerId: result.layerId,
+          layerName: result.layerName,
+          feature: { attributes: result.feature.attributes },
+        };
+      });
+      dispatch(updateBetriebsstunden(results));
+    })
+    .catch((err) => {
+      dispatch(
+        updateBetriebsstunden({
+          error: JSON.stringify(err),
+        })
+      );
     });
-    dispatch(updateBetriebsstunden(results));
-  });
 
-  identify.identify(gwwp_url, params).then((res) => {
-    const results = res.results.map((result) => {
-      return {
-        layerId: result.layerId,
-        layerName: result.layerName,
-        feature: { attributes: result.feature.attributes },
-      };
+  identify
+    .identify(gwwp_url, params)
+    .then((res) => {
+      const results = res.results.map((result) => {
+        return {
+          layerId: result.layerId,
+          layerName: result.layerName,
+          feature: { attributes: result.feature.attributes },
+        };
+      });
+      dispatch(updateGWWPResources(results));
+    })
+    .catch((err) => {
+      dispatch(
+        updateGWWPResources({
+          error: JSON.stringify(err),
+        })
+      );
     });
-    dispatch(updateGWWPResources(results));
-  });
 
-  identify.identify(ampelkarte_url, params).then((res) => {
-    const results = res.results.map((result) => {
-      return {
-        layerId: result.layerId,
-        layerName: result.layerName,
-        feature: { attributes: result.feature.attributes },
-      };
+  identify
+    .identify(ampelkarte_url, params)
+    .then((res) => {
+      const results = res.results.map((result) => {
+        return {
+          layerId: result.layerId,
+          layerName: result.layerName,
+          feature: { attributes: result.feature.attributes },
+        };
+      });
+      dispatch(updateAmpelkarte(results));
+    })
+    .catch((err) => {
+      dispatch(
+        updateAmpelkarte({
+          error: JSON.stringify(err),
+        })
+      );
     });
-    dispatch(updateAmpelkarte(results));
-  });
 };

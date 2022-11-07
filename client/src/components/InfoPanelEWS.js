@@ -66,8 +66,8 @@ const textTemplates = {
 };
 
 export default function InfoPanelEWS() {
-  const image_bal = useRef(null);
   const image = useRef(null);
+  const image_bal = useRef(null);
   const image_borefield = useRef(null);
 
   const [address, setAddress] = useState(null);
@@ -119,11 +119,12 @@ export default function InfoPanelEWS() {
       screenshot,
       image_bal,
       image,
-      cadastralData,
+      Object.keys(cadastralData).length > 0,
       closenessWarning || outsideWarning ? true : false,
       image_borefield,
       computationResult.calculationMode,
-      "EWS"
+      "EWS",
+      Object.keys(resources).length > 0
     );
   };
 
@@ -152,7 +153,7 @@ export default function InfoPanelEWS() {
   return (
     <InfoPanelContainer>
       <CollapsibleSection
-        title="Standortbasierter Bericht"
+        title="Grundstücksabfrage"
         open={!isMobile ? true : false}
         marginBottom="0px"
         flex={true}
@@ -168,7 +169,7 @@ export default function InfoPanelEWS() {
           )}
           {Object.keys(cadastralData).length > 0 && (
             <>
-              <Table id="cadastral-data-table">
+              <Table id="cadastral-data-table" margin="10px 0px 0px 0px">
                 <tbody>
                   <tr>
                     <td>
@@ -201,13 +202,14 @@ export default function InfoPanelEWS() {
               <Line color="blue"></Line>
               <span>Grundstücksgrenze</span>
               <Line color="#00890c"></Line>
-              <span>Zwei-Meter-Abstand zur Grundstücksgrenze</span>
+              <span>2,5-Meter-Abstand zur Grundstücksgrenze</span>
             </GridContainer>
           )}
           {scaleWarning && (
             <Warning id="scale-warning">
               Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und
-              Berechnungen zu ermöglichen!
+              Berechnungen des geothermischen Potentials zu ermöglichen. Mit
+              Klick auf ein Grundstück starten Sie die Abfrage.
             </Warning>
           )}
           {!scaleWarning && !address && (
@@ -239,7 +241,7 @@ export default function InfoPanelEWS() {
               </tbody>
             </Table>
           )}
-          {resources.length > 0 && (
+          {Object.keys(resources).length > 0 && (
             <CollapsibleSection title="Ressourcen">
               <Table id="resources-table">
                 <thead>
@@ -248,31 +250,71 @@ export default function InfoPanelEWS() {
                   </tr>
                 </thead>
                 <tbody>
-                  {resources.map((result) => {
-                    return (
-                      <TableRow key={result.layerId}>
-                        <TableData>
-                          {formatEWS(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes["Pixel Value"]
-                          )}
-                        </TableData>
-                      </TableRow>
-                    );
-                  })}
+                  {!resources.error ? (
+                    resources.map((result) => {
+                      return (
+                        <TableRow key={result.layerId}>
+                          <TableData>
+                            {formatEWS(
+                              result.layerId,
+                              result.layerName,
+                              result.feature.attributes["Pixel Value"]
+                            )}
+                          </TableData>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableData>{resources.error}</TableData>
+                    </TableRow>
+                  )}
                 </tbody>
               </Table>
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {address && ampelkarte && (
-            <AmpelkarteTable
-              results={ampelkarte}
-              setTables={setTables}
-              layerId={0}
-            ></AmpelkarteTable>
-          )}
+          {Object.keys(ampelkarte).length > 0 &&
+            (!ampelkarte.error ? (
+              <AmpelkarteTable
+                results={ampelkarte}
+                setTables={setTables}
+                layerId={0}
+              ></AmpelkarteTable>
+            ) : (
+              <>
+                <CollapsibleSection title="Einschränkungen">
+                  <Table id={"einschraenkungen-table"}>
+                    <thead>
+                      <tr>
+                        <td></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <TableRow>
+                        <TableData>{ampelkarte.error}</TableData>
+                      </TableRow>
+                    </tbody>
+                  </Table>
+                  <Placeholder></Placeholder>
+                </CollapsibleSection>
+                <CollapsibleSection title="Einschränkungen">
+                  <Table id={"hinweise-table"}>
+                    <thead>
+                      <tr>
+                        <td></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <TableRow>
+                        <TableData>{ampelkarte.error}</TableData>
+                      </TableRow>
+                    </tbody>
+                  </Table>
+                  <Placeholder></Placeholder>
+                </CollapsibleSection>
+              </>
+            ))}
           {Object.keys(computationResult).includes("error") && (
             <CollapsibleSection title="Berechnungsergebnisse" open={true}>
               <Table id="calculations-output-table">

@@ -60,24 +60,26 @@ const Toggle = styled.button`
 
 const StyledMenu = styled.div`
   position: fixed;
+  box-sizing: border-box;
   top: 0;
   right: 0;
-  height: 100vh;
+  height: 100%;
   width: 70%;
-  background-color: #3a4251;
+  background-color: white;
   z-index: 99;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
+  padding: 30% 0;
 `;
 
 const CloseToggle = styled.button`
   position: fixed;
-  top: 5%;
+  top: 2%;
   right: 4%;
-  background: #3a4251;
-  color: #fff;
+  background: #fff;
+  color: #444444;
   padding: 0.75rem;
   display: flex;
   place-items: center;
@@ -110,7 +112,9 @@ const Layout = () => {
         to="gwwp"
         className={({ isActive }) => (isActive ? name + " active" : name)}
       >
-        <span>Thermische Grundwassernutzung</span>
+        <span style={{ textAlign: "center" }}>
+          Thermische Grundwassernutzung
+        </span>
       </NavLink>
       <NavLink
         to="data"

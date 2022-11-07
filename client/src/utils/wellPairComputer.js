@@ -11,8 +11,8 @@ import {
   SRS,
 } from "./view";
 
-// grid points have to be at least 2 meters away from parcel boundary
-const distanceToBoundary = 2;
+// grid points have to be at least 2.5 meters away from parcel boundary
+const distanceToBoundary = 2.5;
 
 const drawPoint = (point, color = [255, 255, 255, 0.25]) => {
   pointGraphicsLayer.add(

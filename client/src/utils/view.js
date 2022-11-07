@@ -16,6 +16,7 @@ import LayerList from "@arcgis/core/widgets/LayerList";
 import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
 import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
 import Point from "@arcgis/core/geometry/Point";
+import Zoom from "@arcgis/core/widgets/Zoom";
 
 import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
 import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
@@ -30,14 +31,14 @@ import { updateCadastralData } from "../redux/cadastreSlice";
 // spatial reference WKID
 export const SRS = 31256;
 
-// layer urls
-const ampelkarte_url =
+// layer URLs
+export const ampelkarte_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Ampelkarte_Wien/MapServer";
-const ews_url =
+export const ews_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Erdwaermesonden_EWS_Wien_TEST/MapServer";
-const gwwp_url =
+export const gwwp_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_thermischeGrundwassernutzung_GWP_Wien_TEST/MapServer";
-const betriebsstunden_url =
+export const betriebsstunden_url =
   "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BetriebsStd_Wien_TEST/MapServer";
 
 // exports
@@ -109,14 +110,14 @@ export function initialize(container, theme, isMobile) {
   });
 
   const ews = new MapImageLayer({
-    title: "Geothermische Ressourcen für Erdwärmesonden",
+    title: "Potentialkarten für Erdwärmesonden",
     url: ews_url,
     visible: true,
     listMode: theme === "EWS" ? "show" : "hide",
   });
 
   const gwwp = new MapImageLayer({
-    title: "Geothermische Ressourcen für Grundwasserwärmepumpen",
+    title: "Potentialkarten für Grundwasserwärmepumpen",
     url: gwwp_url,
     visible: true,
     listMode: theme === "GWWP" ? "show" : "hide",
@@ -244,6 +245,11 @@ export function initialize(container, theme, isMobile) {
   const scaleBar = new ScaleBar({
     view: view,
     unit: "metric",
+  });
+
+  const zoom = new Zoom({
+    view,
+    layout: "horizontal",
   });
 
   const sketch = new Sketch({
@@ -559,7 +565,7 @@ export function initialize(container, theme, isMobile) {
   // add UI components
   view.ui.components = [];
   if (!isMobile) {
-    view.ui.add([search, layerList, legend], "top-left");
+    view.ui.add([zoom, search, layerList, legend], "top-left");
     view.ui.add(scaleBar, "bottom-left");
   }
 

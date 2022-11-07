@@ -12,7 +12,7 @@ export const Line = styled.span`
 export const GridContainer = styled.div`
   display: grid;
   box-sizing: border-box;
-  grid-template-columns: auto auto;
+  grid-template-columns: 30% 70%;
   grid-template-rows: min-content min-content;
   margin: 5px 0px 10px 0;
 `;

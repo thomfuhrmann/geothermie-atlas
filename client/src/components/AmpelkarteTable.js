@@ -167,7 +167,7 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
     }
   });
 
-  setTables(einschraenkungen.length > 0, hinweise.length > 0);
+  setTables(true, hinweise.length > 0);
 
   return (
     <>
