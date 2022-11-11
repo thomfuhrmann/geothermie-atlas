@@ -74,23 +74,18 @@ def main():
     # calculate scenario for balanced load if BALANCED > 0
     BALANCED = 1
     
- ###DEFINE SITE-DEPENDENT PARAMETERS    
-    GT = float(sys.argv[3])               # mean underground temperature °C
-    lamda = float(sys.argv[4])            # heat conductivity of the earth (W/m/K)
-    BS_HZ = float(sys.argv[7])            # known operational hours for heating  (h/yr)
-    BS_KL = float(sys.argv[8])            # known operational hours for cooling
-    P_HZ = float(sys.argv[9])             # known heating power of heat pump
-    P_KL = -float(sys.argv[10])           # known cooling power (of heat pump), has to be negative
-    H = float(sys.argv[12])               # Borehole length (m)
-    
-    #option 1.1:
-    #calculate typical operation hours from BT:
-    BT = float(sys.argv[2])       # import mean surface temperature °C from map
-    
-    # option 1.2:
-    # #import typical operation hours from maps
-    BS_HZ_Norm = float(sys.argv[5])       # typical operational hours for heating (h/yr)
-    BS_KL_Norm = float(sys.argv[6])       # typical operational hours for cooling (h/yr)
+ ###DEFINE SITE-DEPENDENT PARAMETERS
+    BT = float(sys.argv[1])               # import mean surface temperature °C from map
+    GT = float(sys.argv[2])               # mean underground temperature °C
+    lamda = float(sys.argv[3])            # heat conductivity of the earth (W/m/K)
+    BS_HZ_Norm = float(sys.argv[4])       # typical operational hours for heating (h/yr)
+    BS_KL_Norm = float(sys.argv[5])       # typical operational hours for cooling (h/yr)
+    BS_HZ = float(sys.argv[6])            # known operational hours for heating  (h/yr)
+    BS_KL = float(sys.argv[7])            # known operational hours for cooling
+    P_HZ = float(sys.argv[8])             # known heating power of heat pump
+    P_KL = -float(sys.argv[9])            # known cooling power (of heat pump), has to be negative
+    H = float(sys.argv[10])               # Borehole length (m)
+    heating = sys.argv[11]
     
  ###DEFINE BHE Field
     #option 2.1: define rectangular field
@@ -100,10 +95,10 @@ def main():
     
     # option 2.2: define coordinates of bore_positions, can be irregular, if ractangular field is not defined
     # bore_position=np.array([[ 0.,  0.], [ 0.,  5.], [0.,  10.], [ 5.,  0.], [ 5.,  5.]])
-    l = list(map(lambda x: x.strip(" []"), sys.argv[13].split(",")))
+    l = list(map(lambda x: x.strip(" []"), sys.argv[12].split(",")))
     bore_position_temp = []
-    for i in range(0, len(l)-1, 2):
-        bore_position_temp.append([float(l[i]), float(l[i+1])])
+    for i in range(0, len(l) - 1, 2):
+        bore_position_temp.append([float(l[i]), float(l[i + 1])])
     bore_position = np.array(bore_position_temp)
    
     print('\n')
@@ -139,12 +134,12 @@ def main():
             MATquadrant   = np.zeros((len(b),len(b)),dtype=int)
             NEAREST = np.tile(np.nan, (len(b),4))       
             for i in (range(len(b))):
-                b1=b[i]
+                b1 = b[i]
                 xy1 = b[i].position()
                 for j in (range(len(b))):
-                    b2=b[j]
+                    b2 = b[j]
                     xy2 = b[j].position()
-                    MATdistance[i,j]  = b1.distance(b2)
+                    MATdistance[i,j] = b1.distance(b2)
                     XX, YY = np.subtract(xy2,xy1)
                     #caculate Direction (Quadrant)
                     if(XX>0 and YY>=0):     
@@ -161,17 +156,17 @@ def main():
                 
                 # calculate nearest distance in each quadrant for all BHEs
                 for k in range(4):
-                    a = (MATdistance[i,:][MATquadrant[i,:]==k+1])
-                    if (np.size(a)>0): 
-                        NEAREST[i,k]=min(a)
+                    a = MATdistance[i, :][MATquadrant[i, :] == k + 1]
+                    if (np.size(a) > 0): 
+                        NEAREST[i, k] = min(a)
             #print(MATdistance)
             #print(MATquadrant)
             #print(NEAREST)
-            BB_mean=np.nanmean(NEAREST)
-            BB_mean=np.round(np.nanmean(NEAREST),1)
+            # BB_mean=np.nanmean(NEAREST)
+            BB_mean = np.round(np.nanmean(NEAREST), 1)
             print(f"mean distance to other BHEs: {BB_mean}")
         else:
-            BB_mean=0.
+            BB_mean = 0.
         
         boreField=b
         BB_L3=("given by coordinates")
@@ -287,7 +282,7 @@ def main():
         printratio(Efactor_bal, Pfactor_bal)
     
     automatic_results = [BALANCED, P_HZ_bal, P_KL_bal, E_HZ_bal, E_KL_bal, cover_bal, P_heatpump_bal, P_chiller_bal, E_heatpump_bal, E_chiller_bal, nBoreholes, H, BB_L3, BB_mean, Efactor_bal, image_hash_bal]
-    line = sys.argv[1:12] + list(map(str, user_defined_results)) + list(map(str, automatic_results))
+    line = list(map(str, user_defined_results)) + list(map(str, automatic_results))
     print(line)
 
 

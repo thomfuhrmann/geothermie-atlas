@@ -242,7 +242,7 @@ export default function InfoPanelGWWP() {
               </tbody>
             </Table>
           )}
-          {Object.keys(resources).length > 0 && (
+          {resources && resources.length > 0 && (
             <CollapsibleSection title="Ressourcen">
               <Table id="resources-table">
                 <thead>
@@ -251,72 +251,58 @@ export default function InfoPanelGWWP() {
                   </tr>
                 </thead>
                 <tbody>
-                  {!resources.error ? (
-                    resources.map((result) => {
-                      return (
-                        <TableRow key={result.layerId}>
-                          <TableData>
-                            {formatGWWP(
-                              result.layerId,
-                              result.layerName,
-                              result.feature.attributes["Pixel Value"]
-                            )}
-                          </TableData>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableData>{resources.error}</TableData>
-                    </TableRow>
-                  )}
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Ressourcen für vordefinierte Grundwassernutzung
+                    </TableHeader>
+                  </TableRow>
+                  {resources.slice(0, 2).map((result) => {
+                    return (
+                      <TableRow key={result.layerId}>
+                        <TableData>
+                          {formatGWWP(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes["Pixel Value"]
+                          )}
+                        </TableData>
+                      </TableRow>
+                    );
+                  })}
+                  <tr>
+                    <td></td>
+                  </tr>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Standortabhängige Parameter
+                    </TableHeader>
+                  </TableRow>
+                  {resources.slice(2).map((result) => {
+                    return (
+                      <TableRow key={result.layerId}>
+                        <TableData>
+                          {formatGWWP(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes["Pixel Value"]
+                          )}
+                        </TableData>
+                      </TableRow>
+                    );
+                  })}
                 </tbody>
               </Table>
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {Object.keys(ampelkarte).length > 0 &&
-            (!ampelkarte.error ? (
-              <AmpelkarteTable
-                results={ampelkarte}
-                setTables={setTables}
-                layerId={1}
-              ></AmpelkarteTable>
-            ) : (
-              <>
-                <CollapsibleSection title="Einschränkungen">
-                  <Table id={"einschraenkungen-table"}>
-                    <thead>
-                      <tr>
-                        <td></td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <TableRow>
-                        <TableData>{ampelkarte.error}</TableData>
-                      </TableRow>
-                    </tbody>
-                  </Table>
-                  <Placeholder></Placeholder>
-                </CollapsibleSection>
-                <CollapsibleSection title="Einschränkungen">
-                  <Table id={"hinweise-table"}>
-                    <thead>
-                      <tr>
-                        <td></td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <TableRow>
-                        <TableData>{ampelkarte.error}</TableData>
-                      </TableRow>
-                    </tbody>
-                  </Table>
-                  <Placeholder></Placeholder>
-                </CollapsibleSection>
-              </>
-            ))}
-          {computationResult.error && (
+          {ampelkarte && ampelkarte.length > 0 && (
+            <AmpelkarteTable
+              results={ampelkarte}
+              setTables={setTables}
+              layerId={1}
+            ></AmpelkarteTable>
+          )}
+          {computationResult && computationResult.error && (
             <CollapsibleSection title="Berechnungsergebnis" open={true}>
               <Table id="calculations-output-table">
                 <thead>
@@ -333,7 +319,7 @@ export default function InfoPanelGWWP() {
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {computationResult.result && (
+          {computationResult && computationResult.result && (
             <CollapsibleSection title="Berechnungsergebnis" open={true}>
               <Table id="calculations-input-table">
                 <thead>

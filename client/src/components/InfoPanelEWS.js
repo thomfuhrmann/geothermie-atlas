@@ -136,12 +136,9 @@ export default function InfoPanelEWS() {
       } else {
         value = parseFloat(value).toFixed(0);
       }
-    }
-
-    if (value === "NoData") {
-      return layerName + ": keine Daten";
-    } else {
       return textTemplates[layerId][0] + value + textTemplates[layerId][1];
+    } else {
+      return layerName + ": keine Daten";
     }
   };
 
@@ -241,7 +238,7 @@ export default function InfoPanelEWS() {
               </tbody>
             </Table>
           )}
-          {Object.keys(resources).length > 0 && (
+          {resources && resources.length > 0 && (
             <CollapsibleSection title="Ressourcen">
               <Table id="resources-table">
                 <thead>
@@ -250,71 +247,57 @@ export default function InfoPanelEWS() {
                   </tr>
                 </thead>
                 <tbody>
-                  {!resources.error ? (
-                    resources.map((result) => {
-                      return (
-                        <TableRow key={result.layerId}>
-                          <TableData>
-                            {formatEWS(
-                              result.layerId,
-                              result.layerName,
-                              result.feature.attributes["Pixel Value"]
-                            )}
-                          </TableData>
-                        </TableRow>
-                      );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableData>{resources.error}</TableData>
-                    </TableRow>
-                  )}
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Ressourcen für vordefinierte Erdwärmesondenanlage
+                    </TableHeader>
+                  </TableRow>
+                  {resources.slice(0, 4).map((result) => {
+                    return (
+                      <TableRow key={result.layerId}>
+                        <TableData>
+                          {formatEWS(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes["Pixel Value"]
+                          )}
+                        </TableData>
+                      </TableRow>
+                    );
+                  })}
+                  <tr>
+                    <td></td>
+                  </tr>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Standortabhängige Parameter
+                    </TableHeader>
+                  </TableRow>
+                  {resources.slice(4).map((result) => {
+                    return (
+                      <TableRow key={result.layerId}>
+                        <TableData>
+                          {formatEWS(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes["Pixel Value"]
+                          )}
+                        </TableData>
+                      </TableRow>
+                    );
+                  })}
                 </tbody>
               </Table>
               <Placeholder></Placeholder>
             </CollapsibleSection>
           )}
-          {Object.keys(ampelkarte).length > 0 &&
-            (!ampelkarte.error ? (
-              <AmpelkarteTable
-                results={ampelkarte}
-                setTables={setTables}
-                layerId={0}
-              ></AmpelkarteTable>
-            ) : (
-              <>
-                <CollapsibleSection title="Einschränkungen">
-                  <Table id={"einschraenkungen-table"}>
-                    <thead>
-                      <tr>
-                        <td></td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <TableRow>
-                        <TableData>{ampelkarte.error}</TableData>
-                      </TableRow>
-                    </tbody>
-                  </Table>
-                  <Placeholder></Placeholder>
-                </CollapsibleSection>
-                <CollapsibleSection title="Einschränkungen">
-                  <Table id={"hinweise-table"}>
-                    <thead>
-                      <tr>
-                        <td></td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <TableRow>
-                        <TableData>{ampelkarte.error}</TableData>
-                      </TableRow>
-                    </tbody>
-                  </Table>
-                  <Placeholder></Placeholder>
-                </CollapsibleSection>
-              </>
-            ))}
+          {ampelkarte && ampelkarte.length > 0 && (
+            <AmpelkarteTable
+              results={ampelkarte}
+              setTables={setTables}
+              layerId={0}
+            ></AmpelkarteTable>
+          )}
           {Object.keys(computationResult).includes("error") && (
             <CollapsibleSection title="Berechnungsergebnisse" open={true}>
               <Table id="calculations-output-table">
@@ -336,7 +319,7 @@ export default function InfoPanelEWS() {
           )}
           {Object.keys(computationResult).length > 1 && (
             <CollapsibleSection
-              title="Berechnungsergebnisse mit Benutzervorgabe"
+              title="Ressourcen für Benutzereingabe"
               open={true}
             >
               <Table id="calculations-input-table">
@@ -349,32 +332,50 @@ export default function InfoPanelEWS() {
                   <TableRow>
                     {computationResult.calculationMode === "norm" ? (
                       <TableData>
-                        Die Berechnung basiert auf einer vereinfachten
-                        Betriebsfunktion im standortbezogenen Normbetrieb auf 20
-                        Jahre, d.h. es werden die Norm-Volllaststunden für
-                        Heizen und Kühlen eines typischen Wohngebäudes am
-                        Standort verwendet. Ergebnis ist die erzielbare Leistung
-                        für die benutzerdefiniert vorgegebene Sondenfeldgröße,
-                        sodass die mittlere Fluidtemperatur zwischen -1.5 °C und
-                        28 °C bleibt. Zudem werden folgende standortabhängige
-                        Erdreich- und fixe Sondenparameter berücksichtigt:
+                        Die Berechnung erfolgt für das gewählte Sondenfeld mit
+                        Norm-Jahresbetriebsstunden. Für die Betriebsfunktion
+                        werden Norm-Jahresbetriebsstunden am Standort für Heizen
+                        und Kühlen eines typischen Wohngebäudes verwendet. Die
+                        Berechnung berücksichtigt zudem Untergrunddaten, fixe
+                        Sondenparameter und Temperaturgrenzen für die
+                        Fluidtemperatur in der Sonde. Ergebnisse sind die
+                        maximal erzielbare Leistung (kW) und Energiemenge
+                        (MWh/a) bei einem Betrieb von 20 Jahren. Folgende
+                        Parameter sind fix vorgegeben:
                       </TableData>
                     ) : (
                       <TableData>
-                        Die Berechnung basiert auf einer vereinfachten
-                        Betriebsfunktion mit benutzerdefinierten Angaben zu
-                        Leistung und Volllaststunden für Heizen und Kühlen auf
-                        20 Jahre. Ergebnis ist die erzielbare Leistung für die
-                        benutzerdefiniert vorgegebene Sondenfeldgröße, sodass
-                        die mittlere Fluidtemperatur zwischen -1.5 °C und 28 °C
-                        bleibt. Zudem werden folgende standortabhängige
-                        Erdreich- und fixe Sondenparameter berücksichtigt:
+                        Die Berechnung erfolgt für das gewählte Sondenfeld mit
+                        der benutzerdefinierten Betriebsfunktion, bestehend aus
+                        den Jahresbetriebsstunden und dem Leistungsverhältnis
+                        zwischen Heizen und Kühlen. Die Berechnung
+                        berücksichtigt zudem Untergrunddaten, fixe
+                        Sondenparameter und Temperaturgrenzen für die
+                        Fluidtemperatur in der Sonde. Ergebnisse sind die
+                        maximal erzielbare Leistung (kW) und Energiemenge
+                        (MWh/a) bei einem Betrieb von 20 Jahren. Folgende
+                        Parameter sind fix vorgegeben:
                       </TableData>
                     )}
                   </TableRow>
                   <tr>
                     <td></td>
                   </tr>
+                  <TableRow>
+                    <TableData>
+                      Minimale mittlere Fluidtemperatur am Ende der Heizsaison:
+                      -1.5 °C
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Maximale mittlere Fluidtemperatur am Ende der Kühlsaison:
+                      28 °C
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>Simulationsjahre: 20 Jahre</TableData>
+                  </TableRow>
                   <TableRow>
                     <TableData>
                       Volumetrische Wärmekapazität des Erdreichs: 2.2 MJ/m³/K
@@ -402,21 +403,98 @@ export default function InfoPanelEWS() {
                   <TableRow>
                     <TableData>Sondenkopf Überdeckung: 1 m</TableData>
                   </TableRow>
-                  <tr>
-                    <td></td>
-                  </tr>
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Benutzereingabe
+                    </TableHeader>
+                  </TableRow>
                   <TableRow>
                     <TableData>
-                      Das Energie- und Leistungsverhältnis zwischen Heizen und
-                      Kühlen ist{" "}
-                      {computationResult.calculationMode === "norm"
-                        ? "standortbezogen"
-                        : "benutzerdefiniert"}{" "}
-                      vorgegeben. Die vereinfachte Betriebsvorgabe in Watt pro
-                      Bohrmeter und die Entwicklung der Fluidtemperaturen werden
-                      als Grafik ausgegeben.
+                      Sondenanzahl: {computationResult.points}
                     </TableData>
                   </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Durchschnittlicher Sondenabstand:{" "}
+                      {computationResult.meanBoreholeSpacing} m
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Sondentiefe: {computationResult.boreDepth} m
+                    </TableData>
+                  </TableRow>
+                  {computationResult.calculationMode === "user" && (
+                    <>
+                      <TableRow>
+                        <TableData>
+                          Jahresbetriebsstunden Heizen:{" "}
+                          {computationResult.BS_HZ} h
+                        </TableData>
+                      </TableRow>
+                      <TableRow>
+                        <TableData>
+                          Jahresbetriebsstunden Kühlen:{" "}
+                          {computationResult.BS_KL} h
+                        </TableData>
+                      </TableRow>
+                      <TableRow>
+                        <TableData>
+                          Heizleistung Gebäude: {computationResult.P_HZ} kW
+                        </TableData>
+                      </TableRow>
+                      <TableRow>
+                        <TableData>
+                          Kühlleistung Gebäude: {computationResult.P_KL} kW
+                        </TableData>
+                      </TableRow>
+                    </>
+                  )}
+                  <TableRow>
+                    <TableHeader textAlign="center">
+                      Standortabhängige Parameter
+                    </TableHeader>
+                  </TableRow>
+                  {computationResult.calculationMode === "norm" && (
+                    <>
+                      <TableRow>
+                        <TableData>
+                          Norm-Jahresbetriebsstunden Heizen:{" "}
+                          {computationResult.BS_HZ_Norm} h
+                        </TableData>
+                      </TableRow>
+                      <TableRow>
+                        <TableData>
+                          Norm-Jahresbetriebsstunden Kühlen:{" "}
+                          {computationResult.BS_KL_Norm} h
+                        </TableData>
+                      </TableRow>
+                    </>
+                  )}
+
+                  {resources && resources.length > 0 && (
+                    <>
+                      <TableRow>
+                        <TableData>
+                          Untergrundtemperatur{" "}
+                          {parseFloat(
+                            resources[4].feature.attributes["Pixel Value"]
+                          ).toFixed(1)}{" "}
+                          °C
+                        </TableData>
+                      </TableRow>
+                      <TableRow>
+                        <TableData>
+                          Wärmeleitfähigkeit{" "}
+                          {parseFloat(
+                            resources[5].feature.attributes["Pixel Value"]
+                          ).toFixed(1)}{" "}
+                          W/m/K
+                        </TableData>
+                      </TableRow>
+                    </>
+                  )}
+
                   {computationResult.points >= 10 &&
                     (computationResult.energiefaktor > 1.1 ||
                       computationResult.energiefaktor < 0.9) && (
@@ -428,74 +506,18 @@ export default function InfoPanelEWS() {
                           <TableData>
                             Hinweis: Größere Sondenfelder sollten mit einer
                             möglichst ausgeglichenen Jahresenergiebilanz
-                            zwischen Heizen und Kühlen betrieben werden. Dies
-                            hat den Vorteil, dass sich die Sonden gegenseitig
-                            kaum beeinflussen und eine möglichst hohe
-                            spezifische Sondenleistung erreicht werden kann. Der
-                            Sondenabstand kann so auf ca. 5 m reduziert und die
-                            Flächendichte wesentlich erhöht werden. Überlegen
-                            Sie eine Verbesserung der Energiebilanz zwischen
-                            Heizen und Kühlen!
+                            zwischen Heizen und Kühlen betrieben werden. Dadurch
+                            beeinflussen sich die Sonden gegenseitig kaum und
+                            der Sondenabstand kann auf ungefähr 5 Meter
+                            reduziert werden. Dies ermöglicht eine optimale
+                            thermische Nutzung des Untergrunds und es können
+                            höhere Leistungen erreicht werden. Überlegen Sie
+                            eine Verbesserung der Energiebilanz zwischen Heizen
+                            und Kühlen!
                           </TableData>
                         </TableRow>
                       </>
                     )}
-                  <tr>
-                    <td></td>
-                  </tr>
-                  <TableRow>
-                    <TableHeader textAlign="center">
-                      Benutzerdefinierte Vorgaben
-                    </TableHeader>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
-                      Sondenanzahl: {computationResult.points}
-                    </TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
-                      Sondentiefe: {computationResult.boreDepth} m
-                    </TableData>
-                  </TableRow>
-                  {computationResult.P_HZ > 0 && (
-                    <TableRow>
-                      <TableData>
-                        Heizleistung: {computationResult.P_HZ} kW
-                      </TableData>
-                    </TableRow>
-                  )}
-                  {computationResult.P_KL > 0 && (
-                    <TableRow>
-                      <TableData>
-                        Kühlleistung: {computationResult.P_KL} kW
-                      </TableData>
-                    </TableRow>
-                  )}
-                  <TableRow>
-                    {computationResult.calculationMode === "norm" ? (
-                      <TableData>
-                        Norm-Volllaststunden Heizen:{" "}
-                        {computationResult.BS_HZ_Norm} h
-                      </TableData>
-                    ) : (
-                      <TableData>
-                        Volllaststunden Heizen: {computationResult.BS_HZ} h
-                      </TableData>
-                    )}
-                  </TableRow>
-                  <TableRow>
-                    {computationResult.calculationMode === "norm" ? (
-                      <TableData>
-                        Norm-Volllaststunden Kühlen:{" "}
-                        {computationResult.BS_KL_Norm} h
-                      </TableData>
-                    ) : (
-                      <TableData>
-                        Volllaststunden Kühlen: {computationResult.BS_KL} h
-                      </TableData>
-                    )}
-                  </TableRow>
                 </tbody>
               </Table>
               <Image
@@ -507,55 +529,111 @@ export default function InfoPanelEWS() {
                 <tbody>
                   <TableRow>
                     <TableHeader textAlign="center">
-                      Berechnungsergebnisse
+                      Berechnungsergebnisse für das Sondenfeld
                     </TableHeader>
                   </TableRow>
+                  <tr>
+                    <td></td>
+                  </tr>
+                  <TableRow>
+                    <TableHeader textAlign="center">Heizbetrieb</TableHeader>
+                  </TableRow>
                   <TableRow>
                     <TableData>
-                      Heizleistung aus Erdwärmesonden:{" "}
-                      {computationResult.heizleistung} kW
+                      Wärmeentzugsleistung aus Erdwärmesonden:{" "}
+                      {computationResult.waermeentzugsleistung.toFixed(1)} kW
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Kühlleistung aus Erdwärmesonden:{" "}
-                      {computationResult.kuehlleistung} kW
+                      Elektrische Leistung Wärmepumpe (bei COP 5):{" "}
+                      {computationResult.elektrischeLeistungWPHeizen.toFixed(1)}{" "}
+                      kW
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Strombedarf Wärmepumpe Heizen bei Leistungszahl 5.0:{" "}
-                      {computationResult.strombedarf} kW
+                      Heizleistung Erdwärmeanlage:{" "}
+                      {computationResult.heizleistung.toFixed(1)} kW
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Heizarbeit pro Jahr aus Erdwärmesonden:{" "}
-                      {computationResult.heizarbeit} MWh/a
+                      Jährlicher Wärmeentzug aus Erdwärmesonde:{" "}
+                      {computationResult.waermeentzug.toFixed(1)} MWh/a
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Kühlarbeit pro Jahr aus Erdwärmesonden:{" "}
-                      {computationResult.kuehlarbeit} MWh/a
+                      Strombedarf Wärmepumpe (bei JAZ 3.5):{" "}
+                      {computationResult.strombedarfWPHeizen.toFixed(1)} MWh/a
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Energieverhältnis Entladen/Beladen (benutzerdefiniert):{" "}
-                      {computationResult.energiefaktor}
+                      Heizarbeit Erdwärmeanlage:{" "}
+                      {computationResult.heizarbeit.toFixed(1)} MWh/a
+                    </TableData>
+                  </TableRow>
+                  <tr>
+                    <td></td>
+                  </tr>
+                  <TableRow>
+                    <TableHeader textAlign="center">Kühlbetrieb</TableHeader>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Wärmeeintragsleistung in Erdwärmesonden:{" "}
+                      {computationResult.waermeeintragsleistung.toFixed(1)} kW
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Energiebedarf Wärmepumpe Heizen bei Leistungszahl 5.0:{" "}
-                      {computationResult.energiebedarf} MWh
+                      Elektrische Leistung Wärmepumpe (bei EER 5):{" "}
+                      {computationResult.elektrischeLeistungWPKuehlen.toFixed(
+                        1
+                      )}{" "}
+                      kW
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Kühlleistung Erdwärmeanlage:{" "}
+                      {computationResult.kuehlleistung.toFixed(1)} kW
+                    </TableData>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableData>
+                      Jährlicher Wärmeeintrag in Erdwärmesonde:{" "}
+                      {computationResult.waermeeintrag.toFixed(1)} MWh/a
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Strombedarf Wärmepumpe (bei SEER 3.5):{" "}
+                      {computationResult.strombedarfWPKuehlen.toFixed(1)} MWh/a
+                    </TableData>
+                  </TableRow>
+                  <TableRow>
+                    <TableData>
+                      Kühlarbeit Erdwärmeanlage:{" "}
+                      {computationResult.kuehlarbeit.toFixed(1)} MWh/a
                     </TableData>
                   </TableRow>
                   {computationResult.cover > 0 && (
                     <TableRow>
                       <TableData>
-                        Deckungsgrad: {parseInt(computationResult.cover)} %
+                        Deckungsgrad gesamt: {computationResult.cover} %
+                      </TableData>
+                    </TableRow>
+                  )}
+                  {computationResult.balanced === 0 && (
+                    <TableRow>
+                      <TableData>
+                        Ihre Gebäudeanforderung ist ausgeglichen (gleicher
+                        Anteil Heizen und Kühlen) und ist damit optimal für den
+                        Speicherbetrieb eines Erdwärmesondenfeldes geeignet.
                       </TableData>
                     </TableRow>
                   )}
@@ -573,7 +651,7 @@ export default function InfoPanelEWS() {
           {Object.keys(computationResult).length > 1 &&
             computationResult.balanced === 1 && (
               <CollapsibleSection
-                title="Berechnungsergebnisse mit automatischer Vorgabe"
+                title="Ressourcen für Benutzereingabe und Speicherbetrieb"
                 open={true}
               >
                 <Table id="calculations-bal-output-table">
@@ -585,32 +663,41 @@ export default function InfoPanelEWS() {
                   <tbody>
                     <TableRow>
                       <TableData>
-                        Diese Berechnung liefert die erzielbare Leistung des
-                        benutzerdefiniert vorgegebenen Sondenfeldes mit einer
-                        automatisch angepassten Betriebsfunktion, sodass das
-                        Energieverhältnis zwischen Ent- und Beladen des
-                        Erdwärmesondenfeldes ausgeglichen ist. Das Sondenfeld
-                        wird im saisonalem Speicherbetrieb bewirtschaftet,
-                        wodurch eine zusätzliche Wärmequelle bzw. Wärmesenke zur
-                        Regeneration erforderlich wird, oder die Heiz- bzw.
-                        Kühlspitzen auf ein bestimmtes Maß reduziert werden
-                        müssen.
+                        Die Berechnung erfolgt für das gewählte Sondenfeld im
+                        saisonalen Speicherbetrieb. Eine ausgeglichene
+                        Betriebsweise zwischen Heizen und Kühlen wird erreicht,
+                        indem das Sondenfeld über das Jahr gesehen gleich stark
+                        be- und entladen wird. Da die Jahresbetriebsstunden für
+                        Heizen in Österreich klimatisch bedingt generell höher
+                        sind als jene für Kühlen, ist für den Ausgleich eine
+                        zusätzliche Wärmequelle zur Regeneration der Sonden im
+                        Sommer erforderlich. Je nach gegebener
+                        Gebäudeanforderung kann es aber auch sein, dass eine
+                        zusätzliche Wärmesenke notwendig ist. Die Berechnung
+                        beinhaltet daher eine zusätzliche Wärmequelle oder
+                        -senke um eine ausgeglichene Energiebilanz zu erreichen.
+                        Bei einer ausgeglichenen Betriebsweise des Sondenfelds
+                        können durch die jährliche Regeneration größere
+                        Leistungen und Energiemengen erzielt werden, als bei
+                        einem einseitigen Betrieb. Ergebnisse sind die maximal
+                        erzielbare Leistung (kW) und Energiemenge (MWh/a) bei
+                        einem Betrieb von 20 Jahren.
                       </TableData>
                     </TableRow>
-                    {computationResult.meanBoreholeSpacing > 6 && (
+                    {computationResult.meanBoreholeSpacing > 5 && (
                       <>
                         <tr>
                           <td></td>
                         </tr>
                         <TableRow>
                           <TableData>
-                            Hinweis: Im saisonalem Speicherbetrieb kann der
-                            Sondenabstand auf ca. 5 Meter reduziert werden ohne
-                            dass sich die einzelnen Erdwärmesonden nennenswert
-                            gegenseitig beeinflussen. Somit kann der
-                            Flächenbedarf reduziert werden ohne signifikante
-                            Einbußen der Sondenleistung. Versuchen Sie eine
-                            Reduktion des Sondenabstandes!
+                            Hinweis: Im saisonalen Speicherbetrieb kann der
+                            Sondenabstand auf ungefähr fünf Meter reduziert
+                            werden ohne dass sich die einzelnen Erdwärmesonden
+                            nennenswert gegenseitig beeinflussen. Somit kann der
+                            Flächenbedarf ohne signifikante Einbußen der
+                            Sondenleistung reduziert werden. Versuchen Sie eine
+                            Reduktion des Sondenabstands!
                           </TableData>
                         </TableRow>
                       </>
@@ -619,124 +706,158 @@ export default function InfoPanelEWS() {
                   <tbody>
                     <TableRow>
                       <TableHeader textAlign="center">
-                        Berechnungsergebnisse
+                        Berechnungsergebnisse für das Sondenfeld
                       </TableHeader>
                     </TableRow>
                     {computationResult.energiefaktor >= 1 && (
                       <>
                         <TableRow>
                           <TableData>
-                            Heizleistung aus Erdwärmesonden:{" "}
-                            {computationResult.heizleistung_bal} kW
+                            Wärmeentzugsleistung aus Erdwärmesonden:{" "}
+                            {computationResult.waermeentzugsleistungBal.toFixed(
+                              1
+                            )}{" "}
+                            kW
                           </TableData>
                         </TableRow>
                         <TableRow>
                           <TableData>
-                            Kühlleistung aus Erdwärmesonden und
-                            Regenerationsleistung aus Zusatzquelle:{" "}
-                            {computationResult.kuehlleistung_bal} kW
+                            Elektrische Leistung Wärmepumpe (bei COP 5):{" "}
+                            {computationResult.elektrischeLeistungWPHeizenBal.toFixed(
+                              1
+                            )}{" "}
+                            kW
                           </TableData>
                         </TableRow>
                         <TableRow>
                           <TableData>
-                            Strombedarf Wärmepumpe Heizen bei Leistungszahl 5.0:{" "}
-                            {computationResult.strombedarf_bal} kW
+                            Heizleistung Erdwärmeanlage:{" "}
+                            {computationResult.heizleistungBal.toFixed(1)} kW
                           </TableData>
                         </TableRow>
                         <TableRow>
                           <TableData>
-                            Heizarbeit pro Jahr aus Erdwärmesonden:{" "}
-                            {computationResult.heizarbeit_bal} MWh/a
+                            Jahresarbeit Erdwärmesonden (jeweils Heizen und
+                            Kühlen):{" "}
+                            {computationResult.jahresarbeitBal.toFixed(1)} MWh/a
                           </TableData>
                         </TableRow>
                         <TableRow>
                           <TableData>
-                            Kühlarbeit und Regenerationsarbeit pro Jahr aus
-                            Erdwärmesonden: {computationResult.kuehlarbeit_bal}{" "}
+                            Strombedarf Wärmepumpe (bei JAZ 3.5):{" "}
+                            {computationResult.strombedarfWPBal.toFixed(1)}{" "}
                             MWh/a
                           </TableData>
                         </TableRow>
                         <TableRow>
                           <TableData>
-                            Energieverhältnis Entladen/Beladen (automatisch):{" "}
-                            {computationResult.energiefaktor_bal}
-                          </TableData>
-                        </TableRow>
-                        <TableRow>
-                          <TableData>
-                            Energiebedarf Wärmepumpe Heizen bei Leistungszahl
-                            5.0: {computationResult.energiebedarf_bal} MWh
+                            Heizarbeit Erdwärmeanlage:{" "}
+                            {computationResult.heizarbeitBal.toFixed(1)} MWh/a
                           </TableData>
                         </TableRow>
                         {computationResult.cover > 0 && (
                           <TableRow>
                             <TableData>
-                              Deckungsgrad: {computationResult.cover} %
+                              Deckungsgrad: {computationResult.coverBal} %
                             </TableData>
                           </TableRow>
                         )}
+                        <TableRow>
+                          <TableData>
+                            Bei einer ausgeglichenen Betriebsweise kann somit
+                            die Heizarbeit um{" "}
+                            {(
+                              (100 *
+                                (parseFloat(computationResult.heizarbeitBal) -
+                                  parseFloat(computationResult.heizarbeit))) /
+                              parseFloat(computationResult.heizarbeit)
+                            ).toFixed(1)}{" "}
+                            % gesteigert werden.
+                          </TableData>
+                        </TableRow>
                       </>
                     )}
                     {computationResult.energiefaktor < 1 && (
                       <>
                         <TableRow>
                           <TableData>
-                            Heizleistung aus Erdwärmesonden und
-                            Regenerationsleistung aus Zusatzsenke:{" "}
-                            {computationResult.heizleistung_bal} kW
-                          </TableData>
-                        </TableRow>
-                        <TableRow>
-                          <TableData>
                             Kühlleistung aus Erdwärmesonden:{" "}
-                            {computationResult.kuehlleistung_bal} kW
+                            {computationResult.kuehlleistungBal.toFixed(1)} kW
                           </TableData>
                         </TableRow>
                         <TableRow>
                           <TableData>
-                            Strombedarf Wärmepumpe Heizen bei Leistungszahl 5.0:{" "}
-                            {computationResult.strombedarf_bal} kW
+                            Elektrische Leistung Wärmepumpe (bei EER 5):{" "}
+                            {computationResult.elektrischeLeistungWPKuehlenBal.toFixed(
+                              1
+                            )}{" "}
+                            kW
                           </TableData>
                         </TableRow>
                         <TableRow>
                           <TableData>
-                            Heizarbeit und Regenerationsarbeit pro Jahr aus
-                            Erdwärmesonden: {computationResult.heizarbeit_bal}{" "}
+                            Kühlleistung Erdwärmeanlage:{" "}
+                            {computationResult.kuehlleistungBal.toFixed(1)} kW
+                          </TableData>
+                        </TableRow>
+
+                        <TableRow>
+                          <TableData>
+                            Jahresarbeit Erdwärmesonden (jeweils Heizen und
+                            Kühlen):{" "}
+                            {computationResult.jahresarbeitBal.toFixed(1)} MWh/a
+                          </TableData>
+                        </TableRow>
+                        <TableRow>
+                          <TableData>
+                            Strombedarf Wärmepumpe (bei JAZ 3.5):{" "}
+                            {computationResult.strombedarfWPBal.toFixed(1)}{" "}
                             MWh/a
                           </TableData>
                         </TableRow>
                         <TableRow>
                           <TableData>
-                            Kühlarbeit pro Jahr aus Erdwärmesonden:{" "}
-                            {computationResult.kuehlarbeit_bal} MWh/a
-                          </TableData>
-                        </TableRow>
-                        <TableRow>
-                          <TableData>
-                            Energieverhältnis Entladen/Beladen (automatisch):{" "}
-                            {computationResult.energiefaktor_bal}
-                          </TableData>
-                        </TableRow>
-                        <TableRow>
-                          <TableData>
-                            Energiebedarf Wärmepumpe Heizen bei Leistungszahl
-                            5.0: {computationResult.energiebedarf_bal} MWh
+                            Heizarbeit Erdwärmeanlage:{" "}
+                            {computationResult.heizarbeitBal.toFixed(1)} MWh/a
                           </TableData>
                         </TableRow>
                         {computationResult.cover > 0 && (
                           <TableRow>
                             <TableData>
-                              Deckungsgrad: {computationResult.cover} %
+                              Deckungsgrad: {computationResult.coverBal} %
                             </TableData>
                           </TableRow>
                         )}
+                        <TableRow>
+                          <TableData>
+                            Die Gebäudeanforderung weist einen größeren Kühl-
+                            als Wärmebedarf auf. Bei einer ausgeglichenen
+                            Betriebsweise des Sondenfelds können durch die
+                            jährliche Regeneration größere Leistungen und
+                            Energiemengen erzielt werden, als bei einem
+                            einseitigen Betrieb. Es ist daher empfehlenswert mit
+                            der Anlage weitere Gebäude mit Wärme zu versorgen,
+                            um eine optimale Nutzung des Sondenfelds zu
+                            erreichen. Dann können{" "}
+                            {(
+                              computationResult.heizarbeitBal -
+                              computationResult.heizarbeit
+                            ).toFixed(1)}{" "}
+                            MWh/a zum Heizen und{" "}
+                            {(
+                              computationResult.heizarbeitBal -
+                              computationResult.kuehlarbeit
+                            ).toFixed(1)}
+                            MWh/a zum Kühlen genutzt werden.
+                          </TableData>
+                        </TableRow>
                       </>
                     )}
                   </tbody>
                 </Table>
                 <Placeholder></Placeholder>
                 <Image
-                  src={computationResult.imagehash_bal}
+                  src={computationResult.imagehashBal}
                   alt="Grafik mit bilanzierten Berechnungsergebnissen"
                   ref={image_bal}
                 ></Image>

@@ -1,6 +1,24 @@
 import React from "react";
 import styled from "styled-components";
 
+export const Main = styled.div`
+  position: absolute;
+  box-sizing: border-box;
+  top: 7%;
+  left: 0;
+  height: 93%;
+  width: 100%;
+  overflow-y: auto;
+`;
+
+export const Content = styled.div`
+  position: absolute;
+  top: 7%;
+  left: 10%;
+  width: 80%;
+  height: 93%;
+`;
+
 export const Line = styled.span`
   display: inline-block;
   width: 80%;
@@ -39,13 +57,6 @@ export const Clearance = styled.p`
   padding: 10px;
   box-sizing: border-box;
   border-radius: 10px;
-`;
-
-export const Content = styled.div`
-  position: absolute;
-  top: 7%;
-  left: 10%;
-  width: 60%;
 `;
 
 export const Heading = styled.h1`

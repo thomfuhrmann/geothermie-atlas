@@ -15,7 +15,6 @@ app.use(express.static(path.join(__dirname, "client/build")));
 app.post("/api", ({ body }, res) => {
   let options = {
     args: [
-      body.EZ,
       body.BT,
       body.GT,
       body.WLF,
@@ -25,8 +24,8 @@ app.post("/api", ({ body }, res) => {
       body.BS_KL,
       body.P_HZ,
       body.P_KL,
-      body.FF,
       body.boreDepth,
+      body.heating,
       body.points,
     ],
   };

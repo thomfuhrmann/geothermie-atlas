@@ -72,6 +72,7 @@ const StyledMenu = styled.div`
   justify-content: space-around;
   align-items: center;
   padding: 30% 0;
+  border-left: 1px solid #ededed;
 `;
 
 const CloseToggle = styled.button`

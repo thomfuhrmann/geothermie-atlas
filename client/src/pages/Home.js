@@ -112,7 +112,7 @@ const Home = () => {
   return (
     <Content>
       <ImageContainer isMobile={isMobile}>
-        <ImageFrame borderRight="1px">
+        <ImageFrame borderRight={!isMobile ? "1px" : "0px"}>
           <NavLink to="/ews">
             <Image
               src={graphicEWS}
@@ -130,7 +130,7 @@ const Home = () => {
             )}
           </NavLink>
         </ImageFrame>
-        <ImageFrame borderLeft="1px">
+        <ImageFrame borderLeft={!isMobile ? "1px" : "0px"}>
           <NavLink to="/gwwp">
             <Image
               src={graphicGWWP}

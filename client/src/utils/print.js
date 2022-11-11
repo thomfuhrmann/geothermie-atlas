@@ -14,76 +14,111 @@ export const print = (
   theme,
   resources
 ) => {
+  // space between tables
   let spaceBetween = 5;
 
+  // create new pdf document object
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",
     format: "a4",
   });
 
+  // add date to top right corner
   let today = new Date().toLocaleDateString();
   doc.setFontSize(8);
   doc.text("erstellt am " + today, 190, 10, { align: "right" });
+
+  // add heading
   doc.setFontSize(14);
   doc.text("Standortbasierter Bericht", 105, 20, {
     align: "center",
   });
 
+  // screenshot of the map
   doc.addImage(screenshot, "PNG", 20, 30, 170, 85);
 
-  doc.setFillColor(255, 255, 255);
-
+  // cadastral data
   if (cadastralData) {
     doc.autoTable({
       html: "#cadastral-data-table",
       rowPageBreak: "avoid",
       startY: 120,
       styles: { halign: "center" },
-      willDrawCell: function (data) {
-        if (data.section === "body") {
-          doc.setFillColor(255, 255, 255);
-        }
-      },
+      columnStyles: { 0: { fillColor: [255, 255, 255] } },
     });
   }
 
-  let finalY;
-  if (cadastralData) {
-    finalY = doc.lastAutoTable.finalY;
-    doc.autoTable({
-      html: "#address-table",
-      rowPageBreak: "avoid",
-      startY: finalY,
-      styles: { halign: "center" },
-      willDrawCell: function (data) {
-        if (data.section === "body") {
-          doc.setFillColor(255, 255, 255);
-        }
-      },
-    });
-  } else {
-    doc.autoTable({
-      html: "#address-table",
-      rowPageBreak: "avoid",
-      startY: 120,
-      styles: { halign: "center" },
-      willDrawCell: function (data) {
-        if (data.section === "body") {
-          doc.setFillColor(255, 255, 255);
-        }
-      },
-    });
-  }
+  // address table
+  let finalY = doc.lastAutoTable.finalY;
+  doc.autoTable({
+    html: "#address-table",
+    rowPageBreak: "avoid",
+    startY: cadastralData ? finalY : 120,
+    styles: { halign: "center" },
+    columnStyles: { 0: { fillColor: [255, 255, 255] } },
+  });
 
+  // legend for parcel boundary lines
   finalY = doc.lastAutoTable.finalY;
+  if (computationResult) {
+    doc.autoTable({
+      startY: finalY,
+      head: [],
+      body: [
+        ["                  ", "Grundstücksgrenze"],
+        theme === "EWS" && [
+          "                  ",
+          "2,5-Meter-Abstand zur Grundstückgsrenze",
+        ],
+      ],
+      willDrawCell: () => {
+        doc.setFillColor(255, 255, 255);
+      },
+      didDrawCell: function (data) {
+        let rowCenterY = data.row.height / 2;
+        doc.setLineWidth(0.5);
+        if (
+          computationResult &&
+          data.row.index === 0 &&
+          data.column.index === 0
+        ) {
+          doc.setDrawColor("blue");
+          doc.line(
+            data.cursor.x + 5,
+            data.cursor.y + rowCenterY,
+            data.cursor.x + 40,
+            data.cursor.y + rowCenterY
+          );
+        }
+
+        if (
+          computationResult &&
+          theme === "EWS" &&
+          data.row.index === 1 &&
+          data.column.index === 0
+        ) {
+          doc.setDrawColor("#00890c");
+          doc.line(
+            data.cursor.x + 5,
+            data.cursor.y + rowCenterY,
+            data.cursor.x + 40,
+            data.cursor.y + rowCenterY
+          );
+        }
+      },
+    });
+  }
+
+  // warnings table
   if (computationResult && warnings) {
+    finalY = doc.lastAutoTable.finalY;
     doc.autoTable({
       html: "#warnings-table",
       rowPageBreak: "avoid",
       startY: finalY,
       willDrawCell: function (data) {
-        if (data.section === "body" && data.cell.text[0] !== "") {
+        if (data.section === "body" && data.cell.text !== "") {
           doc.setFillColor(255, 251, 214);
           doc.setTextColor(113, 81, 0);
         } else {
@@ -93,21 +128,32 @@ export const print = (
     });
   }
 
+  // resources table
   if (resources) {
     finalY = doc.lastAutoTable.finalY;
     doc.autoTable({
       html: "#resources-table",
       rowPageBreak: "avoid",
       showHead: "firstPage",
-      startY: finalY + 5,
+      startY: finalY + spaceBetween,
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Ressourcen";
+        }
+
+        if (
+          data.cell.text.length > 0 &&
+          (data.cell.text[0].startsWith("Ressourcen") ||
+            data.cell.text[0].startsWith("Standortabhängige"))
+        ) {
+          doc.setFillColor(255, 255, 255);
+          data.cell.styles.halign = "center";
         }
       },
     });
   }
 
+  // restrictions table
   if (einschraenkungen) {
     // start at second page
     doc.addPage();
@@ -117,7 +163,7 @@ export const print = (
       rowPageBreak: "avoid",
       showHead: "firstPage",
       startY: 20,
-      willDrawCell: function (data) {
+      willDrawCell: (data) => {
         if (data.section === "head") {
           data.cell.text = "Einschränkungen";
         }
@@ -125,6 +171,7 @@ export const print = (
     });
   }
 
+  // hints table
   finalY = doc.lastAutoTable.finalY;
   if (hinweise) {
     doc.autoTable({
@@ -140,9 +187,10 @@ export const print = (
     });
   }
 
+  // calculations output table
   finalY = doc.lastAutoTable.finalY;
   if (computationResult) {
-    if (hinweise) {
+    if (einschraenkungen || hinweise) {
       doc.addPage();
     }
 
@@ -174,10 +222,15 @@ export const print = (
           doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }
+
+        if (data.cell.text[0].startsWith("Hinweis")) {
+          doc.setFillColor(255, 255, 255);
+        }
       },
     });
   }
 
+  // borefield map
   finalY = doc.lastAutoTable.finalY;
   if (computationResult && image_borefield) {
     const imgProps = doc.getImageProperties(image_borefield.current);
@@ -223,7 +276,12 @@ export const print = (
           data.cell.styles.halign = "center";
         }
 
-        if (data.cell.text[0] === "Berechnungsergebnisse") {
+        if (
+          data.cell.text[0] === "Berechnungsergebnisse für das Sondenfeld" ||
+          data.cell.text[0] === "Berechnungsergebnisse" ||
+          data.cell.text[0] === "Heizbetrieb" ||
+          data.cell.text[0] === "Kühlbetrieb"
+        ) {
           doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }
@@ -231,6 +289,7 @@ export const print = (
     });
   }
 
+  // plot graph for user defined input
   finalY = doc.lastAutoTable.finalY;
   let height = 0;
   if (computationResult && image_userdefined) {
@@ -253,6 +312,7 @@ export const print = (
     }
   }
 
+  // calculations output for automatic input
   finalY = doc.lastAutoTable.finalY;
   if (computationResult && image_bal) {
     doc.addPage();
@@ -267,7 +327,7 @@ export const print = (
             "Berechnungsergebnisse mit automatischer Vorgabe im Speicherbetrieb";
         }
 
-        if (data.cell.text[0].startsWith("Diese Berechnung")) {
+        if (data.cell.text[0].startsWith("Die Berechnung")) {
           doc.setFillColor(255, 255, 255);
         }
 
@@ -275,7 +335,10 @@ export const print = (
           doc.setFillColor(255, 255, 255);
         }
 
-        if (data.cell.text[0] === "Berechnungsergebnisse") {
+        if (
+          data.cell.text[0] === "Berechnungsergebnisse für das Sondenfeld" ||
+          data.cell.text[0] === ""
+        ) {
           doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }
@@ -283,8 +346,8 @@ export const print = (
     });
   }
 
+  // plot graph for automatic input
   finalY = doc.lastAutoTable.finalY;
-  height = 0;
   if (computationResult && image_bal) {
     const imgProps = doc.getImageProperties(image_bal.current);
     const width = doc.internal.pageSize.getWidth() - 60;
@@ -298,34 +361,56 @@ export const print = (
     }
   }
 
+  // show glossary
   doc.addPage();
+  if (computationResult) {
+    doc.autoTable({
+      startY: 20,
+      head: [
+        [
+          {
+            content: "Glossar",
+            colSpan: 2,
+          },
+        ],
+      ],
+      body: [
+        ["COP", "Coefficient of Production"],
+        ["JAZ", "Jahrearbeitszahl"],
+        ["EER", "Energy Efficiency Rating"],
+        ["SEER", "Seasonal Energy Efficiency Rating"],
+      ],
+      columnStyles: {
+        0: { fillColor: [255, 255, 255] },
+        1: { fillColor: [255, 255, 255] },
+      },
+    });
+  }
+
+  // disclaimer
+  finalY = doc.lastAutoTable.finalY;
   doc.autoTable({
     html: "#disclaimer",
     rowPageBreak: "avoid",
-    showHead: "firstPage",
-    startY: 20,
+    startY: computationResult ? finalY + spaceBetween : 20,
+    columnStyles: { 0: { fillColor: [255, 255, 255] } },
     willDrawCell: function (data) {
       if (data.section === "head") {
         data.cell.text = "Haftungsausschluss";
       }
-      if (data.section === "body") {
-        doc.setFillColor(255, 255, 255);
-      }
     },
   });
 
+  // contact
   finalY = doc.lastAutoTable.finalY;
   doc.autoTable({
     html: "#contact",
     rowPageBreak: "avoid",
-    showHead: "firstPage",
     startY: finalY + spaceBetween,
-    willDrawCell: function (data) {
+    columnStyles: { 0: { fillColor: [255, 255, 255] } },
+    willDrawCell: (data) => {
       if (data.section === "head") {
         data.cell.text = "Kontakt";
-      }
-      if (data.section === "body") {
-        doc.setFillColor(255, 255, 255);
       }
     },
   });

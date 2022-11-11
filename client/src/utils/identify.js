@@ -31,11 +31,7 @@ export const identifyAllLayers = (view, mapPoint, dispatch) => {
       dispatch(updateEWSResources(results));
     })
     .catch((err) => {
-      dispatch(
-        updateEWSResources({
-          error: JSON.stringify(err),
-        })
-      );
+      dispatch(updateEWSResources([]));
     });
 
   identify
@@ -51,11 +47,7 @@ export const identifyAllLayers = (view, mapPoint, dispatch) => {
       dispatch(updateBetriebsstunden(results));
     })
     .catch((err) => {
-      dispatch(
-        updateBetriebsstunden({
-          error: JSON.stringify(err),
-        })
-      );
+      dispatch(updateBetriebsstunden([]));
     });
 
   identify
@@ -71,11 +63,7 @@ export const identifyAllLayers = (view, mapPoint, dispatch) => {
       dispatch(updateGWWPResources(results));
     })
     .catch((err) => {
-      dispatch(
-        updateGWWPResources({
-          error: JSON.stringify(err),
-        })
-      );
+      dispatch(updateGWWPResources([]));
     });
 
   identify
@@ -91,10 +79,6 @@ export const identifyAllLayers = (view, mapPoint, dispatch) => {
       dispatch(updateAmpelkarte(results));
     })
     .catch((err) => {
-      dispatch(
-        updateAmpelkarte({
-          error: JSON.stringify(err),
-        })
-      );
+      dispatch(updateAmpelkarte([]));
     });
 };

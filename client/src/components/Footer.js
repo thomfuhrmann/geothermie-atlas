@@ -3,7 +3,7 @@ import React from "react";
 import CollapsibleSection from "./CollapsibleSection";
 import { Placeholder, Table } from "./CommonStyledElements";
 
-export default function Footer({ children }) {
+export default function Footer() {
   return (
     <>
       <CollapsibleSection title="Haftungsausschluss">

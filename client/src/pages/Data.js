@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { Content, Placeholder } from "../components/CommonStyledElements";
+import { Content, Main } from "../components/CommonStyledElements";
 
 const Heading = styled.h1`
   margin: 0px;
@@ -16,15 +16,16 @@ const Paragraph = styled.p`
 
 const Data = () => {
   return (
-    <Content>
-      <Placeholder></Placeholder>
-      <Heading>Daten</Heading>
-      <Paragraph>
-        Hier kommen die Links zu Tethys. <br></br>
-        <br></br>
-        <a href="https://www.tethys.at/">https://www.tethys.at/</a>
-      </Paragraph>
-    </Content>
+    <Main>
+      <Content>
+        <Heading>Daten</Heading>
+        <Paragraph>
+          Hier kommen die Links zu Tethys. <br></br>
+          <br></br>
+          <a href="https://www.tethys.at/">https://www.tethys.at/</a>
+        </Paragraph>
+      </Content>
+    </Main>
   );
 };
 

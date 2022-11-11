@@ -35,6 +35,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   const [P_KL, setP_KL] = useState(0);
   const [P_HZ, setP_HZ] = useState(0);
   const [points, setPoints] = useState([]);
+  const [heating, setHeating] = useState("fussboden");
 
   const cadastralData = useSelector((store) => store.cadastre.value);
   const resources = useSelector((store) => store.ewsResources.value);
@@ -73,7 +74,6 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
       let url = "/api";
 
       const data = {
-        EZ: cadastralData.GNR,
         BT,
         GT,
         WLF,
@@ -83,12 +83,21 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         BS_KL: BS_KL,
         P_HZ: P_HZ,
         P_KL: P_KL,
-        FF: cadastralData.FF,
         boreDepth,
         points: pointsText,
+        heating,
       };
 
-      if (BT !== "NoData" && points.length !== 0 && pointsText !== undefined) {
+      if (
+        Object.values(data).every(
+          (x) => typeof x !== "undefined" && x !== null
+        ) &&
+        BT !== "NoData" &&
+        GT !== "NoData" &&
+        WLF !== "NoData" &&
+        BS_HZ_Norm !== "NoData" &&
+        BS_KL_Norm !== "NoData"
+      ) {
         fetch(url, {
           method: "POST",
           headers: {
@@ -98,30 +107,52 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         })
           .then((res) => res.json())
           .then((data) => {
-            const meanBoreholeSpacing = gridSpacing;
+            const meanBoreholeSpacing = parseFloat(data[13]);
 
-            const calculationMode = data[11];
-            const heizleistung = parseFloat(data[12]).toFixed(1);
-            const kuehlleistung = -parseFloat(data[13]).toFixed(1);
-            const strombedarf = parseFloat(data[17]).toFixed(1);
-            const heizarbeit = (parseFloat(data[14]) / 1000).toFixed(1);
-            const kuehlarbeit = -(parseFloat(data[15]) / 1000).toFixed(1);
-            const energiefaktor = parseFloat(data[25]).toFixed(1);
-            const energiebedarf = (parseFloat(data[19]) / 1000).toFixed(1);
-            const cover = parseInt(data[16]);
-            const imagehash = "data:image/png;base64," + data[26];
-            const imagehashSondenfeld = "data:image/png;base64," + data[27];
+            const calculationMode = data[0];
+            const waermeentzugsleistung = parseFloat(data[1]);
+            const waermeeintragsleistung = -parseFloat(data[2]);
+            const elektrischeLeistungWPHeizen = parseFloat(data[6]);
+            const elektrischeLeistungWPKuehlen = parseFloat(data[7]);
+            const waermeentzug = parseFloat(data[3]) / 1000;
+            const waermeeintrag = -(parseFloat(data[4]) / 1000);
+            const energiefaktor = parseFloat(data[14]);
+            const strombedarfWPHeizen = parseFloat(data[8]) / 1000;
+            const strombedarfWPKuehlen = parseFloat(data[9]) / 1000;
+            const cover = parseInt(data[5]);
+            const imagehash = "data:image/png;base64," + data[15];
+            const imagehashSondenfeld = "data:image/png;base64," + data[16];
 
-            const balanced = parseInt(data[28]);
-            const heizleistung_bal = parseFloat(data[29]).toFixed(1);
-            const kuehlleistung_bal = -parseFloat(data[30]).toFixed(1);
-            const strombedarf_bal = parseFloat(data[34]).toFixed(1);
-            const heizarbeit_bal = (parseFloat(data[31]) / 1000).toFixed(1);
-            const kuehlarbeit_bal = -(parseFloat(data[32]) / 1000).toFixed(1);
-            const energiefaktor_bal = parseFloat(data[42]).toFixed(1);
-            const energiebedarf_bal = (parseFloat(data[36]) / 1000).toFixed(1);
-            const cover_bal = parseInt(data[33]);
-            const imagehash_bal = "data:image/png;base64," + data[43];
+            const heizleistung =
+              waermeentzugsleistung + elektrischeLeistungWPHeizen;
+            const heizarbeit = waermeentzug + strombedarfWPHeizen;
+
+            const kuehlleistung =
+              waermeeintragsleistung + elektrischeLeistungWPKuehlen;
+            const kuehlarbeit = waermeeintrag + strombedarfWPKuehlen;
+
+            // ausgeglichene Betriebsweise
+            const balanced = parseInt(data[17]);
+            const energiefaktorBal = parseFloat(data[31]);
+
+            const waermeentzugsleistungBal = parseFloat(data[18]);
+            const elektrischeLeistungWPHeizenBal = parseFloat(data[23]);
+            const heizleistungBal =
+              waermeentzugsleistungBal + elektrischeLeistungWPHeizenBal;
+
+            const jahresarbeitBal =
+              (parseFloat(data[20]) - parseFloat(data[21])) / 1000;
+            const strombedarfWPBal =
+              (parseFloat(data[25]) + parseFloat(data[26])) / 1000;
+            const heizarbeitBal = strombedarfWPBal + jahresarbeitBal;
+
+            const waermeeintragsleistungBal = -parseFloat(data[19]);
+            const elektrischeLeistungWPKuehlenBal = parseFloat(data[24]);
+            const kuehlleistungBal =
+              waermeeintragsleistungBal + elektrischeLeistungWPKuehlenBal;
+
+            const coverBal = parseInt(data[22]);
+            const imagehashBal = "data:image/png;base64," + data[32];
 
             dispatch(
               updateEWSComputationResult({
@@ -135,26 +166,35 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
                 BS_KL,
                 BS_HZ_Norm,
                 BS_KL_Norm,
-                heizleistung,
-                kuehlleistung,
-                strombedarf,
-                heizarbeit,
-                kuehlarbeit,
+                waermeentzugsleistung,
+                waermeeintragsleistung,
+                elektrischeLeistungWPHeizen,
+                elektrischeLeistungWPKuehlen,
+                waermeentzug,
+                waermeeintrag,
                 energiefaktor,
-                energiebedarf,
+                strombedarfWPHeizen,
+                strombedarfWPKuehlen,
                 cover,
                 imagehash,
                 imagehashSondenfeld,
                 balanced,
-                heizleistung_bal,
-                kuehlleistung_bal,
-                strombedarf_bal,
-                heizarbeit_bal,
-                kuehlarbeit_bal,
-                energiefaktor_bal,
-                energiebedarf_bal,
-                cover_bal,
-                imagehash_bal,
+                waermeentzugsleistungBal,
+                waermeeintragsleistungBal,
+                elektrischeLeistungWPHeizenBal,
+                elektrischeLeistungWPKuehlenBal,
+                strombedarfWPBal,
+                energiefaktorBal,
+                jahresarbeitBal,
+                coverBal,
+                imagehashBal,
+                heizleistung,
+                heizarbeit,
+                kuehlleistung,
+                kuehlarbeit,
+                heizleistungBal,
+                heizarbeitBal,
+                kuehlleistungBal,
               })
             );
             isLoading(false);
@@ -182,13 +222,6 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         );
         isLoading(false);
       }
-    } else if (points.length > 300) {
-      dispatch(
-        updateEWSComputationResult({
-          error: "Es sind maximal 300 Punkte möglich.",
-        })
-      );
-      isLoading(false);
     }
   };
 
@@ -272,6 +305,10 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
     event.preventDefault();
   };
 
+  const handleHeating = (event) => {
+    setHeating(event.target.value);
+  };
+
   return (
     <CollapsibleSection
       title="Berechnungsmenü"
@@ -283,8 +320,17 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
     >
       <CollapsibleContent id="collapsible-content">
         <>
-          <label>Sondenpunkte auswählen oder zeichnen</label>
-          <div ref={sketchContainerRef}></div>
+          <InputSection>
+            <label>Sondenpunkte auswählen oder zeichnen</label>
+            <div ref={sketchContainerRef}></div>
+          </InputSection>
+          <InputSection>
+            <label htmlFor="gridspacing-input">Heizart </label>
+            <select id="gridspacing-input" onChange={handleHeating}>
+              <option value="fussboden">Fußbodenheizung</option>
+              <option value="radiator">Radiator</option>
+            </select>
+          </InputSection>
           <InputSection>
             <label htmlFor="gridspacing-input">Sondenabstand in Meter</label>
             <Input
@@ -292,7 +338,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
               type="number"
               min="5"
               max="15"
-              placeholder="Wert zwischen 5 und 15 m (default=10)"
+              placeholder="Wert zwischen 15 und 15 m (default=100)"
               value={gridSpacing}
               onChange={handleGridSpacing}
               onKeyDown={handleKeyDown}
@@ -335,7 +381,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
           </InputSection>
           <InputSection>
             <label htmlFor="bshz-input">
-              Volllaststunden Heizen (optional)
+              Jahresbetriebsstunden Heizen (optional)
             </label>
             <Input
               id="bshz-input"
@@ -349,7 +395,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
           </InputSection>
           <InputSection>
             <label htmlFor="bskl-input">
-              Volllaststunden Kühlen (optional)
+              Jahresbetriebsstunden Kühlen (optional)
             </label>
             <Input
               id="bskl-input"
@@ -361,14 +407,28 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
               value={BS_KL}
             ></Input>
           </InputSection>
-          {points.length > 0 ? (
+          {(P_HZ > 0 || P_KL > 0 || BS_HZ > 0 || BS_KL > 0) &&
+            (P_HZ === 0 || P_KL === 0 || BS_HZ === 0 || BS_KL === 0) && (
+              <Warning>
+                Solange nicht alle Parameter ausgefüllt sind, wird mit
+                Normwerten gerechnet.
+              </Warning>
+            )}
+          {points.length > 300 && (
+            <Warning>
+              Es sind maximal 300 Punkte möglich. Bitte löschen Sie zuerst
+              Punkte.
+            </Warning>
+          )}
+          {points.length === 0 && (
+            <Warning>Bitte zeichnen Sie mindestens einen Punkt!</Warning>
+          )}
+          {points.length > 0 && points.length <= 300 && (
             <ButtonContainer>
               <Button onClick={handlePythonCalculation}>
                 Berechnung starten
               </Button>
             </ButtonContainer>
-          ) : (
-            <Warning>Bitte zeichnen Sie mindestens einen Punkt!</Warning>
           )}
         </>
       </CollapsibleContent>

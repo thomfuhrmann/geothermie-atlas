@@ -208,7 +208,9 @@ export const AmpelkarteTable = ({ results, setTables, layerId }) => {
             </thead>
             <tbody>
               <TableRow>
-                <TableData>Keine Einschränkungen bekannt</TableData>
+                <TableData>
+                  An diesem Standort sind keine Einschränkungen bekannt.
+                </TableData>
               </TableRow>
             </tbody>
           </Table>
