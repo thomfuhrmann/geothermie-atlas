@@ -206,18 +206,11 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
               })
             );
           });
-      } else if (points.length === 0) {
-        dispatch(
-          updateEWSComputationResult({
-            error: "Bitte zeichnen Sie zuerst ein Sondennetz!",
-          })
-        );
-        isLoading(false);
       } else {
         dispatch(
           updateEWSComputationResult({
             error:
-              "Aufgrund fehlender Daten ist für dieses Grundstück keine Berechnung möglich.",
+              "Aufgrund ungültiger Daten ist für dieses Grundstück keine Berechnung möglich.",
           })
         );
         isLoading(false);

@@ -29,7 +29,7 @@ app.post("/api", ({ body }, res) => {
       body.points,
     ],
   };
-  if (options.args.every((option) => option !== undefined)) {
+  if (options.args.every((option) => typeof option !== "undefined")) {
     runPythonShell(res, options);
   } else {
     res.status(500).send({
