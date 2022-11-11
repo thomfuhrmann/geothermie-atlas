@@ -269,9 +269,6 @@ export default function InfoPanelGWWP() {
                       </TableRow>
                     );
                   })}
-                  <tr>
-                    <td></td>
-                  </tr>
                   <TableRow>
                     <TableHeader textAlign="center">
                       Standortabhängige Parameter
@@ -339,9 +336,6 @@ export default function InfoPanelGWWP() {
                           Benutzerdefinierte Vorgaben
                         </TableHeader>
                       </TableRow>
-                      <tr>
-                        <td></td>
-                      </tr>
                       {computationResult.eHZ > 0 && (
                         <TableRow>
                           <TableData>
@@ -389,9 +383,6 @@ export default function InfoPanelGWWP() {
                       Berechnungsergebnisse
                     </TableHeader>
                   </TableRow>
-                  <tr>
-                    <td></td>
-                  </tr>
                   <TableRow>
                     <TableData>
                       Energieflächendichte im einseitigen Heizbetrieb:{" "}

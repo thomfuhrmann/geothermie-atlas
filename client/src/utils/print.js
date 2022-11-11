@@ -136,6 +136,13 @@ export const print = (
       rowPageBreak: "avoid",
       showHead: "firstPage",
       startY: finalY + spaceBetween,
+      columnStyles: {
+        0: {
+          lineWidth: { bottom: 0.1 },
+          lineColor: "#d1d1d1",
+          fillColor: [255, 255, 255],
+        },
+      },
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Ressourcen";
@@ -146,7 +153,6 @@ export const print = (
           (data.cell.text[0].startsWith("Ressourcen") ||
             data.cell.text[0].startsWith("Standortabhängige"))
         ) {
-          doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }
       },
@@ -163,6 +169,13 @@ export const print = (
       rowPageBreak: "avoid",
       showHead: "firstPage",
       startY: 20,
+      columnStyles: {
+        0: {
+          lineWidth: { bottom: 0.1 },
+          lineColor: "#d1d1d1",
+          fillColor: [255, 255, 255],
+        },
+      },
       willDrawCell: (data) => {
         if (data.section === "head") {
           data.cell.text = "Einschränkungen";
@@ -179,6 +192,13 @@ export const print = (
       rowPageBreak: "avoid",
       showHead: "firstPage",
       startY: einschraenkungen ? finalY + spaceBetween : 20,
+      columnStyles: {
+        0: {
+          lineWidth: { bottom: 0.1 },
+          lineColor: "#d1d1d1",
+          fillColor: [255, 255, 255],
+        },
+      },
       willDrawCell: function (data) {
         if (data.section === "head") {
           data.cell.text = "Hinweise";
@@ -199,6 +219,13 @@ export const print = (
       rowPageBreak: "avoid",
       showHead: "firstPage",
       startY: hinweise ? 20 : finalY + spaceBetween,
+      columnStyles: {
+        0: {
+          lineWidth: { bottom: 0.1 },
+          lineColor: "#d1d1d1",
+          fillColor: [255, 255, 255],
+        },
+      },
       willDrawCell: function (data) {
         if (data.section === "head") {
           let title = "Ressourcen aus Berechnung mit Benutzervorgabe";
@@ -208,23 +235,8 @@ export const print = (
           data.cell.text[0] = title;
         }
 
-        if (data.cell.text[0].startsWith("Die Berechnung")) {
-          doc.setFillColor(255, 255, 255);
-        }
-
-        if (
-          data.cell.text[0].startsWith("Das Energie- und Leistungsverhältnis")
-        ) {
-          doc.setFillColor(255, 255, 255);
-        }
-
         if (data.cell.text[0] === "Benutzerdefinierte Vorgaben") {
-          doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
-        }
-
-        if (data.cell.text[0].startsWith("Hinweis")) {
-          doc.setFillColor(255, 255, 255);
         }
       },
     });
@@ -264,15 +276,15 @@ export const print = (
       rowPageBreak: "avoid",
       showHead: "firstPage",
       startY: theme === "EWS" ? 20 : finalY + spaceBetween,
-      willDrawCell: function (data) {
-        if (
-          data.cell.text[0].startsWith("Das Energie- und Leistungsverhältnis")
-        ) {
-          doc.setFillColor(255, 255, 255);
-        }
-
+      columnStyles: {
+        0: {
+          lineWidth: { bottom: 0.1 },
+          lineColor: "#d1d1d1",
+          fillColor: [255, 255, 255],
+        },
+      },
+      willDrawCell: (data) => {
         if (data.cell.text[0] === "Benutzerdefinierte Vorgaben") {
-          doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }
 
@@ -321,25 +333,23 @@ export const print = (
       rowPageBreak: "avoid",
       showHead: "firstPage",
       startY: 20,
-      willDrawCell: function (data) {
+      columnStyles: {
+        0: {
+          lineWidth: { bottom: 0.1 },
+          lineColor: "#d1d1d1",
+          fillColor: [255, 255, 255],
+        },
+      },
+      willDrawCell: (data) => {
         if (data.section === "head") {
           data.cell.text[0] =
             "Berechnungsergebnisse mit automatischer Vorgabe im Speicherbetrieb";
-        }
-
-        if (data.cell.text[0].startsWith("Die Berechnung")) {
-          doc.setFillColor(255, 255, 255);
-        }
-
-        if (data.cell.text[0].startsWith("Hinweis")) {
-          doc.setFillColor(255, 255, 255);
         }
 
         if (
           data.cell.text[0] === "Berechnungsergebnisse für das Sondenfeld" ||
           data.cell.text[0] === ""
         ) {
-          doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
         }
       },
@@ -363,7 +373,7 @@ export const print = (
 
   // show glossary
   doc.addPage();
-  if (computationResult) {
+  if (computationResult && theme === "EWS") {
     doc.autoTable({
       startY: 20,
       head: [
@@ -381,8 +391,16 @@ export const print = (
         ["SEER", "Seasonal Energy Efficiency Rating"],
       ],
       columnStyles: {
-        0: { fillColor: [255, 255, 255] },
-        1: { fillColor: [255, 255, 255] },
+        0: {
+          lineWidth: { bottom: 0.1 },
+          lineColor: "#d1d1d1",
+          fillColor: [255, 255, 255],
+        },
+        1: {
+          lineWidth: { bottom: 0.1 },
+          lineColor: "#d1d1d1",
+          fillColor: [255, 255, 255],
+        },
       },
     });
   }
@@ -392,7 +410,7 @@ export const print = (
   doc.autoTable({
     html: "#disclaimer",
     rowPageBreak: "avoid",
-    startY: computationResult ? finalY + spaceBetween : 20,
+    startY: computationResult && theme === "EWS" ? finalY + spaceBetween : 20,
     columnStyles: { 0: { fillColor: [255, 255, 255] } },
     willDrawCell: function (data) {
       if (data.section === "head") {

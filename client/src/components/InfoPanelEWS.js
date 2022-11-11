@@ -265,9 +265,6 @@ export default function InfoPanelEWS() {
                       </TableRow>
                     );
                   })}
-                  <tr>
-                    <td></td>
-                  </tr>
                   <TableRow>
                     <TableHeader textAlign="center">
                       Standortabhängige Parameter
@@ -331,7 +328,7 @@ export default function InfoPanelEWS() {
                 <tbody>
                   <TableRow>
                     {computationResult.calculationMode === "norm" ? (
-                      <TableData>
+                      <td>
                         Die Berechnung erfolgt für das gewählte Sondenfeld mit
                         Norm-Jahresbetriebsstunden. Für die Betriebsfunktion
                         werden Norm-Jahresbetriebsstunden am Standort für Heizen
@@ -342,9 +339,9 @@ export default function InfoPanelEWS() {
                         maximal erzielbare Leistung (kW) und Energiemenge
                         (MWh/a) bei einem Betrieb von 20 Jahren. Folgende
                         Parameter sind fix vorgegeben:
-                      </TableData>
+                      </td>
                     ) : (
-                      <TableData>
+                      <td>
                         Die Berechnung erfolgt für das gewählte Sondenfeld mit
                         der benutzerdefinierten Betriebsfunktion, bestehend aus
                         den Jahresbetriebsstunden und dem Leistungsverhältnis
@@ -355,12 +352,9 @@ export default function InfoPanelEWS() {
                         maximal erzielbare Leistung (kW) und Energiemenge
                         (MWh/a) bei einem Betrieb von 20 Jahren. Folgende
                         Parameter sind fix vorgegeben:
-                      </TableData>
+                      </td>
                     )}
                   </TableRow>
-                  <tr>
-                    <td></td>
-                  </tr>
                   <TableRow>
                     <TableData>
                       Minimale mittlere Fluidtemperatur am Ende der Heizsaison:
@@ -499,11 +493,8 @@ export default function InfoPanelEWS() {
                     (computationResult.energiefaktor > 1.1 ||
                       computationResult.energiefaktor < 0.9) && (
                       <>
-                        <tr>
-                          <td></td>
-                        </tr>
                         <TableRow>
-                          <TableData>
+                          <td>
                             Hinweis: Größere Sondenfelder sollten mit einer
                             möglichst ausgeglichenen Jahresenergiebilanz
                             zwischen Heizen und Kühlen betrieben werden. Dadurch
@@ -514,12 +505,13 @@ export default function InfoPanelEWS() {
                             höhere Leistungen erreicht werden. Überlegen Sie
                             eine Verbesserung der Energiebilanz zwischen Heizen
                             und Kühlen!
-                          </TableData>
+                          </td>
                         </TableRow>
                       </>
                     )}
                 </tbody>
               </Table>
+              <Placeholder></Placeholder>
               <Image
                 src={computationResult.imagehashSondenfeld}
                 alt="Grafik mit Sondenfeld"
@@ -532,9 +524,6 @@ export default function InfoPanelEWS() {
                       Berechnungsergebnisse für das Sondenfeld
                     </TableHeader>
                   </TableRow>
-                  <tr>
-                    <td></td>
-                  </tr>
                   <TableRow>
                     <TableHeader textAlign="center">Heizbetrieb</TableHeader>
                   </TableRow>
@@ -575,9 +564,6 @@ export default function InfoPanelEWS() {
                       {computationResult.heizarbeit.toFixed(1)} MWh/a
                     </TableData>
                   </TableRow>
-                  <tr>
-                    <td></td>
-                  </tr>
                   <TableRow>
                     <TableHeader textAlign="center">Kühlbetrieb</TableHeader>
                   </TableRow>
@@ -630,11 +616,11 @@ export default function InfoPanelEWS() {
                   )}
                   {computationResult.balanced === 0 && (
                     <TableRow>
-                      <TableData>
+                      <td>
                         Ihre Gebäudeanforderung ist ausgeglichen (gleicher
                         Anteil Heizen und Kühlen) und ist damit optimal für den
                         Speicherbetrieb eines Erdwärmesondenfeldes geeignet.
-                      </TableData>
+                      </td>
                     </TableRow>
                   )}
                 </tbody>
@@ -662,7 +648,7 @@ export default function InfoPanelEWS() {
                   </thead>
                   <tbody>
                     <TableRow>
-                      <TableData>
+                      <td>
                         Die Berechnung erfolgt für das gewählte Sondenfeld im
                         saisonalen Speicherbetrieb. Eine ausgeglichene
                         Betriebsweise zwischen Heizen und Kühlen wird erreicht,
@@ -682,15 +668,12 @@ export default function InfoPanelEWS() {
                         einem einseitigen Betrieb. Ergebnisse sind die maximal
                         erzielbare Leistung (kW) und Energiemenge (MWh/a) bei
                         einem Betrieb von 20 Jahren.
-                      </TableData>
+                      </td>
                     </TableRow>
                     {computationResult.meanBoreholeSpacing > 5 && (
                       <>
-                        <tr>
-                          <td></td>
-                        </tr>
                         <TableRow>
-                          <TableData>
+                          <td>
                             Hinweis: Im saisonalen Speicherbetrieb kann der
                             Sondenabstand auf ungefähr fünf Meter reduziert
                             werden ohne dass sich die einzelnen Erdwärmesonden
@@ -698,7 +681,7 @@ export default function InfoPanelEWS() {
                             Flächenbedarf ohne signifikante Einbußen der
                             Sondenleistung reduziert werden. Versuchen Sie eine
                             Reduktion des Sondenabstands!
-                          </TableData>
+                          </td>
                         </TableRow>
                       </>
                     )}
@@ -763,7 +746,7 @@ export default function InfoPanelEWS() {
                           </TableRow>
                         )}
                         <TableRow>
-                          <TableData>
+                          <td>
                             Bei einer ausgeglichenen Betriebsweise kann somit
                             die Heizarbeit um{" "}
                             {(
@@ -773,7 +756,7 @@ export default function InfoPanelEWS() {
                               parseFloat(computationResult.heizarbeit)
                             ).toFixed(1)}{" "}
                             % gesteigert werden.
-                          </TableData>
+                          </td>
                         </TableRow>
                       </>
                     )}
@@ -829,7 +812,7 @@ export default function InfoPanelEWS() {
                           </TableRow>
                         )}
                         <TableRow>
-                          <TableData>
+                          <td>
                             Die Gebäudeanforderung weist einen größeren Kühl-
                             als Wärmebedarf auf. Bei einer ausgeglichenen
                             Betriebsweise des Sondenfelds können durch die
@@ -849,7 +832,7 @@ export default function InfoPanelEWS() {
                               computationResult.kuehlarbeit
                             ).toFixed(1)}
                             MWh/a zum Kühlen genutzt werden.
-                          </TableData>
+                          </td>
                         </TableRow>
                       </>
                     )}

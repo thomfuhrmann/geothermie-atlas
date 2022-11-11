@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 
 export const Main = styled.div`
@@ -161,6 +160,7 @@ export const TableData = styled.td`
   text-align: ${(props) => props.textAlign || "left"};
   ${TablePadding};
   word-break: break-word;
+  border-bottom: 1px solid #d1d1d1;
 `;
 
 export const TableHeader = styled.th`
@@ -173,30 +173,4 @@ export const TableHeader = styled.th`
 
 export const TableRow = styled.tr`
   width: 100%;
-  &:nth-child(even) {
-    background-color: #eee;
-  }
 `;
-
-export const Dot = styled.span`
-  /* position: relative;
-  top: 3px; */
-  height: ${(props) => props.height || "20px"};
-  width: ${(props) => props.width || "20px"};
-  background-color: ${(props) => props.backgroundColor};
-  border-radius: 50%;
-  display: inline-block;
-`;
-
-export const returnDot = (color) => {
-  switch (color) {
-    case "Grün":
-      return <Dot backgroundColor="green"></Dot>;
-    case "Gelb":
-      return <Dot backgroundColor="yellow"></Dot>;
-    case "Magenta":
-      return <Dot backgroundColor="red"></Dot>;
-    default:
-      return;
-  }
-};
