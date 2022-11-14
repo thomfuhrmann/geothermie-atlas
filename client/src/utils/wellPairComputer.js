@@ -106,41 +106,4 @@ export const calculateWells = (polygon, setPoints) => {
       })
     );
   }
-
-  // filter points that are not on buildings
-  // filterPointsByPixelAndDraw(filteredGridPoints, setPoints);
 };
-
-// select points that are not on buildings
-// const filterPointsByPixelAndDraw = (points, setPoints) => {
-//   cadastre.fetchImage(view.extent, view.width, view.height).then((image) => {
-//     const canvas = document.createElement("canvas");
-//     canvas.width = view.width;
-//     canvas.height = view.height;
-
-//     const context = canvas.getContext("2d");
-//     context.drawImage(image, 0, 0);
-
-//     const selectedGridPoints = [];
-//     for (const point of points) {
-//       const screenPoint = view.toScreen(point);
-
-//       const { data } = context.getImageData(
-//         Math.round(screenPoint.x),
-//         Math.round(screenPoint.y),
-//         1,
-//         1
-//       );
-
-//       // buildings are identified by their RGB value (218, 62, 56) in the cadastral layer
-//       if (!(data[0] === 218 && data[1] === 62 && data[2] === 56)) {
-//         selectedGridPoints.push(point);
-//       }
-//     }
-//     // draw points
-//     selectedGridPoints.map((point) => drawPoint(point));
-
-//     // set grid points for the UI
-//     setPoints(selectedGridPoints.map((point) => [point.x, point.y]));
-//   });
-// };

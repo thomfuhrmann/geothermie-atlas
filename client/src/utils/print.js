@@ -228,14 +228,13 @@ export const print = (
       },
       willDrawCell: function (data) {
         if (data.section === "head") {
-          let title = "Ressourcen aus Berechnung mit Benutzervorgabe";
-          if (calculationMode === "norm") {
-            title += " und Normbetriebsstunden";
-          }
-          data.cell.text[0] = title;
+          data.cell.text[0] = "Berechnungsergebnisse";
         }
 
-        if (data.cell.text[0] === "Benutzerdefinierte Vorgaben") {
+        if (
+          data.cell.text[0] === "Berechnungsvorgaben" ||
+          data.cell.text[0] === "Benutzereingabe"
+        ) {
           data.cell.styles.halign = "center";
         }
       },
@@ -289,10 +288,9 @@ export const print = (
         }
 
         if (
-          data.cell.text[0] === "Berechnungsergebnisse für das Sondenfeld" ||
-          data.cell.text[0] === "Berechnungsergebnisse" ||
-          data.cell.text[0] === "Heizbetrieb" ||
-          data.cell.text[0] === "Kühlbetrieb"
+          data.cell.text[0].startsWith("Berechnungsergebnisse") ||
+          data.cell.text[0].startsWith("Heizbetrieb") ||
+          data.cell.text[0].startsWith("Kühlbetrieb")
         ) {
           doc.setFillColor(255, 255, 255);
           data.cell.styles.halign = "center";
@@ -343,12 +341,13 @@ export const print = (
       willDrawCell: (data) => {
         if (data.section === "head") {
           data.cell.text[0] =
-            "Berechnungsergebnisse mit automatischer Vorgabe im Speicherbetrieb";
+            "Berechnungsergebnisse für den saisonalen Speicherbetrieb";
         }
 
         if (
-          data.cell.text[0] === "Berechnungsergebnisse für das Sondenfeld" ||
-          data.cell.text[0] === ""
+          data.cell.text[0] === "Berechnungsergebnisse" ||
+          data.cell.text[0].startsWith("Heizbetrieb") ||
+          data.cell.text[0].startsWith("Kühlbetrieb")
         ) {
           data.cell.styles.halign = "center";
         }
@@ -385,10 +384,22 @@ export const print = (
         ],
       ],
       body: [
-        ["COP", "Coefficient of Production"],
-        ["JAZ", "Jahrearbeitszahl"],
-        ["EER", "Energy Efficiency Rating"],
-        ["SEER", "Seasonal Energy Efficiency Rating"],
+        [
+          "COP",
+          "Leistungszahl der Wärmepumpe im Heizbetrieb (Coefficient of Performance)",
+        ],
+        [
+          "JAZ",
+          "Jahresarbeitszahl oder saisonale Leistungszahl der Wärmepumpe im Heizbetrieb",
+        ],
+        [
+          "EER",
+          "Leistungszahl der Wärmepumpe im Kühlbetrieb (Energy Efficiency Rating)",
+        ],
+        [
+          "SEER",
+          "Saisonale Leistungszahl der Wärmepumpe im Kühlbetrieb (Seasonal Energy Efficiency Rating)",
+        ],
       ],
       columnStyles: {
         0: {

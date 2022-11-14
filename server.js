@@ -27,6 +27,7 @@ app.post("/api", ({ body }, res) => {
       body.boreDepth,
       body.heating,
       body.points,
+      body.heating,
     ],
   };
   if (options.args.every((option) => typeof option !== "undefined")) {

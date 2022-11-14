@@ -35,7 +35,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   const [P_KL, setP_KL] = useState(0);
   const [P_HZ, setP_HZ] = useState(0);
   const [points, setPoints] = useState([]);
-  const [heating, setHeating] = useState("fussboden");
+  const [heating, setHeating] = useState(35);
 
   const cadastralData = useSelector((store) => store.cadastre.value);
   const resources = useSelector((store) => store.ewsResources.value);
@@ -107,52 +107,68 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         })
           .then((res) => res.json())
           .then((data) => {
-            const meanBoreholeSpacing = parseFloat(data[13]);
-
+            // user defined input
             const calculationMode = data[0];
-            const waermeentzugsleistung = parseFloat(data[1]);
-            const waermeeintragsleistung = -parseFloat(data[2]);
-            const elektrischeLeistungWPHeizen = parseFloat(data[6]);
-            const elektrischeLeistungWPKuehlen = parseFloat(data[7]);
-            const waermeentzug = parseFloat(data[3]) / 1000;
-            const waermeeintrag = -(parseFloat(data[4]) / 1000);
-            const energiefaktor = parseFloat(data[14]);
-            const strombedarfWPHeizen = parseFloat(data[8]) / 1000;
-            const strombedarfWPKuehlen = parseFloat(data[9]) / 1000;
+            const P_HZ_user = parseFloat(data[1]);
+            const P_KL_user = -parseFloat(data[2]);
+            const E_HZ_user = parseFloat(data[3]) / 1000;
+            const E_KL_user = -(parseFloat(data[4]) / 1000);
             const cover = parseInt(data[5]);
-            const imagehash = "data:image/png;base64," + data[15];
-            const imagehashSondenfeld = "data:image/png;base64," + data[16];
+            const Pel_heatpump_user = parseFloat(data[6]);
+            const Pel_chiller_user = -parseFloat(data[7]);
+            const Eel_heatpump_user = parseFloat(data[8]) / 1000;
+            const Eel_chiller_user = -parseFloat(data[9]) / 1000;
 
-            const heizleistung =
-              waermeentzugsleistung + elektrischeLeistungWPHeizen;
-            const heizarbeit = waermeentzug + strombedarfWPHeizen;
+            const COP = parseFloat(data[15]);
+            const EER = parseFloat(data[16]);
+            const SCOP = parseFloat(data[17]);
+            const SEER = parseFloat(data[18]);
+            const Efactor_user = parseFloat(data[19]);
 
-            const kuehlleistung =
-              waermeeintragsleistung + elektrischeLeistungWPKuehlen;
-            const kuehlarbeit = waermeeintrag + strombedarfWPKuehlen;
+            const imagehash = "data:image/png;base64," + data[20];
+            const imagehashSondenfeld = "data:image/png;base64," + data[21];
 
-            // ausgeglichene Betriebsweise
-            const balanced = parseInt(data[17]);
-            const energiefaktorBal = parseFloat(data[31]);
+            const GTcalc = parseFloat(data[22]);
 
-            const waermeentzugsleistungBal = parseFloat(data[18]);
-            const elektrischeLeistungWPHeizenBal = parseFloat(data[23]);
-            const heizleistungBal =
-              waermeentzugsleistungBal + elektrischeLeistungWPHeizenBal;
+            const heizleistung = P_HZ_user + Pel_heatpump_user;
+            const heizarbeit = E_HZ_user + Eel_heatpump_user;
 
-            const jahresarbeitBal =
-              (parseFloat(data[20]) - parseFloat(data[21])) / 1000;
-            const strombedarfWPBal =
-              (parseFloat(data[25]) + parseFloat(data[26])) / 1000;
-            const heizarbeitBal = strombedarfWPBal + jahresarbeitBal;
+            const kuehlleistung = P_KL_user - Pel_chiller_user;
+            const kuehlarbeit = E_KL_user - Eel_chiller_user;
 
-            const waermeeintragsleistungBal = -parseFloat(data[19]);
-            const elektrischeLeistungWPKuehlenBal = parseFloat(data[24]);
-            const kuehlleistungBal =
-              waermeeintragsleistungBal + elektrischeLeistungWPKuehlenBal;
+            // automatically balanced
+            const balanced = parseInt(data[23]);
+            const P_HZ_bal = parseFloat(data[24]);
+            const P_KL_bal = -parseFloat(data[25]);
+            const E_HZ_bal = parseFloat(data[26]) / 1000;
+            const E_KL_bal = -parseFloat(data[27]) / 1000;
+            const cover_bal = parseInt(data[28]);
+            const Pel_heatpump_bal = parseFloat(data[29]);
+            const Pel_chiller_bal = -parseFloat(data[30]);
+            const Eel_heatpump_bal = parseFloat(data[31]) / 1000;
+            const Eel_chiller_bal = -parseFloat(data[32]) / 1000;
 
-            const coverBal = parseInt(data[22]);
-            const imagehashBal = "data:image/png;base64," + data[32];
+            const meanBoreholeSpacing = parseFloat(data[36]);
+            const cover_rise = parseFloat(data[37]);
+            const COP_bal = parseFloat(data[38]);
+            const EER_bal = parseFloat(data[39]);
+            const SCOP_bal = parseFloat(data[40]);
+            const SEER_bal = parseFloat(data[41]);
+
+            const Efactor_bal = parseFloat(data[42]);
+
+            const imagehashBal = "data:image/png;base64," + data[43];
+
+            const BS_HZ_bal = parseFloat(data[44]);
+            const BS_KL_bal = parseFloat(data[45]);
+
+            const T_radiator = parseInt(data[46]);
+
+            const heizleistungBal = P_HZ_bal + Pel_heatpump_bal;
+            const heizarbeitBal = Eel_heatpump_bal + E_HZ_bal;
+
+            const kuehlleistungBal = P_KL_bal - Pel_chiller_bal;
+            const kuehlarbeitBal = E_KL_bal - Eel_chiller_bal;
 
             dispatch(
               updateEWSComputationResult({
@@ -166,27 +182,27 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
                 BS_KL,
                 BS_HZ_Norm,
                 BS_KL_Norm,
-                waermeentzugsleistung,
-                waermeeintragsleistung,
-                elektrischeLeistungWPHeizen,
-                elektrischeLeistungWPKuehlen,
-                waermeentzug,
-                waermeeintrag,
-                energiefaktor,
-                strombedarfWPHeizen,
-                strombedarfWPKuehlen,
+                P_HZ_user,
+                P_KL_user,
+                Pel_heatpump_user,
+                Pel_chiller_user,
+                E_HZ_user,
+                E_KL_user,
+                Efactor_user,
+                Eel_heatpump_user,
+                Eel_chiller_user,
                 cover,
                 imagehash,
                 imagehashSondenfeld,
                 balanced,
-                waermeentzugsleistungBal,
-                waermeeintragsleistungBal,
-                elektrischeLeistungWPHeizenBal,
-                elektrischeLeistungWPKuehlenBal,
-                strombedarfWPBal,
-                energiefaktorBal,
-                jahresarbeitBal,
-                coverBal,
+                P_HZ_bal,
+                P_KL_bal,
+                Pel_heatpump_bal,
+                Pel_chiller_bal,
+                Eel_heatpump_bal,
+                Efactor_bal,
+                E_HZ_bal,
+                cover_bal,
                 imagehashBal,
                 heizleistung,
                 heizarbeit,
@@ -195,6 +211,22 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
                 heizleistungBal,
                 heizarbeitBal,
                 kuehlleistungBal,
+                GTcalc,
+                COP,
+                SCOP,
+                EER,
+                SEER,
+                BS_HZ_bal,
+                BS_KL_bal,
+                COP_bal,
+                EER_bal,
+                E_KL_bal,
+                SEER_bal,
+                SCOP_bal,
+                Eel_chiller_bal,
+                kuehlarbeitBal,
+                cover_rise,
+                T_radiator,
               })
             );
             isLoading(false);
@@ -310,6 +342,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
       ref={ref}
       width="300px"
       isMobile={isMobile}
+      flex={true}
     >
       <CollapsibleContent id="collapsible-content">
         <>
@@ -320,8 +353,8 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
           <InputSection>
             <label htmlFor="gridspacing-input">Heizart </label>
             <select id="gridspacing-input" onChange={handleHeating}>
-              <option value="fussboden">Fußbodenheizung</option>
-              <option value="radiator">Radiator</option>
+              <option value={35}>Fußbodenheizung</option>
+              <option value={50}>Radiator</option>
             </select>
           </InputSection>
           <InputSection>

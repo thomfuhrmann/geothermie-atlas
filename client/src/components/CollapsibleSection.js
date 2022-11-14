@@ -32,7 +32,8 @@ const CollapsibleContainer = styled.div`
   margin-bottom: ${(props) => props.marginBottom};
   box-sizing: border-box;
   min-height: 54px;
-  max-height: ${(props) => (!props.isMobile ? "60%" : "35%")};
+  max-height: ${(props) => (!props.isMobile ? "100%" : "35%")};
+  height: fit-content;
   width: ${(props) => props.width || "100%"};
 `;
 

@@ -300,7 +300,7 @@ export default function InfoPanelGWWP() {
             ></AmpelkarteTable>
           )}
           {computationResult && computationResult.error && (
-            <CollapsibleSection title="Berechnungsergebnis" open={true}>
+            <CollapsibleSection title="Berechnungsergebnisse" open={true}>
               <Table id="calculations-output-table">
                 <thead>
                   <tr>
@@ -317,7 +317,7 @@ export default function InfoPanelGWWP() {
             </CollapsibleSection>
           )}
           {computationResult && computationResult.result && (
-            <CollapsibleSection title="Berechnungsergebnis" open={true}>
+            <CollapsibleSection title="Berechnungsergebnisse" open={true}>
               <Table id="calculations-input-table">
                 <thead>
                   <tr>
