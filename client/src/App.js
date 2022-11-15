@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./pages/Layout";
 import Map from "./pages/Map";
 import About from "./pages/About";
-import Impressum from "./pages/Impressum";
 import Data from "./pages/Data";
 import Home from "./pages/Home";
 
@@ -18,7 +17,6 @@ function App() {
           <Route path="gwwp" element={<Map theme="GWWP" />} />
           <Route path="data" element={<Data />} />
           <Route path="about" element={<About />} />
-          <Route path="impressum" element={<Impressum />} />
         </Route>
       </Routes>
     </BrowserRouter>

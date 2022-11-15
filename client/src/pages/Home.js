@@ -89,6 +89,13 @@ const Overlay = styled(OverlayComponent)`
   }
 `;
 
+const ImageTitle = styled.div`
+  position: absolute;
+  top: 93%;
+  left: 12%;
+  color: #89e9ff;
+`;
+
 const Home = () => {
   const imgRef = useRef(null);
   const [imgWidth, setImgWidth] = useState(0);
@@ -123,12 +130,13 @@ const Home = () => {
             ></Image>
             {!isMobile && (
               <Overlay right width={imgWidth}>
-                <Card textAlign="right" isMobile={isMobile}>
+                <Card textAlign="right">
                   Erfahren Sie mehr über Erdwärmesonden
                 </Card>
               </Overlay>
             )}
           </NavLink>
+          {isMobile && <ImageTitle>Erdwärmesonden</ImageTitle>}
         </ImageFrame>
         <ImageFrame borderLeft={!isMobile ? "1px" : "0px"}>
           <NavLink to="/gwwp">
@@ -146,6 +154,7 @@ const Home = () => {
               </Overlay>
             )}
           </NavLink>
+          {isMobile && <ImageTitle>Grundwasserwärmepumpen</ImageTitle>}
         </ImageFrame>
       </ImageContainer>
     </Content>

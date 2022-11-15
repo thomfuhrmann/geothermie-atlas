@@ -129,12 +129,6 @@ const Layout = () => {
       >
         <span>About</span>
       </NavLink>
-      <NavLink
-        to="impressum"
-        className={({ isActive }) => (isActive ? name + " active" : name)}
-      >
-        <span>Impressum</span>
-      </NavLink>
     </>
   );
 

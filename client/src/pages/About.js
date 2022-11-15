@@ -1,6 +1,11 @@
 import React from "react";
+import styled from "styled-components";
 
 import { Content, Heading, Main } from "../components/CommonStyledElements";
+
+const MediumHeading = styled.h3`
+  color: #808080;
+`;
 
 const About = () => {
   return (
@@ -25,6 +30,82 @@ const About = () => {
           Die Untersuchungsgebiete des Projekts umfassen Wien, den
           Dauersiedlungsraum Salzburg und ausgewählte Gebiete in der Steiermark.
           Diese Applikation beschränkt sich ausschließlich auf Wien.
+        </p>
+        <Heading>Zusatzinfo zur Berechnungsweise für Erdwäremsonden</Heading>
+        <p>
+          Das Programm berechnet die mögliche Leistung und Energie, die aus dem
+          vorgegebenen Sondenfeld gewonnen werden kann. Dabei wird die Geometrie
+          des Sondenfeldes (Lage, Tiefe, Sondenabstand) vom Benutzer interaktiv
+          vorgegeben. Für dieses Sondenfeld wird zuerst die g-Funktion berechnet
+          und danach das maximale Potenzial (Leistung und Jahresenergie)
+          ermittelt. Das ermittelte Potenzial berücksichtigt die Betriebsweise
+          (siehe unten) und ist auf die Grenzwerte der mittleren
+          Fluidtemperturen ausgelegt. Im Heizbetrieb werden -1.5 °C nicht
+          unterschritten und im Kühlbetrieb werden 28 °C nicht überschritten.
+          Die Betriebsweise wird vereinfacht in vier Phasen pro Jahr unterteilt:
+          Heizbetrieb – Stillstand – Kühlbetrieb - Stillstand.
+        </p>
+
+        <MediumHeading>Betriebsweise</MediumHeading>
+        <p>
+          Die Betriebsfunktion kann durch den Benutzer durch Angabe der
+          gebäudeseitigen Heiz- und Kühlleistung sowie der Jahresbetriebsstunden
+          für Heizen und Kühlen vorgegeben werden. In diesem Fall wird die
+          erzielbare Sondenleistung für das benutzerdefinierte Sondenfeld so
+          ermittelt, dass das Leistungsverhältnis zwischen Heizen und Kühlen
+          eingehalten wird. Es kann auch ein reiner Heiz- bzw. Kühlbetrieb
+          vorgegeben werden. Bei der benutzerdefinierten Betriebsweise wird auch
+          ein Deckungsgrad berechnet, also wieviel Prozent das vorgegebene
+          Sondenfeld von der vorgegebenen Betriebsfunktion abdecken kann. Wird
+          die Betriebsfunktion nicht durch den Benutzer vorgegeben, so wird mit
+          einem Normbetrieb gerechnet. Dabei werden die Jahresbetriebsstunden
+          für Heizen und Kühlen aus der standortbezogenen Bodentemperatur für
+          ein typisches Wohnhaus herangezogen. Die mittlere
+          Oberflächentemperatur des Bodens wird dabei aus den Ressourcenkarten
+          für den Standort abgefragt. Ein Deckungsgrad wird hier nicht
+          ausgegeben. Ist die Jahresenergiebilanz des Sondenfeldes nicht
+          ausgeglichen (mit einer Toleranz von +/- 10 %) wird zusätzlich die
+          Betriebsweise „saisonaler Speicherbetrieb“ gerechnet. Wenn der
+          Wärmeentzug überwiegt, wird automatisch eine Zusatzquelle verwendet,
+          welche die Bilanz mit dem zusätzlichen Wärmeeintrag ausgleicht. Wenn
+          der Wärmeeintrag überwiegt, wird automatisch eine Zusatzsenke zur
+          Betriebsfunktion hinzugefügt, welche die Bilanz mit einem zusätzlichen
+          Wärmeentzug ausgleicht. Dabei wird angegeben, um wieviel Prozent die
+          Leistungsfähigkeit des Sondenfeldes im Speicherbetrieb gesteigert
+          werden kann. Ist der gegenseitige Sondenabstand größer als 6 m wird
+          ein Hinweis ausgegeben, dass der gegenseitige Sondenabstand auf 5 m
+          reduziert werden kann. Die mittlere Wärmeleitfähigkeit und die
+          mittlere Untergrundtemperatur von 0 bis 100 m Tiefe werden aus den
+          Ressourcenkarten für das ausgewählte Grundstück übernommen und fließen
+          in die Berechnung ein. Ist die Vorgabe der Sondentiefe größer als 100
+          m, so wird die Untergrundtemperatur mit einem Gradienten von 0.03 K/m
+          mit der Tiefe erhöht. Zusätzlich wird eine Grafik mit der Entwicklung
+          der mittleren Fluidtemperatur in Zusammenhang mit der berechneten
+          Betriebsfunktion ausgegeben.
+        </p>
+        <MediumHeading>Parameter für die Berechnung</MediumHeading>
+        <p>
+          Die folgenden Parameter werden für alle Simulationen verwendet und
+          können vom Benutzer nicht verändert werden. <br></br>
+          <br></br>
+          Simulationsjahre: 20 Jahre<br></br>
+          Volumetrische Wärmekapazität des Erdreichs: 2.2 MJ/m³/K<br></br>
+          Sondenkopf Überdeckung: 1 m <br></br>
+          Bohrradius: 0.075 m <br></br>
+          Sondentyp: Duplex 32 mm, 0.04 m <br></br>
+          Rohrabstand Wärmeträgermedium: Ethanol 12 % <br></br>
+          Massenstrom pro Sonde: 0.4 kg /s<br></br>
+          Wärmeleitfähigkeit der Verpressung: 2 W/m/K
+        </p>
+        <MediumHeading>Grenztemperaturen</MediumHeading>
+        <p>
+          Minimale mittlere Fluidtemperatur am Ende der Heizsaison: -1.5 °C{" "}
+          <br></br>
+          Maximale mittlere Fluidtemperatur am Ende der Kühlsaison: 28 °C{" "}
+          <br></br>
+          <br></br>
+          Das Sondenfeld wird im Heizbetrieb auf die minimale Grenztemperatur
+          ausgelegt, im Kühlbetrieb auf die maximale Grenztemperatur.
         </p>
         <Heading>Verwendete 3rd-Party Software</Heading>
         <p>
@@ -131,75 +212,25 @@ const About = () => {
             Wärmeleitfähigkeit aufweisen.
           </dd>
         </dl>
-
-        <Heading>Zusatzinfo für ExpertInnen</Heading>
+        <Heading>Hinweise und Haftungsausschluss</Heading>
         <p>
-          Das Programm berechnet die mögliche Leistung und Energie, die aus dem
-          vorgegebenen Sondenfeld gewonnen werden kann. Dabei wird die Geometrie
-          des Sondenfeldes (Lage, Tiefe, Sondenabstand) vom Benutzer interaktiv
-          vorgegeben. Für dieses Sondenfeld wird zuerst die g-Funktion berechnet
-          und danach das maximale Potenzial (Leistung und Jahresenergie)
-          ermittelt. Das ermittelte Potenzial berücksichtigt die Betriebsweise
-          (siehe unten) und ist auf die Grenzwerte der mittleren
-          Fluidtemperturen ausgelegt. Im Heizbetrieb werden -1.5 °C nicht
-          unterschritten und im Kühlbetrieb werden 28 °C nicht überschritten.
-          Die Betriebsweise wird vereinfacht in vier Phasen pro Jahr unterteilt:
-          Heizbetrieb – Stillstand – Kühlbetrieb - Stillstand.
+          Die thematischen Inhalte auf unserem Webportal dienen dazu, einen
+          Überblick über Potentiale und Konflikte in Zusammenhang mit
+          geothermischen Anlagen zu geben. Sie ersetzen keine detaillierten
+          Planungen. Aus unseren Karten ergibt sich keinerlei
+          Genehmigungsanspruch einer geplanten Nutzung gegenüber den zuständigen
+          Behörden. Der Anbieter dieses Webportals und der damit verbundenen
+          Dienstleistungen übernimmt keine Haftung für Schäden, die durch den
+          ungeeigneten Gebrauch des Webportals entstehen.
         </p>
-
-        <h3>Betriebsweise</h3>
+        <Heading>Kontakt</Heading>
         <p>
-          Die Betriebsfunktion kann durch den Benutzer durch Angabe der
-          gebäudeseitigen Heiz- und Kühlleistung sowie der Jahresbetriebsstunden
-          für Heizen und Kühlen vorgegeben werden. In diesem Fall wird die
-          erzielbare Sondenleistung für das benutzerdefinierte Sondenfeld so
-          ermittelt, dass das Leistungsverhältnis zwischen Heizen und Kühlen
-          eingehalten wird. Es kann auch ein reiner Heiz- bzw. Kühlbetrieb
-          vorgegeben werden. Bei der benutzerdefinierten Betriebsweise wird auch
-          ein Deckungsgrad berechnet, also wieviel Prozent das vorgegebene
-          Sondenfeld von der vorgegebenen Betriebsfunktion abdecken kann. Wird
-          die Betriebsfunktion nicht durch den Benutzer vorgegeben, so wird mit
-          einem Normbetrieb gerechnet. Dabei werden die Jahresbetriebsstunden
-          für Heizen und Kühlen aus der standortbezogenen Bodentemperatur für
-          ein typisches Wohnhaus herangezogen. Die mittlere
-          Oberflächentemperatur des Bodens wird dabei aus den Ressourcenkarten
-          für den Standort abgefragt. Ein Deckungsgrad wird hier nicht
-          ausgegeben. Ist die Jahresenergiebilanz des Sondenfeldes nicht
-          ausgeglichen (mit einer Toleranz von +/- 10 %) wird zusätzlich die
-          Betriebsweise „saisonaler Speicherbetrieb“ gerechnet. Wenn der
-          Wärmeentzug überwiegt, wird automatisch eine Zusatzquelle verwendet,
-          welche die Bilanz mit dem zusätzlichen Wärmeeintrag ausgleicht. Wenn
-          der Wärmeeintrag überwiegt, wird automatisch eine Zusatzsenke zur
-          Betriebsfunktion hinzugefügt, welche die Bilanz mit einem zusätzlichen
-          Wärmeentzug ausgleicht. Dabei wird angegeben, um wieviel Prozent die
-          Leistungsfähigkeit des Sondenfeldes im Speicherbetrieb gesteigert
-          werden kann. Ist der gegenseitige Sondenabstand größer als 6 m wird
-          ein Hinweis ausgegeben, dass der gegenseitige Sondenabstand auf 5 m
-          reduziert werden kann. Die mittlere Wärmeleitfähigkeit und die
-          mittlere Untergrundtemperatur von 0 bis 100 m Tiefe werden aus den
-          Ressourcenkarten für das ausgewählte Grundstück übernommen und fließen
-          in die Berechnung ein. Ist die Vorgabe der Sondentiefe größer als 100
-          m, so wird die Untergrundtemperatur mit einem Gradienten von 0.03 K/m
-          mit der Tiefe erhöht. Zusätzlich wird eine Grafik mit der Entwicklung
-          der mittleren Fluidtemperatur in Zusammenhang mit der berechneten
-          Betriebsfunktion ausgegeben.
-        </p>
-        <h3>Parameter für die Berechnung</h3>
-        <p>
-          Die folgenden Parameter werden für alle Simulationen verwendet und
-          können vom Benutzer nicht verändert werden. Simulationsjahre: 20 Jahre
-          Volumetrische Wärmekapazität des Erdreichs: 2.2 MJ/m³/K Sondenkopf
-          Überdeckung: 1 m Bohrradius: 0.075 m Sondentyp: Duplex 32 mm, 0.04 m
-          Rohrabstand Wärmeträgermedium: Ethanol 12 % Massenstrom pro Sonde: 0.4
-          kg /s Wärmeleitfähigkeit der Verpressung: 2 W/m/K
-        </p>
-        <h3>Grenztemperaturen</h3>
-        <p>
-          Minimale mittlere Fluidtemperatur am Ende der Heizsaison: -1.5 °C
-          Maximale mittlere Fluidtemperatur am Ende der Kühlsaison: 28 °C{" "}
+          Geologische Bundesanstalt <br></br>
+          Neulinggasse 38, 1030 Wien <br></br>
+          <a href="mailto:office@geologie.ac.at">office@geologie.ac.at</a>
           <br></br>
-          Das Sondenfeld wird im Heizbetrieb auf die minimale Grenztemperatur
-          ausgelegt, im Kühlbetrieb auf die maximale Grenztemperatur.
+          Telefon: +43-1-7125674<br></br>
+          Fax: +43-1-7125674-56
         </p>
       </Content>
     </Main>

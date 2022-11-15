@@ -1,8 +1,8 @@
 .esri-component {
-  max-height: 70%;
+  max-height: 80%;
 }
 
-.esri-component.esri-layer-list.esri-widget.esri-widget--panel {
+.esri-ui-corner .esri-component.esri-layer-list.esri-widget.esri-widget--panel {
   max-height: 25%;
 }
 
