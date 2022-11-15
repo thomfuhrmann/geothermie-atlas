@@ -30,10 +30,10 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   const [polygon, setPolygon] = useState(null);
   const [gridSpacing, setGridSpacing] = useState(10);
   const [boreDepth, setBoreDepth] = useState(100);
-  const [BS_HZ, setBS_HZ] = useState(0);
-  const [BS_KL, setBS_KL] = useState(0);
-  const [P_KL, setP_KL] = useState(0);
-  const [P_HZ, setP_HZ] = useState(0);
+  const [BS_HZ, setBS_HZ] = useState("");
+  const [BS_KL, setBS_KL] = useState("");
+  const [P_KL, setP_KL] = useState("");
+  const [P_HZ, setP_HZ] = useState("");
   const [points, setPoints] = useState([]);
   const [heating, setHeating] = useState(35);
 
@@ -79,10 +79,10 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         WLF,
         BS_HZ_Norm,
         BS_KL_Norm,
-        BS_HZ: BS_HZ,
-        BS_KL: BS_KL,
-        P_HZ: P_HZ,
-        P_KL: P_KL,
+        BS_HZ: BS_HZ === "" ? 0 : BS_HZ,
+        BS_KL: BS_KL === "" ? 0 : BS_KL,
+        P_HZ: P_HZ === "" ? 0 : P_HZ,
+        P_KL: P_KL === "" ? 0 : P_KL,
         boreDepth,
         points: pointsText,
         heating,
@@ -295,35 +295,53 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   };
 
   const handleBS_HZ = (event) => {
-    if (event.target.value > 4379) {
-      event.target.value = 4379;
-    } else if (event.target.value < 0) {
-      event.target.value = 0;
+    if (event.target.value > 4379 || event.target.value < 0) {
+      event.target.value = "";
     }
-    setBS_HZ(parseInt(event.target.value));
+
+    if (!isNaN(parseInt(event.target.value))) {
+      setBS_HZ(event.target.value);
+    } else {
+      setBS_HZ("");
+    }
   };
 
   const handleBS_KL = (event) => {
-    if (event.target.value > 4379) {
-      event.target.value = 4379;
-    } else if (event.target.value < 0) {
-      event.target.value = 0;
+    if (event.target && event.target !== null) {
+      if (event.target.value > 4379 || event.target.value < 0) {
+        event.target.value = "";
+      }
+
+      if (!isNaN(parseInt(event.target.value))) {
+        setBS_KL(parseInt(event.target.value));
+      } else {
+        setBS_KL("");
+      }
     }
-    setBS_KL(parseInt(event.target.value));
   };
 
   const handleP_HZ = (event) => {
     if (event.target.value < 0) {
-      event.target.value = 0;
+      event.target.value = "";
     }
-    setP_HZ(parseInt(event.target.value));
+
+    if (!isNaN(parseInt(event.target.value))) {
+      setP_HZ(parseInt(event.target.value));
+    } else {
+      setP_HZ("");
+    }
   };
 
   const handleP_KL = (event) => {
     if (event.target.value < 0) {
-      event.target.value = 0;
+      event.target.value = "";
     }
-    setP_KL(parseInt(event.target.value));
+
+    if (!isNaN(parseInt(event.target.value))) {
+      setP_KL(parseInt(event.target.value));
+    } else {
+      setP_KL("");
+    }
   };
 
   const handleKeyDown = (event) => {
@@ -351,7 +369,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
             <div ref={sketchContainerRef}></div>
           </InputSection>
           <InputSection>
-            <label htmlFor="gridspacing-input">Heizart </label>
+            <label htmlFor="gridspacing-input">Heizungsart </label>
             <select id="gridspacing-input" onChange={handleHeating}>
               <option value={35}>Fußbodenheizung</option>
               <option value={50}>Radiator</option>
@@ -434,7 +452,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
             ></Input>
           </InputSection>
           {(P_HZ > 0 || P_KL > 0 || BS_HZ > 0 || BS_KL > 0) &&
-            (P_HZ === 0 || P_KL === 0 || BS_HZ === 0 || BS_KL === 0) && (
+            (P_HZ === "" || P_KL === "" || BS_HZ === "" || BS_KL === "") && (
               <Warning>
                 Solange nicht alle Parameter ausgefüllt sind, wird mit
                 Normwerten gerechnet.

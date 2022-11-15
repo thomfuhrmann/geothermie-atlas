@@ -233,7 +233,8 @@ export const print = (
 
         if (
           data.cell.text[0] === "Berechnungsvorgaben" ||
-          data.cell.text[0] === "Benutzereingabe"
+          data.cell.text[0] === "Benutzereingabe" ||
+          data.cell.text[0] === "Standortabhängige Parameter"
         ) {
           data.cell.styles.halign = "center";
         }

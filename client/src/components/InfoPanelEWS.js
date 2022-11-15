@@ -450,14 +450,14 @@ export default function InfoPanelEWS() {
                           Kühlleistung Gebäude: {computationResult.P_KL} kW
                         </TableData>
                       </TableRow>
-                      <TableRow>
-                        <TableData>
-                          Vorlauftemperatur Heizung:{" "}
-                          {computationResult.T_radiator} °C
-                        </TableData>
-                      </TableRow>
                     </>
                   )}
+                  <TableRow>
+                    <TableData>
+                      Vorlauftemperatur Heizung: {computationResult.T_radiator}{" "}
+                      °C
+                    </TableData>
+                  </TableRow>
                   <TableRow>
                     <TableHeader textAlign="center">
                       Standortabhängige Parameter
