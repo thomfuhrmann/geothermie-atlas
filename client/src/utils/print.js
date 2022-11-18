@@ -207,7 +207,7 @@ export const print = (
     });
   }
 
-  // calculations output table
+  // calculations input table
   finalY = doc.lastAutoTable.finalY;
   if (computationResult) {
     if (einschraenkungen || hinweise) {
@@ -246,17 +246,17 @@ export const print = (
   finalY = doc.lastAutoTable.finalY;
   if (computationResult && image_borefield) {
     const imgProps = doc.getImageProperties(image_borefield.current);
-    const width = doc.internal.pageSize.getWidth() - 60;
+    const width = doc.internal.pageSize.getWidth() - 100;
     const totalHeight = doc.internal.pageSize.getHeight();
     let height = (imgProps.height * width) / imgProps.width;
     if (height > totalHeight - finalY - 10) {
       doc.addPage();
-      doc.addImage(image_borefield.current, "PNG", 30, 20, width, height);
+      doc.addImage(image_borefield.current, "PNG", 50, 20, width, height);
     } else {
       doc.addImage(
         image_borefield.current,
         "PNG",
-        30,
+        50,
         finalY + 5,
         width,
         height

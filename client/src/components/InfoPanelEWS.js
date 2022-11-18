@@ -340,9 +340,6 @@ export default function InfoPanelEWS() {
                         Temperaturgrenzen für die Fluidtemperatur in der Sonde.
                         Ergebnisse sind die maximal erzielbare Leistung (kW) und
                         Energiemenge (MWh/a) bei einem Betrieb von 20 Jahren.
-                        Die folgenden Parameter werden für alle Simulationen
-                        verwendet und können vom Benutzer nicht verändert
-                        werden:
                       </td>
                     ) : (
                       <td>
@@ -354,53 +351,9 @@ export default function InfoPanelEWS() {
                         Sondenparameter und Temperaturgrenzen für die
                         Fluidtemperatur in der Sonde. Ergebnisse sind die
                         maximal erzielbare Leistung (kW) und Energiemenge
-                        (MWh/a) bei einem Betrieb von 20 Jahren. Die folgenden
-                        Parameter werden für alle Simulationen verwendet und
-                        können vom Benutzer nicht verändert werden:
+                        (MWh/a) bei einem Betrieb von 20 Jahren.
                       </td>
                     )}
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
-                      Minimale mittlere Fluidtemperatur am Ende der Heizsaison:
-                      -1.5 °C
-                    </TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
-                      Maximale mittlere Fluidtemperatur am Ende der Kühlsaison:
-                      28 °C
-                    </TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>Simulationsjahre: 20 Jahre</TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
-                      Volumetrische Wärmekapazität des Erdreichs: 2.2 MJ/m³/K
-                    </TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>Wärmeträgermedium: Ethanol 12 %</TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
-                      Wärmeleitfähigkeit der Verpressung: 2 W/m/K
-                    </TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>Massenstrom pro Sonde: 0.35 kg/s</TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>
-                      Sondentyp: Duplex 32 mm, 0.04 m Rohrabstand
-                    </TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>Bohrradius: 0.075 m</TableData>
-                  </TableRow>
-                  <TableRow>
-                    <TableData>Sondenkopf Überdeckung: 1 m</TableData>
                   </TableRow>
                   <TableRow>
                     <TableHeader textAlign="center">
@@ -555,14 +508,14 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Elektrische Leistung Wärmepumpe (bei COP{" "}
+                      + Elektrische Leistung Wärmepumpe (bei COP{" "}
                       {computationResult.COP.toFixed(1)}):{" "}
                       {computationResult.Pel_heatpump_user.toFixed(1)} kW
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Heizleistung Erdwärmeanlage:{" "}
+                      = Heizleistung Erdwärmeanlage:{" "}
                       {computationResult.heizleistung.toFixed(1)} kW
                     </TableData>
                   </TableRow>
@@ -574,14 +527,14 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Strombedarf Wärmepumpe (bei JAZ{" "}
+                      + Strombedarf Wärmepumpe (bei JAZ{" "}
                       {computationResult.SCOP.toFixed(1)}):{" "}
                       {computationResult.Eel_heatpump_user.toFixed(1)} MWh/a
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Heizarbeit Erdwärmeanlage:{" "}
+                      = Heizarbeit Erdwärmeanlage:{" "}
                       {computationResult.heizarbeit.toFixed(1)} MWh/a
                     </TableData>
                   </TableRow>
@@ -602,14 +555,14 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Elektrische Leistung Wärmepumpe (bei EER{" "}
+                      - Elektrische Leistung Wärmepumpe (bei EER{" "}
                       {computationResult.EER.toFixed(1)}):{" "}
                       {computationResult.Pel_chiller_user.toFixed(1)} kW
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Kühlleistung Erdwärmeanlage:{" "}
+                      = Kühlleistung Erdwärmeanlage:{" "}
                       {computationResult.kuehlleistung.toFixed(1)} kW
                     </TableData>
                   </TableRow>
@@ -621,14 +574,14 @@ export default function InfoPanelEWS() {
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Strombedarf Wärmepumpe (bei SEER{" "}
+                      - Strombedarf Wärmepumpe (bei SEER{" "}
                       {computationResult.SEER.toFixed(1)}
                       ): {computationResult.Eel_chiller_user.toFixed(1)} MWh/a
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Kühlarbeit Erdwärmeanlage:{" "}
+                      = Kühlarbeit Erdwärmeanlage:{" "}
                       {computationResult.kuehlarbeit.toFixed(1)} MWh/a
                     </TableData>
                   </TableRow>
@@ -724,14 +677,14 @@ export default function InfoPanelEWS() {
                     </TableRow>
                     <TableRow>
                       <TableData>
-                        Elektrische Leistung Wärmepumpe (bei COP{" "}
+                        + Elektrische Leistung Wärmepumpe (bei COP{" "}
                         {computationResult.COP_bal.toFixed(1)}):{" "}
                         {computationResult.Pel_heatpump_bal.toFixed(1)} kW
                       </TableData>
                     </TableRow>
                     <TableRow>
                       <TableData>
-                        Heizleistung Erdwärmeanlage:{" "}
+                        = Heizleistung Erdwärmeanlage:{" "}
                         {computationResult.heizleistungBal.toFixed(1)} kW
                       </TableData>
                     </TableRow>
@@ -743,13 +696,14 @@ export default function InfoPanelEWS() {
                     </TableRow>
                     <TableRow>
                       <TableData>
-                        JAZ: {computationResult.Eel_heatpump_bal.toFixed(1)}{" "}
-                        MWh/a
+                        + Strombedarf Wärmepumpe (bei JAZ{" "}
+                        {computationResult.SCOP_bal}):{" "}
+                        {computationResult.Eel_heatpump_bal.toFixed(1)} MWh/a
                       </TableData>
                     </TableRow>
                     <TableRow>
                       <TableData>
-                        Heizarbeit Erdwärmeanlage:{" "}
+                        = Heizarbeit Erdwärmeanlage:{" "}
                         {computationResult.heizarbeitBal.toFixed(1)} MWh/a
                       </TableData>
                     </TableRow>
@@ -769,14 +723,14 @@ export default function InfoPanelEWS() {
                     </TableRow>
                     <TableRow>
                       <TableData>
-                        Elektrische Leistung Wärmepumpe (bei EER{" "}
+                        - Elektrische Leistung Wärmepumpe (bei EER{" "}
                         {computationResult.EER_bal.toFixed(1)}):{" "}
                         {computationResult.Pel_chiller_bal.toFixed(1)} kW
                       </TableData>
                     </TableRow>
                     <TableRow>
                       <TableData>
-                        Kühlleistung Erdwärmeanlage:{" "}
+                        = Kühlleistung Erdwärmeanlage:{" "}
                         {computationResult.kuehlleistungBal.toFixed(1)} kW
                       </TableData>
                     </TableRow>
@@ -788,14 +742,14 @@ export default function InfoPanelEWS() {
                     </TableRow>
                     <TableRow>
                       <TableData>
-                        Strombedarf Wärmepumpe (bei SEER{" "}
+                        - Strombedarf Wärmepumpe (bei SEER{" "}
                         {computationResult.SEER_bal.toFixed(1)}):{" "}
                         {computationResult.Eel_chiller_bal.toFixed(1)} MWh/a
                       </TableData>
                     </TableRow>
                     <TableRow>
                       <TableData>
-                        Kühlarbeit Erdwärmeanlage:{" "}
+                        = Kühlarbeit Erdwärmeanlage:{" "}
                         {computationResult.kuehlarbeitBal.toFixed(1)} MWh/a
                       </TableData>
                     </TableRow>

@@ -18,9 +18,9 @@ import { store } from "../redux/store";
 const MapContainer = styled.div`
   box-sizing: border-box;
   position: absolute;
-  top: 7%;
+  top: 50px;
   bottom: 0;
-  height: 93%;
+  height: calc(100% - 50px);
   width: 100%;
   padding: 0;
   margin: 0;

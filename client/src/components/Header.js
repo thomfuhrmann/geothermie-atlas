@@ -5,7 +5,7 @@ import styled from "styled-components";
 const StyledHeader = styled.div`
   position: absolute;
   top: 0;
-  height: 7%;
+  height: 50px;
   width: 100%;
   align-items: center;
 `;

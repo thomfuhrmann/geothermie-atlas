@@ -3,16 +3,16 @@ import styled from "styled-components";
 export const Main = styled.div`
   position: absolute;
   box-sizing: border-box;
-  top: 7%;
+  top: 50px;
   left: 0;
-  height: 93%;
+  height: calc(100% - 50px);
   width: 100%;
   overflow-y: auto;
 `;
 
 export const Content = styled.div`
   position: absolute;
-  top: 7%;
+  top: 5%;
   left: 10%;
   width: 80%;
   height: 93%;

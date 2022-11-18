@@ -10,7 +10,7 @@ const Content = styled.div`
   box-sizing: border-box;
   margin: 0;
   position: absolute;
-  top: 7%;
+  top: 50px;
   bottom: 0;
   width: 100%;
 `;
