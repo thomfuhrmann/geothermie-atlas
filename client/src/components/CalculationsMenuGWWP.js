@@ -1,16 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import styled from "styled-components";
-import { useMediaQuery } from "react-responsive";
+import React, { useEffect, useState, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { useMediaQuery } from 'react-responsive';
 
-import { distance } from "../utils/gridcomputer";
-import { compute } from "../utils/gwwpComputations";
-import { view } from "../utils/view";
-import { initializeCalculationsMenuHandlers } from "../utils/view";
-import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
-import { takeScreenshot } from "../utils/screenshot";
-import CollapsibleSection from "./CollapsibleSection";
-import { Button, ButtonContainer } from "./CommonStyledElements";
+import { distance } from '../utils/gridcomputer';
+import { compute } from '../utils/gwwpComputations';
+import { view } from '../utils/view';
+import { initializeCalculationsMenuHandlers } from '../utils/view';
+import { updateGWWPComputationResult } from '../redux/gwwpComputationsSlice';
+import { takeScreenshot } from '../utils/screenshot';
+import CollapsibleSection from './CollapsibleSection';
+import { Button, ButtonContainer } from './CommonStyledElements';
 
 const CollapsibleContent = styled.div`
   padding: 15px 18px;
@@ -44,9 +44,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
 
   const cadastralData = useSelector((store) => store.cadastre.value);
   const resources = useSelector((store) => store.gwwpResources.value);
-  const bodentemperatur = useSelector((store) =>
-    store.ewsResources.value.filter((resource) => resource.layerId === 4)
-  );
+  const bodentemperatur = useSelector((store) => store.ewsResources.value.filter((resource) => resource.layerId === 4));
 
   const isMobile = useMediaQuery({ maxWidth: 480 });
 
@@ -59,31 +57,28 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
     // const brunnenabstand = distance([point1.x, point1.y], [point2.x, point2.y]);
     const brunnenabstand = distance(point1, point2);
 
-    const flurabstand = resources[2].feature.attributes["Pixel Value"];
-    const gw_macht = resources[3].feature.attributes["Pixel Value"];
-    const kf = resources[4].feature.attributes["Pixel Value"];
-    const gwt_max = resources[5].feature.attributes["Pixel Value"];
-    const gwt_min = resources[7].feature.attributes["Pixel Value"];
+    const flurabstand = resources[2].feature.attributes['Pixel Value'];
+    const gw_macht = resources[3].feature.attributes['Pixel Value'];
+    const kf = resources[4].feature.attributes['Pixel Value'];
+    const gwt_max = resources[5].feature.attributes['Pixel Value'];
+    const gwt_min = resources[7].feature.attributes['Pixel Value'];
 
     const gst_flaeche = cadastralData.FF;
 
     const LST =
-      bodentemperatur &&
-      bodentemperatur.length > 0 &&
-      bodentemperatur[0].feature?.attributes?.["Pixel Value"];
+      bodentemperatur && bodentemperatur.length > 0 && bodentemperatur[0].feature?.attributes?.['Pixel Value'];
 
     if (
-      flurabstand === "NoData" ||
-      gw_macht === "NoData" ||
-      kf === "NoData" ||
-      gwt_max === "NoData" ||
-      gwt_min === "NoData" ||
-      LST === "NoData"
+      flurabstand === 'NoData' ||
+      gw_macht === 'NoData' ||
+      kf === 'NoData' ||
+      gwt_max === 'NoData' ||
+      gwt_min === 'NoData' ||
+      LST === 'NoData'
     ) {
       dispatch(
         updateGWWPComputationResult({
-          error:
-            "Aufgrund fehlender Daten ist für dieses Grundstück keine Berechnung möglich.",
+          error: 'Aufgrund fehlender Daten ist für dieses Grundstück keine Berechnung möglich.',
         })
       );
     } else {
@@ -103,9 +98,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
         LST,
       });
 
-      dispatch(
-        updateGWWPComputationResult({ eHZ, eKL, pHZ, pKL, copWP, result })
-      );
+      dispatch(updateGWWPComputationResult({ eHZ, eKL, pHZ, pKL, copWP, result }));
     }
 
     isLoading(false);
@@ -124,22 +117,11 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
 
       // remove sketch widget from calculations menu
       if (collapsibleContent) {
-        let sketchMenuContainer = collapsibleContent.querySelector(
-          "#sketch-menu-container"
-        );
+        let sketchMenuContainer = collapsibleContent.querySelector('#sketch-menu-container');
         sketchMenuContainer && sketchMenuContainer.remove();
       }
     };
   }, [isMobile]);
-
-  // reset state
-  // useEffect(() => {
-  //   setEHZ(0);
-  //   setEKL(0);
-  //   setPHZ(0);
-  //   setPKL(0);
-  //   setCOPWP(0);
-  // }, [polygon]);
 
   const handleEHZ = (event) => {
     if (event.target.value < 0) {
@@ -187,10 +169,8 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
     >
       <CollapsibleContent id="collapsible-content" ref={collapsibleContentRef}>
         <>
-          <InputSection>
-            <label htmlFor="ehz-input">
-              Jahresheizenergie in MWh (optional)
-            </label>
+          {/* <InputSection>
+            <label htmlFor="ehz-input">Jahresheizenergie in MWh (optional)</label>
             <Input
               id="ehz-input"
               type="number"
@@ -201,9 +181,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
             ></Input>
           </InputSection>
           <InputSection>
-            <label htmlFor="ekl-input">
-              Jahreskühlenergie in MWh (optional)
-            </label>
+            <label htmlFor="ekl-input">Jahreskühlenergie in MWh (optional)</label>
             <Input
               id="ekl-input"
               type="number"
@@ -236,9 +214,7 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
             ></Input>
           </InputSection>
           <InputSection>
-            <label htmlFor="cop-wp-input">
-              Leistungszahl der Wärmepumpe (optional)
-            </label>
+            <label htmlFor="cop-wp-input">Leistungszahl der Wärmepumpe (optional)</label>
             <Input
               id="cop-wp-input"
               type="number"
@@ -246,13 +222,11 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
               placeholder="Wert größer gleich 0"
               onChange={handleCOPWP}
               value={copWP}
-            ></Input>
-          </InputSection>
+             ></Input> 
+          </InputSection> */}
           {points.length === 2 && (
             <ButtonContainer>
-              <Button onClick={handleGWWPCalculation}>
-                Berechnung starten
-              </Button>
+              <Button onClick={handleGWWPCalculation}>Berechnung starten</Button>
             </ButtonContainer>
           )}
         </>

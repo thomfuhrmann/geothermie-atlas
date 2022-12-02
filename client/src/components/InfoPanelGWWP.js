@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from "react";
-import "jspdf-autotable";
-import { useDispatch, useSelector } from "react-redux";
-import { useMediaQuery } from "react-responsive";
+import React, { useState, useEffect } from 'react';
+import 'jspdf-autotable';
+import { useDispatch, useSelector } from 'react-redux';
+import { useMediaQuery } from 'react-responsive';
 
-import { updateScreenshot } from "../redux/screenshotSlice";
-import { updateEWSResources } from "../redux/ewsResourcesSlice";
-import { updateGWWPResources } from "../redux/gwwpResourcesSlice";
-import { updateAmpelkarte } from "../redux/ampelkarteSlice";
-import { updateCadastralData } from "../redux/cadastreSlice";
-import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
-import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
-import { initializeInfoPanelHandlers } from "../utils/view";
-import { print } from "../utils/print";
-import { AmpelkarteTable } from "./AmpelkarteTable";
-import CollapsibleSection from "./CollapsibleSection";
-import Footer from "./Footer";
+import { updateScreenshot } from '../redux/screenshotSlice';
+import { updateEWSResources } from '../redux/ewsResourcesSlice';
+import { updateGWWPResources } from '../redux/gwwpResourcesSlice';
+import { updateAmpelkarte } from '../redux/ampelkarteSlice';
+import { updateCadastralData } from '../redux/cadastreSlice';
+import { updateEWSComputationResult } from '../redux/ewsComputationsSlice';
+import { updateGWWPComputationResult } from '../redux/gwwpComputationsSlice';
+import { initializeInfoPanelHandlers } from '../utils/view';
+import { print } from '../utils/print';
+import { AmpelkarteTable } from './AmpelkarteTable';
+import CollapsibleSection from './CollapsibleSection';
+import Footer from './Footer';
 import {
   Table,
   TableRow,
@@ -30,47 +30,32 @@ import {
   Clearance,
   Line,
   GridContainer,
-} from "./CommonStyledElements";
+} from './CommonStyledElements';
 
 const textTemplates = {
   0: [
     `Die flächenspezifische Jahresenergie für eine thermische Grundwassernutzung mit ausgeglichener Jahresbilanz, wobei die im Winter zur Heizung entzogene Wärme  im Sommer vollständig wieder zurückgegeben wird, 
   abhängig von der bestehenden Grundwassertemperatur und einer minimalen Rückgabetemperatur von 5 °C und einer maximalen Rückgabetemperatur von 18 °C beträgt rund `,
-    " kWh/m²/a",
+    ' kWh/m²/a',
   ],
   1: [
     `Die flächenspezifische Jahresenergie für eine thermische Grundwassernutzung im Heiz- und Kühlbetrieb bei Normbetriebsstunden, 
   abhängig von der bestehenden Grundwassertemperatur und einer minimalen Rückgabetemperatur von 5 °C und einer maximalen Rückgabetemperatur von 18 °C beträgt rund `,
-    " kWh/m²/a",
+    ' kWh/m²/a',
   ],
-  2: [
-    "Der Grundwasserspiegel ist am Grundstück in einer Tiefe von rund ",
-    " m zu erwarten.",
-  ],
-  3: ["Das Grundwasser ist am Grundstück rund ", " m mächtig."],
-  4: [
-    "Die hydraulische Leitfähigkeit (kf-Wert) beträgt am Grundstück rund ",
-    " m/s.",
-  ],
-  5: [
-    "Die maximale Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ",
-    " °C.",
-  ],
-  6: [
-    "Die mittlere Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ",
-    " °C.",
-  ],
-  7: [
-    "Die minimale Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ",
-    " °C.",
-  ],
+  2: ['Der Grundwasserspiegel ist am Grundstück in einer Tiefe von rund ', ' m zu erwarten.'],
+  3: ['Das Grundwasser ist am Grundstück rund ', ' m mächtig.'],
+  4: ['Die hydraulische Leitfähigkeit (kf-Wert) beträgt am Grundstück rund ', ' m/s.'],
+  5: ['Die maximale Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ', ' °C.'],
+  6: ['Die mittlere Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ', ' °C.'],
+  7: ['Die minimale Jahrestemperatur des Grundwassers (für das Jahr 2020) liegt bei ', ' °C.'],
   8: [
-    "Die maximale Pumpleistung eines Brunnenpaars mit 50 m Abstand zwischen Entnahme- und Rückgabebrunnen beträgt rund ",
-    " l/s.",
+    'Die maximale Pumpleistung eines Brunnenpaars mit 50 m Abstand zwischen Entnahme- und Rückgabebrunnen beträgt rund ',
+    ' l/s.',
   ],
   9: [
-    "Die maximale Volllast-Leistung eines Brunnenpaars mit 50 m Abstand zwischen Entnahme- und Rückgabebrunnen beträgt rund ",
-    " kW.",
+    'Die maximale Volllast-Leistung eines Brunnenpaars mit 50 m Abstand zwischen Entnahme- und Rückgabebrunnen beträgt rund ',
+    ' kW.',
   ],
 };
 
@@ -85,9 +70,7 @@ export default function InfoPanelGWWP() {
   const cadastralData = useSelector((store) => store.cadastre.value);
   const resources = useSelector((store) => store.gwwpResources.value);
   const ampelkarte = useSelector((store) => store.ampelkarte.value);
-  const computationResult = useSelector(
-    (store) => store.gwwpComputations.value
-  );
+  const computationResult = useSelector((store) => store.gwwpComputations.value);
   const screenshot = useSelector((store) => store.screenshot.value);
 
   const isMobile = useMediaQuery({ maxWidth: 480 });
@@ -97,13 +80,7 @@ export default function InfoPanelGWWP() {
 
   // initialize query handlers
   useEffect(() => {
-    initializeInfoPanelHandlers(
-      setAddress,
-      dispatch,
-      setClosenessWarning,
-      setOutsideWarning,
-      setScaleWarning
-    );
+    initializeInfoPanelHandlers(setAddress, dispatch, setClosenessWarning, setOutsideWarning, setScaleWarning);
 
     return () => {
       setAddress(null);
@@ -113,7 +90,7 @@ export default function InfoPanelGWWP() {
       dispatch(updateAmpelkarte([]));
       dispatch(updateGWWPComputationResult({}));
       dispatch(updateEWSComputationResult({}));
-      dispatch(updateScreenshot(""));
+      dispatch(updateScreenshot(''));
     };
   }, [dispatch]);
 
@@ -130,14 +107,14 @@ export default function InfoPanelGWWP() {
       closenessWarning || outsideWarning ? true : false,
       null,
       null,
-      "GWWP",
+      'GWWP',
       Object.keys(resources).length > 0
     );
   };
 
   // format values
   const formatGWWP = (layerId, layerName, value) => {
-    if (value !== "NoData") {
+    if (value !== 'NoData') {
       if ([5, 6, 7].includes(layerId)) {
         value = parseFloat(value).toFixed(1);
       } else if (layerId === 4) {
@@ -147,8 +124,8 @@ export default function InfoPanelGWWP() {
       }
     }
 
-    if (value === "NoData") {
-      return layerName + ": keine Daten";
+    if (value === 'NoData') {
+      return layerName + ': keine Daten';
     } else {
       return textTemplates[layerId][0] + value + textTemplates[layerId][1];
     }
@@ -162,12 +139,7 @@ export default function InfoPanelGWWP() {
 
   return (
     <InfoPanelContainer>
-      <CollapsibleSection
-        title="Grundstücksabfrage"
-        open={!isMobile ? true : false}
-        marginBottom="0px"
-        flex={true}
-      >
+      <CollapsibleSection title="Grundstücksabfrage" open={!isMobile ? true : false} marginBottom="0px" flex={true}>
         <InfoPanelContent>
           {address && (
             <>
@@ -215,24 +187,18 @@ export default function InfoPanelGWWP() {
           )}
           {scaleWarning && (
             <Warning id="scale-warning">
-              Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und
-              Berechnungen des geothermischen Potentials zu ermöglichen. Mit
-              Klick auf ein Grundstück starten Sie die Abfrage.
+              Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und Berechnungen des geothermischen
+              Potentials zu ermöglichen. Mit Klick auf ein Grundstück starten Sie die Abfrage.
             </Warning>
           )}
-          {!scaleWarning && !address && (
-            <Clearance>Sie können jetzt ein Grundstück auswählen.</Clearance>
-          )}
+          {!scaleWarning && !address && <Clearance>Sie können jetzt ein Grundstück auswählen.</Clearance>}
           {outsideWarning && (
             <Table id="warnings-table">
               <tbody>
                 <tr>
                   <td>
                     {outsideWarning && (
-                      <Warning>
-                        Achtung: Mindestens ein Punkt liegt außerhalb des
-                        Grundstücks!
-                      </Warning>
+                      <Warning>Achtung: Mindestens ein Punkt liegt außerhalb des Grundstücks!</Warning>
                     )}
                   </td>
                 </tr>
@@ -252,37 +218,25 @@ export default function InfoPanelGWWP() {
                 </thead>
                 <tbody>
                   <TableRow>
-                    <TableHeader textAlign="center">
-                      Ressourcen für vordefinierte Grundwassernutzung
-                    </TableHeader>
+                    <TableHeader textAlign="center">Ressourcen für vordefinierte Grundwassernutzung</TableHeader>
                   </TableRow>
                   {resources.slice(0, 2).map((result) => {
                     return (
                       <TableRow key={result.layerId}>
                         <TableData>
-                          {formatGWWP(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes["Pixel Value"]
-                          )}
+                          {formatGWWP(result.layerId, result.layerName, result.feature.attributes['Pixel Value'])}
                         </TableData>
                       </TableRow>
                     );
                   })}
                   <TableRow>
-                    <TableHeader textAlign="center">
-                      Standortabhängige Parameter
-                    </TableHeader>
+                    <TableHeader textAlign="center">Standortabhängige Parameter</TableHeader>
                   </TableRow>
                   {resources.slice(2).map((result) => {
                     return (
                       <TableRow key={result.layerId}>
                         <TableData>
-                          {formatGWWP(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes["Pixel Value"]
-                          )}
+                          {formatGWWP(result.layerId, result.layerName, result.feature.attributes['Pixel Value'])}
                         </TableData>
                       </TableRow>
                     );
@@ -293,11 +247,7 @@ export default function InfoPanelGWWP() {
             </CollapsibleSection>
           )}
           {ampelkarte && ampelkarte.length > 0 && (
-            <AmpelkarteTable
-              results={ampelkarte}
-              setTables={setTables}
-              layerId={1}
-            ></AmpelkarteTable>
+            <AmpelkarteTable results={ampelkarte} setTables={setTables} layerId={1}></AmpelkarteTable>
           )}
           {computationResult && computationResult.error && (
             <CollapsibleSection title="Berechnungsergebnisse" open={true}>
@@ -332,44 +282,31 @@ export default function InfoPanelGWWP() {
                   <>
                     <tbody>
                       <TableRow>
-                        <TableHeader textAlign="center">
-                          Benutzerdefinierte Vorgaben
-                        </TableHeader>
+                        <TableHeader textAlign="center">Benutzerdefinierte Vorgaben</TableHeader>
                       </TableRow>
                       {computationResult.eHZ > 0 && (
                         <TableRow>
-                          <TableData>
-                            Jahresheizenergie: {computationResult.eHZ} MWh
-                          </TableData>
+                          <TableData>Jahresheizenergie: {computationResult.eHZ} MWh</TableData>
                         </TableRow>
                       )}
                       {computationResult.eKL > 0 && (
                         <TableRow>
-                          <TableData>
-                            Jahreskühlenergie: {computationResult.eKL} MWh
-                          </TableData>
+                          <TableData>Jahreskühlenergie: {computationResult.eKL} MWh</TableData>
                         </TableRow>
                       )}
                       {computationResult.pHZ > 0 && (
                         <TableRow>
-                          <TableData>
-                            Heizleistung: {computationResult.pHZ} kW
-                          </TableData>
+                          <TableData>Heizleistung: {computationResult.pHZ} kW</TableData>
                         </TableRow>
                       )}
                       {computationResult.pKL > 0 && (
                         <TableRow>
-                          <TableData>
-                            Kühlleistung: {computationResult.pKL} kW
-                          </TableData>
+                          <TableData>Kühlleistung: {computationResult.pKL} kW</TableData>
                         </TableRow>
                       )}
                       {computationResult.copWP > 0 && (
                         <TableRow>
-                          <TableData>
-                            Leistungszahl der Wärmepumpe:{" "}
-                            {computationResult.copWP}
-                          </TableData>
+                          <TableData>Leistungszahl der Wärmepumpe: {computationResult.copWP}</TableData>
                         </TableRow>
                       )}
                     </tbody>
@@ -379,61 +316,45 @@ export default function InfoPanelGWWP() {
               <Table id="calculations-output-table">
                 <tbody>
                   <TableRow>
-                    <TableHeader textAlign="center">
-                      Berechnungsergebnisse
-                    </TableHeader>
+                    <TableHeader textAlign="center">Berechnungsergebnisse</TableHeader>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Energieflächendichte im einseitigen Heizbetrieb:{" "}
-                      {computationResult.result[0]} kWh/m²/a
+                      Energieflächendichte im einseitigen Heizbetrieb: {computationResult.result[0]} kWh/m²/a
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Energieflächendichte im einseitigen Kühlbetrieb:{" "}
-                      {computationResult.result[1]} kWh/m²/a
+                      Energieflächendichte im einseitigen Kühlbetrieb: {computationResult.result[1]} kWh/m²/a
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Energieflächendichte im Heiz- und Kühlbetrieb mit
-                      ausgeglichener Betriebsweise:{" "}
+                      Energieflächendichte im Heiz- und Kühlbetrieb mit ausgeglichener Betriebsweise:{' '}
                       {computationResult.result[2]} kWh/m²/a
                     </TableData>
                   </TableRow>
                   <TableRow>
                     <TableData>
-                      Energieflächendichte im Heiz- und Kühlbetrieb nach
-                      Energieverhältnis Heizen/Kühlen:{" "}
+                      Energieflächendichte im Heiz- und Kühlbetrieb nach Energieverhältnis Heizen/Kühlen:{' '}
                       {computationResult.result[3]} kWh/m²/a
                     </TableData>
                   </TableRow>
                   <TableRow>
-                    <TableData>
-                      Leistung einer Brunnendublette mit 2R Brunnenabstand:{" "}
-                      {computationResult.result[4]} l/s
-                    </TableData>
+                    <TableData>Maximale Entnahmemenge: {computationResult.result[4]} l/s</TableData>
                   </TableRow>
                   <TableRow>
-                    <TableData>
-                      Leistung einer Brunnendublette mit 2R Brunnenabstand:{" "}
-                      {computationResult.result[5]} kW
-                    </TableData>
+                    <TableData>Thermische Leistung des Brunnenpaars: {computationResult.result[5]} kW</TableData>
                   </TableRow>
                   {computationResult.result[6] !== null && (
                     <TableRow>
-                      <TableData>
-                        Deckungsbeitrag der Leistung:{" "}
-                        {computationResult.result[6]} %
-                      </TableData>
+                      <TableData>Deckungsbeitrag der Leistung: {computationResult.result[6]} %</TableData>
                     </TableRow>
                   )}
                   {computationResult.result[7] !== null && (
                     <TableRow>
                       <TableData>
-                        Größe der thermischen Fahne in % der Grundstücksfläche:{" "}
-                        {computationResult.result[7]} %
+                        Größe der thermischen Fahne in % der Grundstücksfläche: {computationResult.result[7]} %
                       </TableData>
                     </TableRow>
                   )}

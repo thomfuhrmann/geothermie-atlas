@@ -1,11 +1,11 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Main = styled.div`
   position: absolute;
   box-sizing: border-box;
-  top: 50px;
+  top: 70px;
   left: 0;
-  height: calc(100% - 50px);
+  height: calc(100% - 70px);
   width: 100%;
   overflow-y: auto;
 `;
@@ -115,7 +115,7 @@ export const Image = styled.img`
 export const Menu = styled.div`
   position: relative;
   box-sizing: border-box;
-  width: ${(props) => props.width || "100%"};
+  width: ${(props) => props.width || '100%'};
   margin: 0px;
   border: none;
   color: #444444;
@@ -152,12 +152,12 @@ const TablePadding = `padding: 10px;`;
 export const Table = styled.table`
   table-layout: fixed;
   width: 100%;
-  margin: ${(props) => props.margin || "0px"};
+  margin: ${(props) => props.margin || '0px'};
 `;
 
 export const TableData = styled.td`
   width: 100%;
-  text-align: ${(props) => props.textAlign || "left"};
+  text-align: ${(props) => props.textAlign || 'left'};
   ${TablePadding};
   word-break: break-word;
   border-bottom: 1px solid #d1d1d1;
@@ -168,7 +168,7 @@ export const TableHeader = styled.th`
   padding-bottom: 10px;
   font-size: medium;
   font-weight: normal;
-  text-align: ${(props) => props.textAlign || "left"};
+  text-align: ${(props) => props.textAlign || 'left'};
 `;
 
 export const TableRow = styled.tr`

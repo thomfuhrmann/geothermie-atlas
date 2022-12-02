@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
-import styled from "styled-components";
-import { useMediaQuery } from "react-responsive";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { useState } from 'react';
+import { Outlet, NavLink } from 'react-router-dom';
+import styled from 'styled-components';
+import { useMediaQuery } from 'react-responsive';
+import { FaBars, FaTimes } from 'react-icons/fa';
 
-import Header from "../components/Header";
+import Header from '../components/Header';
+import logo from '../assets/icons/logo_only.png';
 
 const Nav = styled.nav`
   position: absolute;
@@ -18,19 +19,16 @@ const Nav = styled.nav`
 const NavMenu = styled.div`
   display: flex;
   justify-content: space-between;
-  .current {
-    border-bottom: 2px solid black;
-  }
 `;
 
 const Title = styled.span`
   position: absolute;
-  left: 5%;
+  left: 90px;
   top: 50%;
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  font-size: ${(props) => (props.isMobile ? "medium" : "x-large")};
-  color: #444444;
+  font-size: ${(props) => (props.isMobile ? 'medium' : 'x-large')};
+  color: #122e37;
 `;
 
 const PageContent = styled.div`
@@ -89,45 +87,40 @@ const CloseToggle = styled.button`
   border: 0;
 `;
 
+const LogoImage = styled.img`
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  padding-left: 20px;
+  padding-top: 10px;
+`;
+
+const MenuItem = styled.span`
+  color: #153039;
+  font-size: medium;
+`;
+
 const Layout = () => {
   const [navToggled, setNavToggled] = useState(false);
   const isMobile = useMediaQuery({ maxWidth: 480 });
 
-  let name = "nav-link";
+  let name = 'nav-link';
   const navLinks = (
     <>
-      <NavLink
-        to="/"
-        className={({ isActive }) => (isActive ? name + " active" : name)}
-        end
-      >
-        <span>Home</span>
+      <NavLink to="/" className={({ isActive }) => (isActive ? name + ' active' : name)} end>
+        <MenuItem>Home</MenuItem>
       </NavLink>
-      <NavLink
-        to="ews"
-        className={({ isActive }) => (isActive ? name + " active" : name)}
-      >
-        <span>Erdwärmesonden</span>
+      <NavLink to="ews" className={({ isActive }) => (isActive ? name + ' active' : name)}>
+        <MenuItem>Erdwärmesonden</MenuItem>
       </NavLink>
-      <NavLink
-        to="gwwp"
-        className={({ isActive }) => (isActive ? name + " active" : name)}
-      >
-        <span style={{ textAlign: "center" }}>
-          Thermische Grundwassernutzung
-        </span>
+      <NavLink to="gwwp" className={({ isActive }) => (isActive ? name + ' active' : name)}>
+        <MenuItem style={{ textAlign: 'center' }}>Thermische Grundwassernutzung</MenuItem>
       </NavLink>
-      <NavLink
-        to="data"
-        className={({ isActive }) => (isActive ? name + " active" : name)}
-      >
-        <span>Daten</span>
+      <NavLink to="data" className={({ isActive }) => (isActive ? name + ' active' : name)}>
+        <MenuItem>Daten</MenuItem>
       </NavLink>
-      <NavLink
-        to="about"
-        className={({ isActive }) => (isActive ? name + " active" : name)}
-      >
-        <span>About</span>
+      <NavLink to="about" className={({ isActive }) => (isActive ? name + ' active' : name)}>
+        <MenuItem>About</MenuItem>
       </NavLink>
     </>
   );
@@ -139,7 +132,8 @@ const Layout = () => {
   return (
     <PageContent>
       <Header>
-        <Title isMobile={isMobile}>Geothermie Atlas</Title>
+        <LogoImage src={logo} alt="Logo"></LogoImage>
+        <Title isMobile={isMobile}>Geothermie Atlas 1.0</Title>
         {!isMobile && (
           <Nav>
             <NavMenu>{navLinks}</NavMenu>

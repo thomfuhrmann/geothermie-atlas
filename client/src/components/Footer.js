@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
-import CollapsibleSection from "./CollapsibleSection";
-import { Placeholder, Table } from "./CommonStyledElements";
+import CollapsibleSection from './CollapsibleSection';
+import { Placeholder, Table } from './CommonStyledElements';
 
 export default function Footer() {
   return (
@@ -16,14 +16,11 @@ export default function Footer() {
           <tbody>
             <tr>
               <td>
-                Die thematischen Inhalte auf unserem Webportal dienen dazu,
-                einen Überblick über Potentiale und Konflikte in Zusammenhang
-                mit geothermischen Anlagen zu geben. Sie ersetzen keine
-                detaillierten Planungen. Aus unseren Karten ergibt sich
-                keinerlei Genehmigungsanspruch einer geplanten Nutzung gegenüber
-                den zuständigen Behörden. Der Anbieter dieses Webportals und der
-                damit verbundenen Dienstleistungen übernimmt keine Haftung für
-                Schäden, die durch den ungeeigneten Gebrauch des Webportals
+                Die thematischen Inhalte auf unserem Webportal dienen dazu, einen Überblick über Potentiale und
+                Konflikte in Zusammenhang mit geothermischen Anlagen zu geben. Sie ersetzen keine detaillierten
+                Planungen. Aus unseren Karten ergibt sich keinerlei Genehmigungsanspruch einer geplanten Nutzung
+                gegenüber den zuständigen Behörden. Der Anbieter dieses Webportals und der damit verbundenen
+                Dienstleistungen übernimmt keine Haftung für Schäden, die durch den ungeeigneten Gebrauch des Webportals
                 entstehen.
               </td>
             </tr>
@@ -41,7 +38,7 @@ export default function Footer() {
           <tbody>
             <tr>
               <td>
-                office@geologie.ac.at<br></br>
+                geothermie@geologie.ac.at<br></br>
                 Geologische Bundesanstalt<br></br>
                 Fachbereich Hydrogeologie und Geothermie<br></br>
                 Neulinggasse 38<br></br>

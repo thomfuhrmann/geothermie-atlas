@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import styled from 'styled-components';
 // import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
+import 'tippy.js/dist/tippy.css';
 
 const Button = styled.button`
   box-sizing: border-box;
-  background-color: ${(props) => (props.isOpened ? "#555" : "#777")};
+  background-color: ${(props) => (props.isOpened ? '#555' : '#777')};
   color: white;
   cursor: pointer;
   margin-bottom: ${(props) => props.marginBottom};
@@ -27,37 +27,25 @@ const Span = styled.span`
 `;
 
 const CollapsibleContainer = styled.div`
-  display: ${(props) => (props.flex === true ? "flex" : "block")};
+  display: ${(props) => (props.flex === true ? 'flex' : 'block')};
   flex-flow: column;
   margin-bottom: ${(props) => props.marginBottom};
   box-sizing: border-box;
   min-height: 54px;
-  max-height: ${(props) => (!props.isMobile ? "100%" : "35%")};
+  max-height: ${(props) => (!props.isMobile ? '100%' : '35%')};
   height: fit-content;
-  width: ${(props) => props.width || "100%"};
+  width: ${(props) => props.width || '100%'};
 `;
 
 const CollapsibleContent = styled.div`
-  display: ${(props) => (props.isOpened === true ? "block" : "none")};
+  display: ${(props) => (props.isOpened === true ? 'block' : 'none')};
   overflow-y: auto;
   max-height: 100%;
   background-color: white;
 `;
 
 const CollapsibleSection = React.forwardRef(
-  (
-    {
-      title,
-      children,
-      open,
-      marginBottom = "1px",
-      flex,
-      width,
-      isMobile,
-      display,
-    },
-    ref
-  ) => {
+  ({ title, children, open, marginBottom = '1px', flex, width, isMobile, display }, ref) => {
     const [opened, setOpened] = useState(open);
     const [previouslyOpened, setPreviouslyOpened] = useState();
 
@@ -78,9 +66,10 @@ const CollapsibleSection = React.forwardRef(
         width={width}
         isMobile={isMobile}
         isOpened={opened}
+        display={display}
       >
         <Button type="button" onClick={handleClick}>
-          {title} <Span>{opened ? "-" : "+"}</Span>
+          {title} <Span>{opened ? '-' : '+'}</Span>
         </Button>
         <CollapsibleContent isOpened={opened}>{children}</CollapsibleContent>
       </CollapsibleContainer>

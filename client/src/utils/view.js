@@ -1,45 +1,47 @@
-import ArcGISMap from "@arcgis/core/Map";
-import Extent from "@arcgis/core/geometry/Extent";
-import MapView from "@arcgis/core/views/MapView";
-import Basemap from "@arcgis/core/Basemap";
-import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
-import WMSLayer from "@arcgis/core/layers/WMSLayer";
-import WMTSLayer from "@arcgis/core/layers/WMTSLayer";
-import SpatialReference from "@arcgis/core/geometry/SpatialReference";
-import Search from "@arcgis/core/widgets/Search";
-import ScaleBar from "@arcgis/core/widgets/ScaleBar";
-import Sketch from "@arcgis/core/widgets/Sketch";
-import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
-import Graphic from "@arcgis/core/Graphic";
-import Legend from "@arcgis/core/widgets/Legend";
-import LayerList from "@arcgis/core/widgets/LayerList";
-import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
-import * as reactiveUtils from "@arcgis/core/core/reactiveUtils";
-import Point from "@arcgis/core/geometry/Point";
-import Zoom from "@arcgis/core/widgets/Zoom";
+import ArcGISMap from '@arcgis/core/Map';
+import Extent from '@arcgis/core/geometry/Extent';
+import MapView from '@arcgis/core/views/MapView';
+import Basemap from '@arcgis/core/Basemap';
+import MapImageLayer from '@arcgis/core/layers/MapImageLayer';
+import WMSLayer from '@arcgis/core/layers/WMSLayer';
+import WMTSLayer from '@arcgis/core/layers/WMTSLayer';
+import SpatialReference from '@arcgis/core/geometry/SpatialReference';
+import Search from '@arcgis/core/widgets/Search';
+import ScaleBar from '@arcgis/core/widgets/ScaleBar';
+import Sketch from '@arcgis/core/widgets/Sketch';
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import Graphic from '@arcgis/core/Graphic';
+import Legend from '@arcgis/core/widgets/Legend';
+import LayerList from '@arcgis/core/widgets/LayerList';
+import * as geometryEngine from '@arcgis/core/geometry/geometryEngine';
+import * as reactiveUtils from '@arcgis/core/core/reactiveUtils';
+import Point from '@arcgis/core/geometry/Point';
+import Zoom from '@arcgis/core/widgets/Zoom';
 
-import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
-import { updateGWWPComputationResult } from "../redux/gwwpComputationsSlice";
-import { identifyAllLayers } from "./identify";
-import { queryCadastre } from "./queryCadastre";
-import { takeScreenshot } from "./screenshot";
-import { getAddress } from "./getAddress";
+import { updateEWSComputationResult } from '../redux/ewsComputationsSlice';
+import { updateGWWPComputationResult } from '../redux/gwwpComputationsSlice';
+import { identifyAllLayers } from './identify';
+import { queryCadastre } from './queryCadastre';
+import { takeScreenshot } from './screenshot';
+import { getAddress } from './getAddress';
 
-import "./ui.css";
-import { updateCadastralData } from "../redux/cadastreSlice";
+import './ui.css';
+import { updateCadastralData } from '../redux/cadastreSlice';
+import { Vienna, Austria } from '../assets/Vienna';
+import Polygon from '@arcgis/core/geometry/Polygon';
 
 // spatial reference WKID
 export const SRS = 31256;
 
 // layer URLs
 export const ampelkarte_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Ampelkarte_Wien/MapServer";
+  'https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Ampelkarte_Wien/MapServer';
 export const ews_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Erdwaermesonden_EWS_Wien_TEST/MapServer";
+  'https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Erdwaermesonden_EWS_Wien_TEST/MapServer';
 export const gwwp_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_thermischeGrundwassernutzung_GWP_Wien_TEST/MapServer";
+  'https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_thermischeGrundwassernutzung_GWP_Wien_TEST/MapServer';
 export const betriebsstunden_url =
-  "https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BetriebsStd_Wien_TEST/MapServer";
+  'https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BetriebsStd_Wien_TEST/MapServer';
 
 // exports
 export let view;
@@ -81,76 +83,92 @@ export function initialize(container, theme, isMobile) {
     }
   );
 
+  let viennaGraphic = new Graphic({
+    geometry: new Polygon({ rings: [Austria, Vienna], spatialReference: SRS }),
+    symbol: {
+      type: 'simple-fill',
+      color: [5, 46, 55, 0.5],
+      style: 'solid',
+      outline: {
+        color: 'white',
+        width: 0,
+      },
+    },
+  });
+
+  let viennaGraphicsLayer = new GraphicsLayer({ title: 'Wien', listMode: 'hide' });
+  viennaGraphicsLayer.add(viennaGraphic);
+
   pointGraphicsLayer = new GraphicsLayer({
-    title: "Planungslayer - Punkte",
-    listMode: "hide",
+    title: 'Planungslayer - Punkte',
+    listMode: 'hide',
   });
 
   boundaryGraphicsLayer = new GraphicsLayer({
-    title: "EWS - innere Grenze",
-    listMode: "hide",
+    title: 'EWS - innere Grenze',
+    listMode: 'hide',
   });
 
   polygonGraphicsLayer = new GraphicsLayer({
-    title: "Grundstücksgrenze",
-    listMode: "hide",
+    title: 'Grundstücksgrenze',
+    listMode: 'hide',
   });
 
   let highlightGraphicsLayer = new GraphicsLayer({
-    title: "Grundstücksgrenze",
-    listMode: "hide",
+    title: 'Grundstücksgrenze',
+    listMode: 'hide',
   });
 
   // instantiate layers
   const ampelkarte = new MapImageLayer({
     url: ampelkarte_url,
-    title: "Ampelkarte",
+    title: 'Ampelkarte',
     visible: false,
-    listMode: "hide",
+    listMode: 'hide',
   });
 
   const ews = new MapImageLayer({
-    title: "Potentialkarten für Erdwärmesonden",
+    title: 'Potentialkarten für Erdwärmesonden',
     url: ews_url,
     visible: true,
-    listMode: theme === "EWS" ? "show" : "hide",
+    listMode: theme === 'EWS' ? 'show' : 'hide',
   });
 
   const gwwp = new MapImageLayer({
-    title: "Potentialkarten für Grundwasserwärmepumpen",
+    title: 'Potentialkarten für Grundwasserwärmepumpen',
     url: gwwp_url,
     visible: true,
-    listMode: theme === "GWWP" ? "show" : "hide",
+    listMode: theme === 'GWWP' ? 'show' : 'hide',
   });
 
   const betriebsstunden = new MapImageLayer({
-    title: "Betriebsstunden",
+    title: 'Betriebsstunden',
     url: betriebsstunden_url,
     visible: false,
-    listMode: "hide",
+    listMode: 'hide',
   });
 
   // cadastre used as basemap to filter points by category
   cadastre = new WMSLayer({
-    title: "Kataster",
-    url: "https://data.bev.gv.at/geoserver/BEVdataKAT/wms",
+    title: 'Kataster',
+    url: 'https://data.bev.gv.at/geoserver/BEVdataKAT/wms',
     spatialReference: SRS,
   });
 
   // cadastre overlay to query parcel boundaries
   const cadastreOverlay = new WMSLayer({
-    title: "Kataster",
-    url: "https://data.bev.gv.at/geoserver/BEVdataKAT/wms",
-    listMode: "hide",
+    title: 'Kataster',
+    url: 'https://data.bev.gv.at/geoserver/BEVdataKAT/wms',
+    listMode: 'hide',
     spatialReference: SRS,
   });
 
   cadastreOverlay.when(() => {
-    cadastreOverlay.findSublayerByName("DKM_NFL").legendEnabled = false;
-    cadastreOverlay.findSublayerByName("DKM_NFL").visible = false;
-    cadastreOverlay.findSublayerByName("DKM_GST").legendEnabled = false;
-    cadastreOverlay.findSublayerByName("KAT_DKM_GST-NFL").legendEnabled = false;
-    cadastreOverlay.findSublayerByName("KAT_DKM_GST-NFL").visible = false;
+    cadastreOverlay.findSublayerByName('DKM_NFL').legendEnabled = false;
+    cadastreOverlay.findSublayerByName('DKM_NFL').visible = false;
+    cadastreOverlay.findSublayerByName('DKM_GST').legendEnabled = false;
+    cadastreOverlay.findSublayerByName('KAT_DKM_GST-NFL').legendEnabled = false;
+    cadastreOverlay.findSublayerByName('KAT_DKM_GST-NFL').visible = false;
   });
 
   gwwp.when(() => {
@@ -175,21 +193,21 @@ export function initialize(container, theme, isMobile) {
   // default transformation in ArcGIS API from MGI to WGS84 is 1306
   // transformation 1618 is recommended
   const basemap_at = new WMTSLayer({
-    url: "https://maps.wien.gv.at/basemap/1.0.0/WMTSCapabilities_31256.xml",
+    url: 'https://maps.wien.gv.at/basemap/1.0.0/WMTSCapabilities_31256.xml',
     activeLayer: {
-      id: "geolandbasemap",
+      id: 'geolandbasemap',
     },
-    listMode: "hide",
-    serviceMode: "KVP",
+    listMode: 'hide',
+    serviceMode: 'KVP',
   });
 
   let basemap, arcgisMap;
   switch (theme) {
-    case "EWS":
+    case 'EWS':
       basemap = new Basemap({
         baseLayers: [cadastre],
-        title: "basemap",
-        id: "basemap",
+        title: 'basemap',
+        id: 'basemap',
         spatialReference: SRS,
       });
 
@@ -205,14 +223,15 @@ export function initialize(container, theme, isMobile) {
           boundaryGraphicsLayer,
           polygonGraphicsLayer,
           highlightGraphicsLayer,
+          viennaGraphicsLayer,
         ],
       });
       break;
-    case "GWWP":
+    case 'GWWP':
       basemap = new Basemap({
         baseLayers: [basemap_at],
-        title: "basemap",
-        id: "basemap",
+        title: 'basemap',
+        id: 'basemap',
         spatialReference: SRS,
       });
 
@@ -226,6 +245,7 @@ export function initialize(container, theme, isMobile) {
           pointGraphicsLayer,
           polygonGraphicsLayer,
           highlightGraphicsLayer,
+          viennaGraphicsLayer,
         ],
       });
       break;
@@ -244,34 +264,34 @@ export function initialize(container, theme, isMobile) {
 
   const scaleBar = new ScaleBar({
     view: view,
-    unit: "metric",
+    unit: 'metric',
   });
 
   const zoom = new Zoom({
     view,
-    layout: "horizontal",
+    layout: 'horizontal',
   });
 
   const sketch = new Sketch({
     layer: pointGraphicsLayer,
     view: view,
-    availableCreateTools: [theme === "EWS" ? "point" : undefined],
+    availableCreateTools: [theme === 'EWS' ? 'point' : undefined],
     visibleElements: {
       selectionTools: {
-        "lasso-selection": false,
-        "rectangle-selection": theme === "EWS" ? true : false,
+        'lasso-selection': false,
+        'rectangle-selection': theme === 'EWS' ? true : false,
       },
       settingsMenu: false,
       undoRedoMenu: false,
     },
-    creationMode: "single",
+    creationMode: 'single',
   });
 
-  sketch.on("create", (event) => {
-    if (event.tool === "point" && event.state === "complete") {
+  sketch.on('create', (event) => {
+    if (event.tool === 'point' && event.state === 'complete') {
       // point symbol
       const symbol = {
-        type: "simple-marker",
+        type: 'simple-marker',
         color: [255, 255, 255, 0.25],
       };
 
@@ -281,7 +301,7 @@ export function initialize(container, theme, isMobile) {
       let point = event.graphic.geometry;
       let points;
       switch (theme) {
-        case "EWS":
+        case 'EWS':
           // add point to current list of points
           setPoints((currentPoints) => {
             points = [...currentPoints, [point.x, point.y]];
@@ -296,12 +316,7 @@ export function initialize(container, theme, isMobile) {
           });
 
           // check if point is outside the parcel
-          if (
-            !geometryEngine.intersects(
-              point,
-              boundaryGraphicsLayer.graphics.at(0).geometry
-            )
-          ) {
+          if (!geometryEngine.intersects(point, boundaryGraphicsLayer.graphics.at(0).geometry)) {
             setOutsideWarning(true);
           }
 
@@ -313,14 +328,9 @@ export function initialize(container, theme, isMobile) {
             })
           );
           break;
-        case "GWWP":
+        case 'GWWP':
           // check if point is outside the parcel
-          if (
-            !geometryEngine.intersects(
-              point,
-              polygonGraphicsLayer.graphics.at(0).geometry
-            )
-          ) {
+          if (!geometryEngine.intersects(point, polygonGraphicsLayer.graphics.at(0).geometry)) {
             setOutsideWarning(true);
           }
 
@@ -354,26 +364,19 @@ export function initialize(container, theme, isMobile) {
     }
   });
 
-  sketch.on("update", (event) => {
-    if (event.state === "complete") {
+  sketch.on('update', (event) => {
+    if (event.state === 'complete') {
       // list of updated points
-      let allPoints = pointGraphicsLayer.graphics.map(
-        (graphic) => graphic.geometry
-      );
+      let allPoints = pointGraphicsLayer.graphics.map((graphic) => graphic.geometry);
 
       // update state of calculations menu
       setPoints(allPoints.map((point) => [point.x, point.y]).toArray());
 
-      if (theme === "EWS") {
+      if (theme === 'EWS') {
         // check if all points are inside the boundary
         let allPointsInside = true;
         allPoints.forEach((point) => {
-          if (
-            !geometryEngine.intersects(
-              point,
-              boundaryGraphicsLayer.graphics.at(0).geometry
-            )
-          ) {
+          if (!geometryEngine.intersects(point, boundaryGraphicsLayer.graphics.at(0).geometry)) {
             allPointsInside = false;
             return;
           }
@@ -385,10 +388,7 @@ export function initialize(container, theme, isMobile) {
         allPoints.forEach((firstPoint) => {
           allPoints.forEach((secondPoint) => {
             if (secondPoint !== firstPoint) {
-              if (
-                geometryEngine.distance(firstPoint, secondPoint, "meters") <=
-                4.9
-              ) {
+              if (geometryEngine.distance(firstPoint, secondPoint, 'meters') <= 4.9) {
                 tooClose = true;
                 return;
               }
@@ -400,12 +400,7 @@ export function initialize(container, theme, isMobile) {
         // check if all points are inside the boundary
         let allPointsInside = true;
         allPoints.forEach((point) => {
-          if (
-            !geometryEngine.intersects(
-              point,
-              polygonGraphicsLayer.graphics.at(0).geometry
-            )
-          ) {
+          if (!geometryEngine.intersects(point, polygonGraphicsLayer.graphics.at(0).geometry)) {
             allPointsInside = false;
             return;
           }
@@ -416,11 +411,12 @@ export function initialize(container, theme, isMobile) {
   });
 
   // register event handlers for mouse clicks
-  view.on("click", ({ mapPoint }) => {
+  view.on('click', ({ mapPoint }) => {
     // at application start if no polygon is drawn yet
     if (polygonGraphicsLayer.graphics.length === 0) {
       startNewQuery(mapPoint);
     } else {
+      // check if point is selected
       view
         .hitTest(view.toScreen(mapPoint), {
           include: pointGraphicsLayer,
@@ -431,12 +427,7 @@ export function initialize(container, theme, isMobile) {
             const pointGraphic = results.at(0).graphic;
             sketch.update(pointGraphic);
           } else {
-            if (
-              !geometryEngine.intersects(
-                mapPoint,
-                polygonGraphicsLayer.graphics.at(0).geometry
-              )
-            ) {
+            if (!geometryEngine.intersects(mapPoint, polygonGraphicsLayer.graphics.at(0).geometry)) {
               // if click was outside parcel and no point was selected then start new query
               startNewQuery(mapPoint);
             }
@@ -446,7 +437,7 @@ export function initialize(container, theme, isMobile) {
   });
 
   // listen to move event
-  view.on("pointer-move", (event) => {
+  view.on('pointer-move', (event) => {
     let mapPoint = view.toMap({ x: event.x, y: event.y });
     view
       .hitTest(view.toScreen(mapPoint), {
@@ -460,17 +451,17 @@ export function initialize(container, theme, isMobile) {
           let pointGraphic = new Graphic({
             geometry: graphic.geometry,
             symbol: {
-              type: "simple-marker",
-              size: "30px",
+              type: 'simple-marker',
+              size: '30px',
               color: null,
-              outline: { color: "#00ffff" },
+              outline: { color: '#00ffff' },
             },
           });
           highlightGraphicsLayer.add(pointGraphic);
-          document.body.style.cursor = "pointer";
+          document.body.style.cursor = 'pointer';
         } else {
           highlightGraphicsLayer.removeAll();
-          document.body.style.cursor = "default";
+          document.body.style.cursor = 'default';
         }
       });
   });
@@ -486,77 +477,32 @@ export function initialize(container, theme, isMobile) {
     setPolygon(null);
     setPoints([]);
 
-    // hide sketch menu if user starts new query
-    // let sketchMenuContainer = calculationsMenu.querySelector(
-    //   "#sketch-menu-container"
-    // );
-
-    // if (sketchMenuContainer) {
-    //   sketchMenuContainer.style.display = "none";
-    // }
-
     // initialize store in case there was a previous computation
     switch (theme) {
-      case "EWS":
+      case 'EWS':
         dispatch(updateEWSComputationResult({}));
         break;
-      case "GWWP":
+      case 'GWWP':
         dispatch(updateGWWPComputationResult({}));
         break;
       default:
         break;
     }
 
-    // start new queries
+    // start new layer queries
     identifyAllLayers(view, mapPoint, dispatch);
     getAddress(mapPoint, setAddress);
 
     if (view.scale > scaleLimit) {
-      // take screenshot with marker at higher scales when parcels are not selectable
+      // take screenshot with marker at higher scales
       setTimeout(() => takeScreenshot(view, mapPoint, dispatch, true), 0);
     } else {
-      // take screenshot
+      // take screenshot without marker
       setTimeout(() => takeScreenshot(view, mapPoint, dispatch), 0);
 
       // query cadastral data
-      queryCadastre(
-        view,
-        polygonGraphicsLayer,
-        mapPoint,
-        dispatch,
-        setPolygon,
-        setPoints,
-        theme,
-        gridSpacing
-      );
+      queryCadastre(view, polygonGraphicsLayer, mapPoint, dispatch, setPolygon, setPoints, theme, gridSpacing);
     }
-
-    // add sketch menu to calculations menu if below scale limit
-    // if (theme === "EWS" && view.scale < scaleLimit) {
-    //   if (!sketchMenuContainer) {
-    //     // add menu elements
-    //     const collapsibleContent = calculationsMenu.querySelector(
-    //       "#collapsible-content"
-    //     );
-    //     sketchMenuContainer = document.createElement("div");
-    //     sketchMenuContainer.id = "sketch-menu-container";
-    //     sketchMenuContainer.style.fontFamily = `-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif`;
-    //     sketchMenuContainer.style.textRendering = "optimizelegibility";
-    //     sketchMenuContainer.style.lineHeight = "normal";
-    //     sketchMenuContainer.style.boxSizing = "content-box";
-    //     sketchMenuContainer.style.display = "inline";
-    //     collapsibleContent.appendChild(sketchMenuContainer);
-
-    //     let label = document.createElement("label");
-    //     label.innerHTML = "Sondenpunkte auswählen oder zeichnen";
-    //     sketchMenuContainer.appendChild(label);
-    //   } else {
-    //     // set to block mode if container already exists
-    //     sketchMenuContainer.style.display = "block";
-    //   }
-
-    //   sketch.container = sketchMenuContainer;
-    // }
   };
 
   // add map to view
@@ -565,8 +511,8 @@ export function initialize(container, theme, isMobile) {
   // add UI components
   view.ui.components = [];
   if (!isMobile) {
-    view.ui.add([zoom, search, layerList, legend], "top-left");
-    view.ui.add(scaleBar, "bottom-left");
+    view.ui.add([zoom, search, layerList, legend], 'top-left');
+    view.ui.add(scaleBar, 'bottom-left');
   }
 
   // set container of mapview
@@ -592,10 +538,7 @@ export function initializeInfoPanelHandlers(
 }
 
 // initialize calculatoins menu callback functions
-export function initializeCalculationsMenuHandlers(
-  setPointsCallback,
-  setPolygonCallback
-) {
+export function initializeCalculationsMenuHandlers(setPointsCallback, setPolygonCallback) {
   setPoints = setPointsCallback;
   setPolygon = setPolygonCallback;
 }

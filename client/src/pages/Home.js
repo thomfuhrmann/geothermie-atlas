@@ -1,16 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
-import { NavLink } from "react-router-dom";
-import styled from "styled-components";
-import { useMediaQuery } from "react-responsive";
+import React, { useState, useRef, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
+import { useMediaQuery } from 'react-responsive';
 
-import graphicEWS from "../assets/images/EWS.jpg";
-import graphicGWWP from "../assets/images/GWWP.jpg";
+import graphicEWS from '../assets/images/EWS.jpg';
+import graphicGWWP from '../assets/images/GWWP.jpg';
 
 const Content = styled.div`
   box-sizing: border-box;
   margin: 0;
   position: absolute;
-  top: 50px;
+  top: 70px;
   bottom: 0;
   width: 100%;
 `;
@@ -18,10 +18,10 @@ const Content = styled.div`
 const ImageContainer = styled.div`
   display: flex;
   justify-content: center;
-  align-items: ${(props) => props.isMobile && "stretch"};
+  align-items: ${(props) => props.isMobile && 'stretch'};
   height: 100%;
   width: 100%;
-  flex-direction: ${(props) => (props.isMobile ? "column" : "row")};
+  flex-direction: ${(props) => (props.isMobile ? 'column' : 'row')};
 `;
 
 const ImageFrame = styled.div`
@@ -29,8 +29,8 @@ const ImageFrame = styled.div`
   box-sizing: border-box;
   width: 100%;
   min-height: 50%;
-  border-left: ${(props) => props.borderLeft || "0px"} solid white;
-  border-right: ${(props) => props.borderRight || "0px"} solid white;
+  border-left: ${(props) => props.borderLeft || '0px'} solid white;
+  border-right: ${(props) => props.borderRight || '0px'} solid white;
 `;
 
 const Image = styled.img`
@@ -38,7 +38,7 @@ const Image = styled.img`
   height: 100%;
   max-width: 100%;
   object-fit: cover;
-  margin: ${(props) => (props.isMobile ? "0 auto" : "0")};
+  margin: ${(props) => (props.isMobile ? '0 auto' : '0')};
   float: ${(props) => props.float};
 `;
 
@@ -50,7 +50,7 @@ const Card = styled.div`
   width: 100%;
   padding: 0 10%;
   color: #89e9ff;
-  font-size: ${(props) => (props.isMobile ? "small" : "x-large")};
+  font-size: ${(props) => (props.isMobile ? 'small' : 'x-large')};
   text-align: ${(props) => props.textAlign};
 `;
 
@@ -66,12 +66,7 @@ const OverlayComponent = React.forwardRef(({ className, children }, ref) => {
   };
 
   return (
-    <div
-      className={className}
-      onMouseOver={handleMouseOver}
-      onMouseOut={handleMouseOut}
-      ref={ref}
-    >
+    <div className={className} onMouseOver={handleMouseOver} onMouseOut={handleMouseOut} ref={ref}>
       {mouseOver && children}
     </div>
   );
@@ -79,9 +74,9 @@ const OverlayComponent = React.forwardRef(({ className, children }, ref) => {
 
 const Overlay = styled(OverlayComponent)`
   position: absolute;
-  right: ${(props) => props.right && "0px"};
-  left: ${(props) => props.left && "0px"};
-  width: ${(props) => (props.width > 0 ? props.width + "px" : "100%")};
+  right: ${(props) => props.right && '0px'};
+  left: ${(props) => props.left && '0px'};
+  width: ${(props) => (props.width > 0 ? props.width + 'px' : '100%')};
   height: 100%;
   background-color: rgba(255, 255, 255, 0);
   &:hover {
@@ -119,31 +114,29 @@ const Home = () => {
   return (
     <Content>
       <ImageContainer isMobile={isMobile}>
-        <ImageFrame borderRight={!isMobile ? "1px" : "0px"}>
+        <ImageFrame borderRight={!isMobile ? '1px' : '0px'}>
           <NavLink to="/ews">
             <Image
               src={graphicEWS}
               alt="Erdwärmesonden"
-              float={!isMobile ? "right" : undefined}
+              float={!isMobile ? 'right' : undefined}
               ref={imgRef}
               isMobile={isMobile}
             ></Image>
             {!isMobile && (
               <Overlay right width={imgWidth}>
-                <Card textAlign="right">
-                  Erfahren Sie mehr über Erdwärmesonden
-                </Card>
+                <Card textAlign="right">Erfahren Sie mehr über Erdwärmesonden</Card>
               </Overlay>
             )}
           </NavLink>
           {isMobile && <ImageTitle>Erdwärmesonden</ImageTitle>}
         </ImageFrame>
-        <ImageFrame borderLeft={!isMobile ? "1px" : "0px"}>
+        <ImageFrame borderLeft={!isMobile ? '1px' : '0px'}>
           <NavLink to="/gwwp">
             <Image
               src={graphicGWWP}
               alt="Grundwasserwärmepumpen"
-              float={!isMobile ? "left" : undefined}
+              float={!isMobile ? 'left' : undefined}
               isMobile={isMobile}
             ></Image>
             {!isMobile && (
