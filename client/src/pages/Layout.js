@@ -5,7 +5,7 @@ import { useMediaQuery } from 'react-responsive';
 import { FaBars, FaTimes } from 'react-icons/fa';
 
 import Header from '../components/Header';
-import logo from '../assets/icons/logo_only.png';
+import logo from '../assets/icons/logo.png';
 
 const Nav = styled.nav`
   position: absolute;
@@ -23,12 +23,12 @@ const NavMenu = styled.div`
 
 const Title = styled.span`
   position: absolute;
-  left: 90px;
+  left: 200px;
   top: 50%;
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
   font-size: ${(props) => (props.isMobile ? 'medium' : 'x-large')};
-  color: #122e37;
+  color: #052e37;
 `;
 
 const PageContent = styled.div`
@@ -88,7 +88,7 @@ const CloseToggle = styled.button`
 `;
 
 const LogoImage = styled.img`
-  width: 50px;
+  width: 160px;
   height: 50px;
   object-fit: contain;
   padding-left: 20px;
@@ -96,7 +96,7 @@ const LogoImage = styled.img`
 `;
 
 const MenuItem = styled.span`
-  color: #153039;
+  color: #052e37;
   font-size: medium;
 `;
 
