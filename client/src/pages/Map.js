@@ -88,7 +88,7 @@ const Map = ({ theme }) => {
         mapViewRef.current.ui.add(calcMenuContainerRef.current, 'top-left');
       }
     } else {
-      // remove calculations menu to map if cadastral data was not queried
+      // remove calculations menu from map if cadastral data was not queried
       mapViewRef.current.ui.remove(calcMenuContainerRef.current);
     }
   }, [cadastralData, isMobile]);

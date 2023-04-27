@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 
 const { runPythonShell } = require('./pythonShell');
 
@@ -12,7 +11,7 @@ app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-app.post('/api', ({ body }, res) => {
+app.post('/api', ({ body }, res, next) => {
   let options = {
     args: [
       body.BT,
@@ -31,7 +30,14 @@ app.post('/api', ({ body }, res) => {
     ],
   };
   if (options.args.every((option) => typeof option !== 'undefined')) {
-    setImmediate(() => runPythonShell(res, options));
+    setImmediate(() => {
+      try {
+        runPythonShell(res, options);
+      } catch (err) {
+        next(err);
+        // res.status(500).send({ error: 'Es ist ein Fehler aufgetreten.' });
+      }
+    });
   } else {
     res.status(500).send({
       error: 'Sie haben einen ungültigen Query-String eingegeben.',
