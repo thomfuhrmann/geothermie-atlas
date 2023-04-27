@@ -52,3 +52,11 @@ calcite-icon {
   width: 16px;
   height: 16px;
 }
+
+.esri-layer-list {
+  background-color: #fff;
+}
+
+.esri-search {
+  width: 300px;
+}

@@ -5,14 +5,14 @@ import { useMediaQuery } from 'react-responsive';
 
 import { updateEWSResources } from '../redux/ewsResourcesSlice';
 import { updateGWWPResources } from '../redux/gwwpResourcesSlice';
-import { updateAmpelkarte } from '../redux/ampelkarteSlice';
+import { updateAmpelkarteEWS } from '../redux/ampelkarteEWSSlice';
 import { updateCadastralData } from '../redux/cadastreSlice';
 import { updateEWSComputationResult } from '../redux/ewsComputationsSlice';
 import { updateGWWPComputationResult } from '../redux/gwwpComputationsSlice';
 import { updateScreenshot } from '../redux/screenshotSlice';
 
 import { initializeInfoPanelHandlers } from '../utils/view';
-import { AmpelkarteTable } from './AmpelkarteTable';
+import { AmpelkarteTableEWS } from './AmpelkarteTableEWS';
 import CollapsibleSection from './CollapsibleSection';
 import { print } from '../utils/print';
 
@@ -35,27 +35,28 @@ import {
 } from './CommonStyledElements';
 
 const textTemplates = {
-  0: [
-    `Die flächenspezifische Jahresenergie eines 1156 m² großen und 100 m tiefen Sondenfeldes im saisonalem Speicherbetrieb (7 x 7 Sonden mit je 5 m Abstand - die im Winter zur Heizung entzogene Wärme wird im Sommer vollständig wieder zurückgegeben) beträgt rund `,
-    ' kWh/m²/a.',
-  ],
-  1: [
-    `Die flächenspezifische Jahresenergie eines 1156 m² großen und 100 m tiefen Sondenfeldes im standortbezogenen Normbetrieb (4 x 4 Sonden mit je 10 m Abstand - Heizen und Kühlen mit Normbetriebsstunden eines typischen Wohngebäudes am Standort) beträgt rund `,
-    ' kWh/m²/a.',
-  ],
+  0: ['Die mittlere jährliche Bodentemperatur beträgt laut Satellitendaten (MODIS) rund ', ' °C.'],
+  1: ['Die mittlere Temperatur des Untergrunds für eine Tiefe von 0 bis 100 m beträgt rund ', ' °C.'],
   2: [
-    'Die Entzugsleistung einer 100 m tiefen Einzelsonde im saisonalem Speicherbetrieb (die im Winter zur Heizung entzogene Wärme wird im Sommer vollständig wieder zurückgegeben) beträgt am Grundstück rund ',
-    ' W/lfm.',
+    'Die mittlere konduktive Wärmeleitfähigkeit des Untergrunds für eine Tiefe von 0 bis 100 m beträgt rund ',
+    ' W/m/K.',
   ],
   3: [
     'Die Entzugsleistung einer 100 m tiefen Einzelsonde im standortbezogenen Normbetrieb (Heizen und Kühlen mit Normbetriebsstunden eines typischen Wohngebäudes am Standort) beträgt am Grundstück rund ',
     ' W/lfm.',
   ],
-  4: ['Die mittlere jährliche Bodentemperatur beträgt laut Satellitendaten (MODIS) rund ', ' °C.'],
-  5: ['Die mittlere Temperatur des Untergrunds für eine Tiefe von 0 bis 100 m beträgt rund ', ' °C.'],
+  4: [
+    'Die Entzugsleistung einer 100 m tiefen Einzelsonde im saisonalem Speicherbetrieb (die im Winter zur Heizung entzogene Wärme wird im Sommer vollständig wieder zurückgegeben) beträgt am Grundstück rund ',
+    ' W/lfm.',
+  ],
+
+  5: [
+    `Die flächenspezifische Jahresenergie eines 1156 m² großen und 100 m tiefen Sondenfeldes im standortbezogenen Normbetrieb (4 x 4 Sonden mit je 10 m Abstand - Heizen und Kühlen mit Normbetriebsstunden eines typischen Wohngebäudes am Standort) beträgt rund `,
+    ' kWh/m²/a.',
+  ],
   6: [
-    'Die mittlere konduktive Wärmeleitfähigkeit des Untergrunds für eine Tiefe von 0 bis 100 m beträgt rund ',
-    ' W/m/K.',
+    `Die flächenspezifische Jahresenergie eines 1156 m² großen und 100 m tiefen Sondenfeldes im saisonalem Speicherbetrieb (7 x 7 Sonden mit je 5 m Abstand - die im Winter zur Heizung entzogene Wärme wird im Sommer vollständig wieder zurückgegeben) beträgt rund `,
+    ' kWh/m²/a.',
   ],
 };
 
@@ -70,7 +71,7 @@ export default function InfoPanelEWS() {
   const [scaleWarning, setScaleWarning] = useState(true);
 
   const resources = useSelector((store) => store.ewsResources.value);
-  const ampelkarte = useSelector((store) => store.ampelkarte.value);
+  const ampelkarte = useSelector((store) => store.ampelkarteEWS.value);
   const cadastralData = useSelector((store) => store.cadastre.value);
   const computationResult = useSelector((store) => store.ewsComputations.value);
   const screenshot = useSelector((store) => store.screenshot.value);
@@ -91,7 +92,7 @@ export default function InfoPanelEWS() {
       dispatch(updateEWSResources([]));
       dispatch(updateGWWPResources([]));
       dispatch(updateCadastralData({}));
-      dispatch(updateAmpelkarte([]));
+      dispatch(updateAmpelkarteEWS([]));
       dispatch(updateGWWPComputationResult({}));
       dispatch(updateEWSComputationResult({}));
       dispatch(updateScreenshot(''));
@@ -153,9 +154,9 @@ export default function InfoPanelEWS() {
                 <tbody>
                   <tr>
                     <td>
-                      Katastralgemeinde {cadastralData.KG}
+                      Katastralgemeinde: {cadastralData.KG}
                       <br></br>
-                      Grundstücksnummer {cadastralData.GNR}
+                      Grundstücksnummer: {cadastralData.GNR}
                     </td>
                   </tr>
                 </tbody>
@@ -226,11 +227,15 @@ export default function InfoPanelEWS() {
                   <TableRow>
                     <TableHeader textAlign="center">Ressourcen für vordefinierte Erdwärmesondenanlage</TableHeader>
                   </TableRow>
-                  {resources.slice(0, 4).map((result) => {
+                  {resources.slice(3, 7).map((result) => {
                     return (
                       <TableRow key={result.layerId}>
                         <TableData>
-                          {formatEWS(result.layerId, result.layerName, result.feature.attributes['Pixel Value'])}
+                          {formatEWS(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes['Stretch.Pixel Value']
+                          )}
                         </TableData>
                       </TableRow>
                     );
@@ -238,11 +243,15 @@ export default function InfoPanelEWS() {
                   <TableRow>
                     <TableHeader textAlign="center">Standortabhängige Parameter</TableHeader>
                   </TableRow>
-                  {resources.slice(4).map((result) => {
+                  {resources.slice(0, 3).map((result) => {
                     return (
                       <TableRow key={result.layerId}>
                         <TableData>
-                          {formatEWS(result.layerId, result.layerName, result.feature.attributes['Pixel Value'])}
+                          {formatEWS(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes['Stretch.Pixel Value']
+                          )}
                         </TableData>
                       </TableRow>
                     );
@@ -253,7 +262,7 @@ export default function InfoPanelEWS() {
             </CollapsibleSection>
           )}
           {ampelkarte && ampelkarte.length > 0 && (
-            <AmpelkarteTable results={ampelkarte} setTables={setTables} layerId={0}></AmpelkarteTable>
+            <AmpelkarteTableEWS results={ampelkarte} setTables={setTables}></AmpelkarteTableEWS>
           )}
           {Object.keys(computationResult).includes('error') && (
             <CollapsibleSection title="Berechnungsergebnisse" open={true}>
@@ -354,12 +363,12 @@ export default function InfoPanelEWS() {
                     <>
                       <TableRow>
                         <TableData>
-                          Wärmeleitfähigkeit {parseFloat(resources[6].feature.attributes['Pixel Value']).toFixed(1)}{' '}
-                          W/m/K
+                          Wärmeleitfähigkeit:{' '}
+                          {parseFloat(resources[2].feature.attributes['Stretch.Pixel Value']).toFixed(1)} W/m/K
                         </TableData>
                       </TableRow>
                       <TableRow>
-                        <TableData>Untergrundtemperatur {computationResult.GTcalc.toFixed(1)} °C</TableData>
+                        <TableData>Untergrundtemperatur: {computationResult.GTcalc.toFixed(1)} °C</TableData>
                       </TableRow>
                     </>
                   )}

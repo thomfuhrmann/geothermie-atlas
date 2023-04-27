@@ -1,18 +1,18 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 
-const { runPythonShell } = require("./pythonShell");
+const { runPythonShell } = require('./pythonShell');
 
 const app = express();
 const port = 5000;
 
 app.use(cors());
-app.use(express.json({ limit: "100mb" }));
-app.use(express.static(path.join(__dirname, "client/build")));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.static(path.join(__dirname, 'client/build')));
 
-app.post("/api", ({ body }, res) => {
+app.post('/api', ({ body }, res) => {
   let options = {
     args: [
       body.BT,
@@ -30,17 +30,17 @@ app.post("/api", ({ body }, res) => {
       body.heating,
     ],
   };
-  if (options.args.every((option) => typeof option !== "undefined")) {
-    runPythonShell(res, options);
+  if (options.args.every((option) => typeof option !== 'undefined')) {
+    setImmediate(() => runPythonShell(res, options));
   } else {
     res.status(500).send({
-      error: "Sie haben einen ungültigen Query-String eingegeben.",
+      error: 'Sie haben einen ungültigen Query-String eingegeben.',
     });
   }
 });
 
-app.get("*", (_, res) => {
-  res.sendFile(path.resolve(__dirname, "client/build/index.html"));
+app.get('*', (_, res) => {
+  res.sendFile(path.resolve(__dirname, 'client/build/index.html'));
 });
 
 app.listen(process.env.PORT || port);

@@ -152,12 +152,11 @@ const About = () => {
         </p>
         <Heading>Kontakt</Heading>
         <p>
-          Geologische Bundesanstalt <br></br>
-          Neulinggasse 38, 1030 Wien <br></br>
-          <a href="mailto:geothermie@geologie.ac.at">geothermie@geologie.ac.at</a>
+          GeoSphere Austria <br></br>
+          Hohe Warte 38, 1190 Wien <br></br>
+          <a href="mailto:geothermie@geosphere.at">geothermie@geosphere.at</a>
           <br></br>
-          Telefon: +43-1-7125674<br></br>
-          Fax: +43-1-7125674-56
+          <a href="https://geosphere.at">https://www.geosphere.at</a>
         </p>
       </Content>
     </Main>

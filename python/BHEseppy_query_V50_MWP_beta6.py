@@ -317,6 +317,7 @@ def main():
     
     
     #return automatic balanced results:
+    P_HZ_bal = P_KL_bal = E_HZ_bal = E_KL_bal = cover_bal = 0
     if (BALANCED > 0):
         P_HZ_bal       =   PHZ_L3_bal*divider/1000.
         P_KL_bal       =   PKL_L3_bal*divider/1000.

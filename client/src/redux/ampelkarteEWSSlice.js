@@ -1,20 +1,20 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   value: [],
 };
 
 export const counterSlice = createSlice({
-  name: "betriebsstunden",
+  name: 'ampelkarteEWS',
   initialState,
   reducers: {
-    updateBetriebsstunden: (state, action) => {
+    updateAmpelkarteEWS: (state, action) => {
       state.value = action.payload;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { updateBetriebsstunden } = counterSlice.actions;
+export const { updateAmpelkarteEWS } = counterSlice.actions;
 
 export default counterSlice.reducer;

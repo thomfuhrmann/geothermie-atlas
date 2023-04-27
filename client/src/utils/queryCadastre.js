@@ -1,11 +1,12 @@
-import esriRequest from "@arcgis/core/request";
-import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
-import Polygon from "@arcgis/core/geometry/Polygon";
-import Graphic from "@arcgis/core/Graphic";
+import esriRequest from '@arcgis/core/request';
+import * as geometryEngine from '@arcgis/core/geometry/geometryEngine';
+import Polygon from '@arcgis/core/geometry/Polygon';
+import Graphic from '@arcgis/core/Graphic';
 
-import { updateCadastralData } from "../redux/cadastreSlice";
-import { calculateGrid } from "./gridcomputer";
-import { calculateWells } from "./wellPairComputer";
+import { updateCadastralData } from '../redux/cadastreSlice';
+import { calculateGrid } from './gridcomputer';
+import { calculateWells } from './wellPairComputer';
+import { cadastre_url } from './view';
 
 export const queryCadastre = (
   view,
@@ -19,34 +20,31 @@ export const queryCadastre = (
 ) => {
   const { x, y } = view.toScreen(mapPoint);
   let url =
-    "https://data.bev.gv.at/geoserver/BEVdataKAT/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:31256&INFO_FORMAT=application/json";
+    cadastre_url +
+    '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:31256&INFO_FORMAT=application/json';
   const { xmin, ymin, xmax, ymax } = view.extent;
   const width = view.width;
   const height = view.height;
   url +=
-    "&BBOX=" +
+    '&BBOX=' +
     ymin +
-    "," +
+    ',' +
     xmin +
-    "," +
+    ',' +
     ymax +
-    "," +
+    ',' +
     xmax +
-    "&WIDTH=" +
+    '&WIDTH=' +
     width +
-    "&HEIGHT=" +
+    '&HEIGHT=' +
     height +
-    "&I=" +
+    '&I=' +
     Math.round(x) +
-    "&J=" +
+    '&J=' +
     Math.round(y);
 
-  esriRequest(url, { responseType: "json" }).then((response) => {
-    if (
-      response.data &&
-      response.data.features &&
-      response.data.features.length > 0
-    ) {
+  esriRequest(url, { responseType: 'json' }).then((response) => {
+    if (response.data && response.data.features && response.data.features.length > 0) {
       const feature = response.data.features[0];
       let KG = feature.properties.KG;
       let GNR = feature.properties.GNR;
@@ -57,12 +55,12 @@ export const queryCadastre = (
       });
 
       const polygonSymbol = {
-        type: "simple-fill",
+        type: 'simple-fill',
         color: [51, 51, 204, 0],
-        style: "solid",
+        style: 'solid',
         outline: {
-          color: "blue",
-          width: "2px",
+          color: 'blue',
+          width: '2px',
         },
       };
 
@@ -73,11 +71,11 @@ export const queryCadastre = (
 
       polygonGraphicsLayer.add(polygonGraphic);
 
-      let FF = geometryEngine.planarArea(polygon, "square-meters");
+      let FF = geometryEngine.planarArea(polygon, 'square-meters');
 
-      if (theme === "EWS") {
+      if (theme === 'EWS') {
         calculateGrid(polygon, gridSpacing, setPoints);
-      } else if (theme === "GWWP") {
+      } else if (theme === 'GWWP') {
         calculateWells(polygon, setPoints);
       }
 

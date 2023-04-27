@@ -1,14 +1,9 @@
-import Graphic from "@arcgis/core/Graphic";
-import * as geometryEngine from "@arcgis/core/geometry/geometryEngine";
-import Point from "@arcgis/core/geometry/Point";
-import Polygon from "@arcgis/core/geometry/Polygon";
+import Graphic from '@arcgis/core/Graphic';
+import * as geometryEngine from '@arcgis/core/geometry/geometryEngine';
+import Point from '@arcgis/core/geometry/Point';
+import Polygon from '@arcgis/core/geometry/Polygon';
 
-import {
-  view,
-  pointGraphicsLayer,
-  boundaryGraphicsLayer,
-  cadastre,
-} from "./view";
+import { view, pointGraphicsLayer, boundaryGraphicsLayer } from './view';
 
 // grid points have to be at least 2.5 meters away from parcel boundary
 const distanceToBoundary = 2.5;
@@ -18,7 +13,7 @@ const drawPoint = (point, color = [255, 255, 255, 0.25]) => {
     new Graphic({
       geometry: point,
       symbol: {
-        type: "simple-marker",
+        type: 'simple-marker',
         color,
       },
     })
@@ -30,9 +25,9 @@ const drawPolygon = (polygon) => {
     new Graphic({
       geometry: polygon,
       symbol: {
-        type: "simple-fill",
+        type: 'simple-fill',
         color: [0, 0, 0, 0],
-        outline: { color: "#00890c", width: "2px" },
+        outline: { color: '#00890c', width: '2px' },
       },
     })
   );
@@ -49,17 +44,12 @@ const determinant = (m) =>
     ? m[0][0] * m[1][1] - m[0][1] * m[1][0]
     : m[0].reduce(
         (sum, element, i) =>
-          sum +
-          (-1) ** (i + 2) *
-            element *
-            determinant(m.slice(1).map((c) => c.filter((_, j) => i !== j))),
+          sum + (-1) ** (i + 2) * element * determinant(m.slice(1).map((c) => c.filter((_, j) => i !== j))),
         0
       );
 
 const spread = (u, v) => {
-  return (
-    Math.pow(determinant([u, v]), 2) / (dotProduct(u, u) * dotProduct(v, v))
-  );
+  return Math.pow(determinant([u, v]), 2) / (dotProduct(u, u) * dotProduct(v, v));
 };
 
 const intersect = (x1, y1, x2, y2, x3, y3, x4, y4) => {
@@ -101,9 +91,7 @@ const computeParallelLines = (line, offset, maxOffset) => {
 };
 
 export const distance = (point1, point2) => {
-  return Math.sqrt(
-    Math.pow(point2[0] - point1[0], 2) + Math.pow(point2[1] - point1[1], 2)
-  );
+  return Math.sqrt(Math.pow(point2[0] - point1[0], 2) + Math.pow(point2[1] - point1[1], 2));
 };
 
 const computeGridLines = (point1, point2, points, gridSpacing) => {
@@ -115,10 +103,8 @@ const computeGridLines = (point1, point2, points, gridSpacing) => {
 
   for (let point of points) {
     let projectedPoint = [
-      (point[0] * n[1] * n[1] - n[0] * n[1] * point[1] - n[0] * c) /
-        (n[0] * n[0] + n[1] * n[1]),
-      (n[0] * n[0] * point[1] - n[0] * n[1] * point[0] - n[1] * c) /
-        (n[0] * n[0] + n[1] * n[1]),
+      (point[0] * n[1] * n[1] - n[0] * n[1] * point[1] - n[0] * c) / (n[0] * n[0] + n[1] * n[1]),
+      (n[0] * n[0] * point[1] - n[0] * n[1] * point[0] - n[1] * c) / (n[0] * n[0] + n[1] * n[1]),
     ];
 
     const length = distance(point1, projectedPoint);
@@ -138,16 +124,8 @@ const computeGridLines = (point1, point2, points, gridSpacing) => {
 
   const line = [point1, point2];
 
-  const linesRight = computeParallelLines(
-    [point1, point2],
-    gridSpacing,
-    longestDistanceRight
-  );
-  const linesLeft = computeParallelLines(
-    [point1, point2],
-    -gridSpacing,
-    longestDistanceLeft
-  );
+  const linesRight = computeParallelLines([point1, point2], gridSpacing, longestDistanceRight);
+  const linesLeft = computeParallelLines([point1, point2], -gridSpacing, longestDistanceLeft);
   const lines = linesRight.concat(linesLeft, [line]);
 
   return lines;
@@ -156,11 +134,7 @@ const computeGridLines = (point1, point2, points, gridSpacing) => {
 export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
   pointGraphicsLayer.removeAll();
 
-  let offsetPolygon = geometryEngine.offset(
-    polygon,
-    distanceToBoundary,
-    "meters"
-  );
+  let offsetPolygon = geometryEngine.offset(polygon, distanceToBoundary, 'meters');
 
   if (offsetPolygon) {
     // draw only outer polygon and ignore inner rings
@@ -179,10 +153,7 @@ export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
     for (let i = 0; i < points.length - 1; i++) {
       let currentSpread, u, v;
       if (i === 0) {
-        u = [
-          points[points.length - 1][0] - points[0][0],
-          points[points.length - 1][1] - points[0][1],
-        ];
+        u = [points[points.length - 1][0] - points[0][0], points[points.length - 1][1] - points[0][1]];
         v = [points[1][0] - points[0][0], points[1][1] - points[0][1]];
         currentSpread = spread(u, v);
       } else if (i === points.length - 1) {
@@ -190,10 +161,7 @@ export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
           points[points.length - 2][0] - points[points.length - 1][0],
           points[points.length - 2][1] - points[points.length - 1][1],
         ];
-        v = [
-          points[points.length - 1][0] - points[0][0],
-          points[points.length - 1][1] - points[0][1],
-        ];
+        v = [points[points.length - 1][0] - points[0][0], points[points.length - 1][1] - points[0][1]];
         currentSpread = spread(u, v);
       } else {
         u = [points[i - 1][0] - points[i][0], points[i - 1][1] - points[i][1]];
@@ -207,17 +175,9 @@ export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
       }
     }
 
-    const v = [
-      points[index + 1][0] - points[index][0],
-      points[index + 1][1] - points[index][1],
-    ];
+    const v = [points[index + 1][0] - points[index][0], points[index + 1][1] - points[index][1]];
     const n = [-v[1], v[0]];
-    const lines = computeGridLines(
-      points[index],
-      points[index + 1],
-      points,
-      gridSpacing
-    );
+    const lines = computeGridLines(points[index], points[index + 1], points, gridSpacing);
     const orthogonalLines = computeGridLines(
       points[index],
       [points[index][0] + n[0], points[index][1] + n[1]],
@@ -267,34 +227,38 @@ export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
 
 // select points that are not on buildings
 const filterPointsByPixelAndDraw = (points, setPoints) => {
-  cadastre.fetchImage(view.extent, view.width, view.height).then((image) => {
-    const canvas = document.createElement("canvas");
+  view.takeScreenshot().then((screenshot) => {
+    let imageElement = document.createElement('img');
+    imageElement.src = screenshot.dataUrl;
+
+    const canvas = document.createElement('canvas');
     canvas.width = view.width;
     canvas.height = view.height;
 
-    const context = canvas.getContext("2d");
-    context.drawImage(image, 0, 0);
+    const context = canvas.getContext('2d');
 
-    const selectedGridPoints = [];
-    for (const point of points) {
-      const screenPoint = view.toScreen(point);
+    imageElement.onload = () => {
+      context.drawImage(imageElement, 0, 0);
+      const selectedGridPoints = [];
+      for (const point of points) {
+        const screenPoint = view.toScreen(point);
 
-      const { data } = context.getImageData(
-        Math.round(screenPoint.x),
-        Math.round(screenPoint.y),
-        1,
-        1
-      );
+        const { data } = context.getImageData(Math.round(screenPoint.x), Math.round(screenPoint.y), 1, 1);
 
-      // buildings are identified by their RGB value (218, 62, 56) in the cadastral layer
-      if (!(data[0] === 218 && data[1] === 62 && data[2] === 56)) {
-        selectedGridPoints.push(point);
+        // buildings are identified by their RGB values
+        if (
+          !(data[0] === 237 && data[1] === 202 && data[2] === 202) &&
+          !(data[0] === 230 && data[1] === 172 && data[2] === 172)
+        ) {
+          selectedGridPoints.push(point);
+        }
       }
-    }
-    // draw points
-    selectedGridPoints.map((point) => drawPoint(point));
 
-    // set grid points for the UI
-    setPoints(selectedGridPoints.map((point) => [point.x, point.y]));
+      // draw points
+      selectedGridPoints.map((point) => drawPoint(point));
+
+      // set grid points for the UI
+      setPoints(selectedGridPoints.map((point) => [point.x, point.y]));
+    };
   });
 };

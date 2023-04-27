@@ -38,11 +38,12 @@ export default function Footer() {
           <tbody>
             <tr>
               <td>
-                geothermie@geologie.ac.at<br></br>
-                Geologische Bundesanstalt<br></br>
-                Fachbereich Hydrogeologie und Geothermie<br></br>
-                Neulinggasse 38<br></br>
-                1030 Wien
+                GeoSphere Austria<br></br>
+                Department für Rohstoffgeologie und Geoenergie<br></br>
+                Hohe Warte 38<br></br>
+                1190 Wien <br></br>
+                <br></br>
+                Email: geothermie@geosphere.at
               </td>
             </tr>
           </tbody>

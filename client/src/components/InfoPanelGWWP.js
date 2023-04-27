@@ -6,13 +6,13 @@ import { useMediaQuery } from 'react-responsive';
 import { updateScreenshot } from '../redux/screenshotSlice';
 import { updateEWSResources } from '../redux/ewsResourcesSlice';
 import { updateGWWPResources } from '../redux/gwwpResourcesSlice';
-import { updateAmpelkarte } from '../redux/ampelkarteSlice';
+import { updateAmpelkarteGWWP } from '../redux/ampelkarteGWWPSlice';
 import { updateCadastralData } from '../redux/cadastreSlice';
 import { updateEWSComputationResult } from '../redux/ewsComputationsSlice';
 import { updateGWWPComputationResult } from '../redux/gwwpComputationsSlice';
 import { initializeInfoPanelHandlers } from '../utils/view';
 import { print } from '../utils/print';
-import { AmpelkarteTable } from './AmpelkarteTable';
+import { AmpelkarteTableGWWP } from './AmpelkarteTableGWWP';
 import CollapsibleSection from './CollapsibleSection';
 import Footer from './Footer';
 import {
@@ -69,7 +69,7 @@ export default function InfoPanelGWWP() {
 
   const cadastralData = useSelector((store) => store.cadastre.value);
   const resources = useSelector((store) => store.gwwpResources.value);
-  const ampelkarte = useSelector((store) => store.ampelkarte.value);
+  const ampelkarte = useSelector((store) => store.ampelkarteGWWP.value);
   const computationResult = useSelector((store) => store.gwwpComputations.value);
   const screenshot = useSelector((store) => store.screenshot.value);
 
@@ -87,7 +87,7 @@ export default function InfoPanelGWWP() {
       dispatch(updateEWSResources([]));
       dispatch(updateGWWPResources([]));
       dispatch(updateCadastralData({}));
-      dispatch(updateAmpelkarte([]));
+      dispatch(updateAmpelkarteGWWP([]));
       dispatch(updateGWWPComputationResult({}));
       dispatch(updateEWSComputationResult({}));
       dispatch(updateScreenshot(''));
@@ -224,7 +224,11 @@ export default function InfoPanelGWWP() {
                     return (
                       <TableRow key={result.layerId}>
                         <TableData>
-                          {formatGWWP(result.layerId, result.layerName, result.feature.attributes['Pixel Value'])}
+                          {formatGWWP(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes['Stretch.Pixel Value']
+                          )}
                         </TableData>
                       </TableRow>
                     );
@@ -232,11 +236,15 @@ export default function InfoPanelGWWP() {
                   <TableRow>
                     <TableHeader textAlign="center">Standortabhängige Parameter</TableHeader>
                   </TableRow>
-                  {resources.slice(2).map((result) => {
+                  {resources.slice(2, 10).map((result) => {
                     return (
                       <TableRow key={result.layerId}>
                         <TableData>
-                          {formatGWWP(result.layerId, result.layerName, result.feature.attributes['Pixel Value'])}
+                          {formatGWWP(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes['Stretch.Pixel Value']
+                          )}
                         </TableData>
                       </TableRow>
                     );
@@ -247,7 +255,7 @@ export default function InfoPanelGWWP() {
             </CollapsibleSection>
           )}
           {ampelkarte && ampelkarte.length > 0 && (
-            <AmpelkarteTable results={ampelkarte} setTables={setTables} layerId={1}></AmpelkarteTable>
+            <AmpelkarteTableGWWP results={ampelkarte} setTables={setTables}></AmpelkarteTableGWWP>
           )}
           {computationResult && computationResult.error && (
             <CollapsibleSection title="Berechnungsergebnisse" open={true}>

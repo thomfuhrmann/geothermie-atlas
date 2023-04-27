@@ -3,7 +3,6 @@ import Extent from '@arcgis/core/geometry/Extent';
 import MapView from '@arcgis/core/views/MapView';
 import Basemap from '@arcgis/core/Basemap';
 import MapImageLayer from '@arcgis/core/layers/MapImageLayer';
-import WMSLayer from '@arcgis/core/layers/WMSLayer';
 import WMTSLayer from '@arcgis/core/layers/WMTSLayer';
 import SpatialReference from '@arcgis/core/geometry/SpatialReference';
 import Search from '@arcgis/core/widgets/Search';
@@ -11,7 +10,6 @@ import ScaleBar from '@arcgis/core/widgets/ScaleBar';
 import Sketch from '@arcgis/core/widgets/Sketch';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import Graphic from '@arcgis/core/Graphic';
-import Legend from '@arcgis/core/widgets/Legend';
 import LayerList from '@arcgis/core/widgets/LayerList';
 import * as geometryEngine from '@arcgis/core/geometry/geometryEngine';
 import * as reactiveUtils from '@arcgis/core/core/reactiveUtils';
@@ -34,20 +32,16 @@ import Polygon from '@arcgis/core/geometry/Polygon';
 export const SRS = 31256;
 
 // layer URLs
-export const ampelkarte_url =
-  'https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Ampelkarte_Wien/MapServer';
-export const ews_url =
-  'https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_Erdwaermesonden_EWS_Wien_TEST/MapServer';
-export const gwwp_url =
-  'https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_thermischeGrundwassernutzung_GWP_Wien_TEST/MapServer';
-export const betriebsstunden_url =
-  'https://srv-ags02i.gba.geolba.ac.at:6443/arcgis/rest/services/Test/OG_BetriebsStd_Wien_TEST/MapServer';
+export const ampelkarte_ews_url = 'https://gis.geosphere.at/maps/rest/services/geothermie/ampelkarte_ews/MapServer';
+export const ampelkarte_gwwp_url = 'https://gis.geosphere.at/maps/rest/services/geothermie/ampelkarte_gwwp/MapServer';
+export const ews_url = 'https://gis.geosphere.at/maps/rest/services/geothermie/potentialkarte_ews/MapServer';
+export const gwwp_url = 'https://gis.geosphere.at/maps/rest/services/geothermie/potentialkarte_gwwp/MapServer';
+export const cadastre_url = 'https://data.bev.gv.at/geoserver/BEVdataKAT/wms';
+const basemap_at_url = 'https://mapsneu.wien.gv.at/basemap31256neu/1.0.0/WMTSCapabilities.xml';
 
-// exports
 export let view;
 export let pointGraphicsLayer;
 export let boundaryGraphicsLayer;
-export let cadastre;
 
 // initialize the map view container
 let setPoints,
@@ -119,81 +113,40 @@ export function initialize(container, theme, isMobile) {
     listMode: 'hide',
   });
 
-  // instantiate layers
-  const ampelkarte = new MapImageLayer({
-    url: ampelkarte_url,
+  // create layers
+  const ampelkarte_ews = new MapImageLayer({
+    url: ampelkarte_ews_url,
     title: 'Ampelkarte',
     visible: false,
-    listMode: 'hide',
+    listMode: 'show',
+  });
+
+  const ampelkarte_gwwp = new MapImageLayer({
+    url: ampelkarte_gwwp_url,
+    title: 'Ampelkarte',
+    visible: false,
+    listMode: 'show',
   });
 
   const ews = new MapImageLayer({
     title: 'Potentialkarten für Erdwärmesonden',
     url: ews_url,
-    visible: true,
-    listMode: theme === 'EWS' ? 'show' : 'hide',
+    visible: false,
+    listMode: 'hide',
   });
 
   const gwwp = new MapImageLayer({
     title: 'Potentialkarten für Grundwasserwärmepumpen',
     url: gwwp_url,
-    visible: true,
-    listMode: theme === 'GWWP' ? 'show' : 'hide',
-  });
-
-  const betriebsstunden = new MapImageLayer({
-    title: 'Betriebsstunden',
-    url: betriebsstunden_url,
     visible: false,
     listMode: 'hide',
   });
 
-  // cadastre used as basemap to filter points by category
-  cadastre = new WMSLayer({
-    title: 'Kataster',
-    url: 'https://data.bev.gv.at/geoserver/BEVdataKAT/wms',
-    spatialReference: SRS,
-  });
-
-  // cadastre overlay to query parcel boundaries
-  const cadastreOverlay = new WMSLayer({
-    title: 'Kataster',
-    url: 'https://data.bev.gv.at/geoserver/BEVdataKAT/wms',
-    listMode: 'hide',
-    spatialReference: SRS,
-  });
-
-  cadastreOverlay.when(() => {
-    cadastreOverlay.findSublayerByName('DKM_NFL').legendEnabled = false;
-    cadastreOverlay.findSublayerByName('DKM_NFL').visible = false;
-    cadastreOverlay.findSublayerByName('DKM_GST').legendEnabled = false;
-    cadastreOverlay.findSublayerByName('KAT_DKM_GST-NFL').legendEnabled = false;
-    cadastreOverlay.findSublayerByName('KAT_DKM_GST-NFL').visible = false;
-  });
-
-  gwwp.when(() => {
-    const bundeslandGrenzen = gwwp.findSublayerById(10);
-    if (bundeslandGrenzen) {
-      bundeslandGrenzen.visible = false;
-      bundeslandGrenzen.legendEnabled = false;
-    }
-    gwwp.findSublayerById(0).visible = false;
-  });
-
-  ews.when(() => {
-    const bundeslandGrenzen = ews.findSublayerById(7);
-    if (bundeslandGrenzen) {
-      bundeslandGrenzen.visible = false;
-      bundeslandGrenzen.legendEnabled = false;
-    }
-    ews.findSublayerById(0).visible = false;
-  });
-
-  // basemap in Viennese coordinate system due to tranformation inaccuracies from MGI to in WGS84
+  // basemap in Viennese coordinate system due to tranformation inaccuracies from MGI to WGS84
   // default transformation in ArcGIS API from MGI to WGS84 is 1306
   // transformation 1618 is recommended
   const basemap_at = new WMTSLayer({
-    url: 'https://maps.wien.gv.at/basemap/1.0.0/WMTSCapabilities_31256.xml',
+    url: basemap_at_url,
     activeLayer: {
       id: 'geolandbasemap',
     },
@@ -201,24 +154,21 @@ export function initialize(container, theme, isMobile) {
     serviceMode: 'KVP',
   });
 
-  let basemap, arcgisMap;
+  let basemap = new Basemap({
+    baseLayers: [basemap_at],
+    title: 'basemap',
+    id: 'basemap',
+    spatialReference: SRS,
+  });
+
+  let arcgisMap;
   switch (theme) {
     case 'EWS':
-      basemap = new Basemap({
-        baseLayers: [cadastre],
-        title: 'basemap',
-        id: 'basemap',
-        spatialReference: SRS,
-      });
-
       arcgisMap = new ArcGISMap({
         basemap: basemap,
         layers: [
-          basemap_at,
           ews,
-          ampelkarte,
-          betriebsstunden,
-          cadastreOverlay,
+          ampelkarte_ews,
           pointGraphicsLayer,
           boundaryGraphicsLayer,
           polygonGraphicsLayer,
@@ -228,20 +178,11 @@ export function initialize(container, theme, isMobile) {
       });
       break;
     case 'GWWP':
-      basemap = new Basemap({
-        baseLayers: [basemap_at],
-        title: 'basemap',
-        id: 'basemap',
-        spatialReference: SRS,
-      });
-
       arcgisMap = new ArcGISMap({
         basemap: basemap,
         layers: [
           gwwp,
-          ews,
-          ampelkarte,
-          cadastreOverlay,
+          ampelkarte_gwwp,
           pointGraphicsLayer,
           polygonGraphicsLayer,
           highlightGraphicsLayer,
@@ -253,13 +194,11 @@ export function initialize(container, theme, isMobile) {
       break;
   }
 
-  const legend = new Legend({ view });
-
   const layerList = new LayerList({ view });
 
   const search = new Search({
     view,
-    popupEnabled: false,
+    popupEnabled: true,
   });
 
   const scaleBar = new ScaleBar({
@@ -410,7 +349,7 @@ export function initialize(container, theme, isMobile) {
     }
   });
 
-  // register event handlers for mouse clicks
+  // register event handler for mouse clicks
   view.on('click', ({ mapPoint }) => {
     // at application start if no polygon is drawn yet
     if (polygonGraphicsLayer.graphics.length === 0) {
@@ -490,7 +429,7 @@ export function initialize(container, theme, isMobile) {
     }
 
     // start new layer queries
-    identifyAllLayers(view, mapPoint, dispatch);
+    identifyAllLayers(view, mapPoint, dispatch, theme);
     getAddress(mapPoint, setAddress);
 
     if (view.scale > scaleLimit) {
@@ -498,7 +437,7 @@ export function initialize(container, theme, isMobile) {
       setTimeout(() => takeScreenshot(view, mapPoint, dispatch, true), 0);
     } else {
       // take screenshot without marker
-      setTimeout(() => takeScreenshot(view, mapPoint, dispatch), 0);
+      setTimeout(() => takeScreenshot(view, mapPoint, dispatch), 500);
 
       // query cadastral data
       queryCadastre(view, polygonGraphicsLayer, mapPoint, dispatch, setPolygon, setPoints, theme, gridSpacing);
@@ -511,7 +450,7 @@ export function initialize(container, theme, isMobile) {
   // add UI components
   view.ui.components = [];
   if (!isMobile) {
-    view.ui.add([zoom, search, layerList, legend], 'top-left');
+    view.ui.add([zoom, search, layerList], 'top-left');
     view.ui.add(scaleBar, 'bottom-left');
   }
 

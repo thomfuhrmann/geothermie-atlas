@@ -142,7 +142,7 @@ const Home = () => {
             {!isMobile && (
               <Overlay left width={imgWidth}>
                 <Card textAlign="left" isMobile={isMobile}>
-                  Erfahren Sie mehr über Grundwasserwärmepumpen
+                  Erfahren Sie mehr über thermische Grundwassernutzung
                 </Card>
               </Overlay>
             )}

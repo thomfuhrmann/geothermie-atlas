@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import styled from "styled-components";
-import { useMediaQuery } from "react-responsive";
+import React, { useState, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { useMediaQuery } from 'react-responsive';
 
-import { updateEWSComputationResult } from "../redux/ewsComputationsSlice";
-import { view, initializeCalculationsMenuHandlers } from "../utils/view";
-import { calculateGrid } from "../utils/gridcomputer";
-import { takeScreenshot } from "../utils/screenshot";
-import { Button, ButtonContainer, Warning } from "./CommonStyledElements";
-import CollapsibleSection from "./CollapsibleSection";
+import { updateEWSComputationResult } from '../redux/ewsComputationsSlice';
+import { view, initializeCalculationsMenuHandlers } from '../utils/view';
+import { calculateGrid } from '../utils/gridcomputer';
+import { takeScreenshot } from '../utils/screenshot';
+import { Button, ButtonContainer, Warning } from './CommonStyledElements';
+import CollapsibleSection from './CollapsibleSection';
 
 const InputSection = styled.div`
   padding-bottom: 10px;
@@ -30,16 +30,15 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   const [polygon, setPolygon] = useState(null);
   const [gridSpacing, setGridSpacing] = useState(10);
   const [boreDepth, setBoreDepth] = useState(100);
-  const [BS_HZ, setBS_HZ] = useState("");
-  const [BS_KL, setBS_KL] = useState("");
-  const [P_KL, setP_KL] = useState("");
-  const [P_HZ, setP_HZ] = useState("");
+  const [BS_HZ, setBS_HZ] = useState('');
+  const [BS_KL, setBS_KL] = useState('');
+  const [P_KL, setP_KL] = useState('');
+  const [P_HZ, setP_HZ] = useState('');
   const [points, setPoints] = useState([]);
   const [heating, setHeating] = useState(35);
 
   const cadastralData = useSelector((store) => store.cadastre.value);
   const resources = useSelector((store) => store.ewsResources.value);
-  const betriebsstunden = useSelector((store) => store.betriebsstunden.value);
 
   const sketchContainerRef = useRef(null);
 
@@ -55,23 +54,18 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
 
       let pointsText = JSON.stringify(points);
 
-      const BT = resources.find((result) => result.layerId === 4)?.feature
-        ?.attributes["Pixel Value"];
-      const GT = resources.find((result) => result.layerId === 5)?.feature
-        ?.attributes["Pixel Value"];
-      const WLF = resources.find((result) => result.layerId === 6)?.feature
-        ?.attributes["Pixel Value"];
+      const BT = resources.find((result) => result.layerId === 0)?.feature?.attributes['Stretch.Pixel Value'];
+      const GT = resources.find((result) => result.layerId === 1)?.feature?.attributes['Stretch.Pixel Value'];
+      const WLF = resources.find((result) => result.layerId === 2)?.feature?.attributes['Stretch.Pixel Value'];
 
-      const BS_KL_Norm = parseInt(
-        betriebsstunden.find((result) => result.layerId === 0)?.feature
-          ?.attributes["Pixel Value"]
-      );
       const BS_HZ_Norm = parseInt(
-        betriebsstunden.find((result) => result.layerId === 1)?.feature
-          ?.attributes["Pixel Value"]
+        resources.find((result) => result.layerId === 7)?.feature?.attributes['Stretch.Pixel Value']
+      );
+      const BS_KL_Norm = parseInt(
+        resources.find((result) => result.layerId === 8)?.feature?.attributes['Stretch.Pixel Value']
       );
 
-      let url = "/api";
+      let url = '/api';
 
       const data = {
         BT,
@@ -79,29 +73,27 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         WLF,
         BS_HZ_Norm,
         BS_KL_Norm,
-        BS_HZ: BS_HZ === "" ? 0 : BS_HZ,
-        BS_KL: BS_KL === "" ? 0 : BS_KL,
-        P_HZ: P_HZ === "" ? 0 : P_HZ,
-        P_KL: P_KL === "" ? 0 : P_KL,
+        BS_HZ: BS_HZ === '' ? 0 : BS_HZ,
+        BS_KL: BS_KL === '' ? 0 : BS_KL,
+        P_HZ: P_HZ === '' ? 0 : P_HZ,
+        P_KL: P_KL === '' ? 0 : P_KL,
         boreDepth,
         points: pointsText,
         heating,
       };
 
       if (
-        Object.values(data).every(
-          (x) => typeof x !== "undefined" && x !== null
-        ) &&
-        BT !== "NoData" &&
-        GT !== "NoData" &&
-        WLF !== "NoData" &&
-        BS_HZ_Norm !== "NoData" &&
-        BS_KL_Norm !== "NoData"
+        Object.values(data).every((x) => typeof x !== 'undefined' && x !== null) &&
+        BT !== 'NoData' &&
+        GT !== 'NoData' &&
+        WLF !== 'NoData' &&
+        BS_HZ_Norm !== 'NoData' &&
+        BS_KL_Norm !== 'NoData'
       ) {
         fetch(url, {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify(data),
         })
@@ -125,8 +117,8 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
             const SEER = parseFloat(data[18]);
             const Efactor_user = parseFloat(data[19]);
 
-            const imagehash = "data:image/png;base64," + data[20];
-            const imagehashSondenfeld = "data:image/png;base64," + data[21];
+            const imagehash = 'data:image/png;base64,' + data[20];
+            const imagehashSondenfeld = 'data:image/png;base64,' + data[21];
 
             const GTcalc = parseFloat(data[22]);
 
@@ -157,7 +149,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
 
             const Efactor_bal = parseFloat(data[42]);
 
-            const imagehashBal = "data:image/png;base64," + data[43];
+            const imagehashBal = 'data:image/png;base64,' + data[43];
 
             const BS_HZ_bal = parseFloat(data[44]);
             const BS_KL_bal = parseFloat(data[45]);
@@ -241,8 +233,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
       } else {
         dispatch(
           updateEWSComputationResult({
-            error:
-              "Aufgrund ungültiger Daten ist für dieses Grundstück keine Berechnung möglich.",
+            error: 'Aufgrund ungültiger Daten ist für dieses Grundstück keine Berechnung möglich.',
           })
         );
         isLoading(false);
@@ -296,51 +287,51 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
 
   const handleBS_HZ = (event) => {
     if (event.target.value > 4379 || event.target.value < 0) {
-      event.target.value = "";
+      event.target.value = '';
     }
 
     if (!isNaN(parseInt(event.target.value))) {
       setBS_HZ(event.target.value);
     } else {
-      setBS_HZ("");
+      setBS_HZ('');
     }
   };
 
   const handleBS_KL = (event) => {
     if (event.target && event.target !== null) {
       if (event.target.value > 4379 || event.target.value < 0) {
-        event.target.value = "";
+        event.target.value = '';
       }
 
       if (!isNaN(parseInt(event.target.value))) {
         setBS_KL(parseInt(event.target.value));
       } else {
-        setBS_KL("");
+        setBS_KL('');
       }
     }
   };
 
   const handleP_HZ = (event) => {
     if (event.target.value < 0) {
-      event.target.value = "";
+      event.target.value = '';
     }
 
     if (!isNaN(parseInt(event.target.value))) {
       setP_HZ(parseInt(event.target.value));
     } else {
-      setP_HZ("");
+      setP_HZ('');
     }
   };
 
   const handleP_KL = (event) => {
     if (event.target.value < 0) {
-      event.target.value = "";
+      event.target.value = '';
     }
 
     if (!isNaN(parseInt(event.target.value))) {
       setP_KL(parseInt(event.target.value));
     } else {
-      setP_KL("");
+      setP_KL('');
     }
   };
 
@@ -424,9 +415,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
             ></Input>
           </InputSection>
           <InputSection>
-            <label htmlFor="bshz-input">
-              Jahresbetriebsstunden Heizen (optional)
-            </label>
+            <label htmlFor="bshz-input">Jahresbetriebsstunden Heizen (optional)</label>
             <Input
               id="bshz-input"
               type="number"
@@ -438,9 +427,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
             ></Input>
           </InputSection>
           <InputSection>
-            <label htmlFor="bskl-input">
-              Jahresbetriebsstunden Kühlen (optional)
-            </label>
+            <label htmlFor="bskl-input">Jahresbetriebsstunden Kühlen (optional)</label>
             <Input
               id="bskl-input"
               type="number"
@@ -452,26 +439,16 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
             ></Input>
           </InputSection>
           {(P_HZ > 0 || P_KL > 0 || BS_HZ > 0 || BS_KL > 0) &&
-            (P_HZ === "" || P_KL === "" || BS_HZ === "" || BS_KL === "") && (
-              <Warning>
-                Solange nicht alle Parameter ausgefüllt sind, wird mit
-                Normwerten gerechnet.
-              </Warning>
+            (P_HZ === '' || P_KL === '' || BS_HZ === '' || BS_KL === '') && (
+              <Warning>Solange nicht alle Parameter ausgefüllt sind, wird mit Normwerten gerechnet.</Warning>
             )}
           {points.length > 300 && (
-            <Warning>
-              Es sind maximal 300 Punkte möglich. Bitte löschen Sie zuerst
-              Punkte.
-            </Warning>
+            <Warning>Es sind maximal 300 Punkte möglich. Bitte löschen Sie zuerst Punkte.</Warning>
           )}
-          {points.length === 0 && (
-            <Warning>Bitte zeichnen Sie mindestens einen Punkt!</Warning>
-          )}
+          {points.length === 0 && <Warning>Bitte zeichnen Sie mindestens einen Punkt!</Warning>}
           {points.length > 0 && points.length <= 300 && (
             <ButtonContainer>
-              <Button onClick={handlePythonCalculation}>
-                Berechnung starten
-              </Button>
+              <Button onClick={handlePythonCalculation}>Berechnung starten</Button>
             </ButtonContainer>
           )}
         </>

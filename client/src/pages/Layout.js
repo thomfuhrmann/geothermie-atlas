@@ -88,11 +88,11 @@ const CloseToggle = styled.button`
 `;
 
 const LogoImage = styled.img`
-  width: 160px;
-  height: 50px;
+  width: 128px;
+  height: 40px;
   object-fit: contain;
   padding-left: 20px;
-  padding-top: 10px;
+  padding-top: 15px;
 `;
 
 const MenuItem = styled.span`
