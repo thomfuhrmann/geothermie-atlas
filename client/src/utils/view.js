@@ -119,6 +119,10 @@ export function initialize(container, theme, isMobile) {
     title: 'Ampelkarte',
     visible: false,
     listMode: 'show',
+    sublayers: [
+      { id: 0, visible: true, listMode: 'show', title: 'Einschränkungen' },
+      { id: 1, visible: false, listMode: 'hide' },
+    ],
   });
 
   const ampelkarte_gwwp = new MapImageLayer({
@@ -126,20 +130,24 @@ export function initialize(container, theme, isMobile) {
     title: 'Ampelkarte',
     visible: false,
     listMode: 'show',
+    sublayers: [
+      { id: 0, visible: true, listMode: 'show', title: 'Einschränkungen' },
+      { id: 1, visible: false, listMode: 'hide' },
+    ],
   });
 
   const ews = new MapImageLayer({
-    title: 'Potentialkarten für Erdwärmesonden',
+    title: 'Ressourcen',
     url: ews_url,
     visible: false,
-    listMode: 'hide',
+    listMode: 'show',
   });
 
   const gwwp = new MapImageLayer({
-    title: 'Potentialkarten für Grundwasserwärmepumpen',
+    title: 'Ressourcen',
     url: gwwp_url,
     visible: false,
-    listMode: 'hide',
+    listMode: 'show',
   });
 
   // basemap in Viennese coordinate system due to tranformation inaccuracies from MGI to WGS84

@@ -19,6 +19,7 @@ export const queryCadastre = (
   gridSpacing = 10
 ) => {
   const { x, y } = view.toScreen(mapPoint);
+
   let url =
     cadastre_url +
     '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetFeatureInfo&LAYERS=DKM_GST&QUERY_LAYERS=DKM_GST&CRS=EPSG:31256&INFO_FORMAT=application/json';
