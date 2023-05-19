@@ -60,3 +60,7 @@ calcite-icon {
 .esri-search {
   width: 300px;
 }
+
+.esri-legend__layer-child-table > .esri-legend__layer-caption {
+  display: none;
+}
