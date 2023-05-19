@@ -54,17 +54,21 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
 
       let pointsText = JSON.stringify(points);
 
-      const BT = parseInt(resources.find((result) => result.layerId === 0)?.feature?.attributes['Stretch.Pixel Value']);
-      const GT = parseInt(resources.find((result) => result.layerId === 1)?.feature?.attributes['Stretch.Pixel Value']);
+      const BT = parseInt(
+        resources.find((result) => result.layerId === 0)?.feature?.attributes['Classify.Pixel Value']
+      );
+      const GT = parseInt(
+        resources.find((result) => result.layerId === 1)?.feature?.attributes['Classify.Pixel Value']
+      );
       const WLF = parseInt(
-        resources.find((result) => result.layerId === 2)?.feature?.attributes['Stretch.Pixel Value']
+        resources.find((result) => result.layerId === 2)?.feature?.attributes['Classify.Pixel Value']
       );
 
       const BS_HZ_Norm = parseInt(
-        resources.find((result) => result.layerId === 7)?.feature?.attributes['Stretch.Pixel Value']
+        resources.find((result) => result.layerId === 7)?.feature?.attributes['Classify.Pixel Value']
       );
       const BS_KL_Norm = parseInt(
-        resources.find((result) => result.layerId === 8)?.feature?.attributes['Stretch.Pixel Value']
+        resources.find((result) => result.layerId === 8)?.feature?.attributes['Classify.Pixel Value']
       );
 
       let url = '/api';

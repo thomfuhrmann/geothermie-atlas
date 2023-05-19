@@ -15,6 +15,7 @@ import * as geometryEngine from '@arcgis/core/geometry/geometryEngine';
 import * as reactiveUtils from '@arcgis/core/core/reactiveUtils';
 import Point from '@arcgis/core/geometry/Point';
 import Zoom from '@arcgis/core/widgets/Zoom';
+import Legend from '@arcgis/core/widgets/Legend';
 
 import { updateEWSComputationResult } from '../redux/ewsComputationsSlice';
 import { updateGWWPComputationResult } from '../redux/gwwpComputationsSlice';
@@ -217,6 +218,10 @@ export function initialize(container, theme, isMobile) {
   const zoom = new Zoom({
     view,
     layout: 'horizontal',
+  });
+
+  const legend = new Legend({
+    view,
   });
 
   const sketch = new Sketch({
@@ -458,7 +463,7 @@ export function initialize(container, theme, isMobile) {
   // add UI components
   view.ui.components = [];
   if (!isMobile) {
-    view.ui.add([zoom, search, layerList], 'top-left');
+    view.ui.add([zoom, search, layerList, legend], 'top-left');
     view.ui.add(scaleBar, 'bottom-left');
   }
 

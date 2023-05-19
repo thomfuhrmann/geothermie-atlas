@@ -27,7 +27,7 @@ const drawPolygon = (polygon) => {
       symbol: {
         type: 'simple-fill',
         color: [0, 0, 0, 0],
-        outline: { color: '#00890c', width: '2px' },
+        outline: { color: '#009696', width: '2px' },
       },
     })
   );
@@ -132,6 +132,7 @@ const computeGridLines = (point1, point2, points, gridSpacing) => {
 };
 
 export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
+  boundaryGraphicsLayer.removeAll();
   pointGraphicsLayer.removeAll();
 
   let offsetPolygon = geometryEngine.offset(polygon, distanceToBoundary, 'meters');
@@ -221,12 +222,12 @@ export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
     });
 
     // filter points that are not on buildings
-    filterPointsByPixelAndDraw(filteredGridPoints, setPoints);
+    filterPointsByPixelAndDraw(filteredGridPoints, setPoints, offsetPolygon);
   }
 };
 
 // select points that are not on buildings
-const filterPointsByPixelAndDraw = (points, setPoints) => {
+const filterPointsByPixelAndDraw = (points, setPoints, offsetPolygon) => {
   view.takeScreenshot().then((screenshot) => {
     let imageElement = document.createElement('img');
     imageElement.src = screenshot.dataUrl;
@@ -245,11 +246,8 @@ const filterPointsByPixelAndDraw = (points, setPoints) => {
 
         const { data } = context.getImageData(Math.round(screenPoint.x), Math.round(screenPoint.y), 1, 1);
 
-        // buildings are identified by their RGB values
-        if (
-          !(data[0] === 237 && data[1] === 202 && data[2] === 202) &&
-          !(data[0] === 230 && data[1] === 172 && data[2] === 172)
-        ) {
+        // buildings are identified by their RGB values; G === B
+        if (!(data[1] === data[2])) {
           selectedGridPoints.push(point);
         }
       }

@@ -227,7 +227,7 @@ export default function InfoPanelGWWP() {
                           {formatGWWP(
                             result.layerId,
                             result.layerName,
-                            result.feature.attributes['Stretch.Pixel Value']
+                            result.feature.attributes['Classify.Pixel Value']
                           )}
                         </TableData>
                       </TableRow>
@@ -243,7 +243,7 @@ export default function InfoPanelGWWP() {
                           {formatGWWP(
                             result.layerId,
                             result.layerName,
-                            result.feature.attributes['Stretch.Pixel Value']
+                            result.feature.attributes['Classify.Pixel Value']
                           )}
                         </TableData>
                       </TableRow>

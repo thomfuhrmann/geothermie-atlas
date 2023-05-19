@@ -57,16 +57,16 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
     // const brunnenabstand = distance([point1.x, point1.y], [point2.x, point2.y]);
     const brunnenabstand = distance(point1, point2);
 
-    const flurabstand = resources[2].feature.attributes['Stretch.Pixel Value'];
-    const gw_macht = resources[3].feature.attributes['Stretch.Pixel Value'];
-    const kf = resources[4].feature.attributes['Stretch.Pixel Value'];
-    const gwt_max = resources[5].feature.attributes['Stretch.Pixel Value'];
-    const gwt_min = resources[7].feature.attributes['Stretch.Pixel Value'];
+    const flurabstand = resources[2].feature.attributes['Classify.Pixel Value'];
+    const gw_macht = resources[3].feature.attributes['Classify.Pixel Value'];
+    const kf = resources[4].feature.attributes['Classify.Pixel Value'];
+    const gwt_max = resources[5].feature.attributes['Classify.Pixel Value'];
+    const gwt_min = resources[7].feature.attributes['Classify.Pixel Value'];
 
     const gst_flaeche = cadastralData.FF;
 
     const LST =
-      bodentemperatur && bodentemperatur.length > 0 && bodentemperatur[0].feature?.attributes?.['Stretch.Pixel Value'];
+      bodentemperatur && bodentemperatur.length > 0 && bodentemperatur[0].feature?.attributes?.['Classify.Pixel Value'];
 
     if (
       flurabstand === 'NoData' ||

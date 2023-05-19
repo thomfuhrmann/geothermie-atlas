@@ -57,7 +57,7 @@ export const queryCadastre = (
 
       const polygonSymbol = {
         type: 'simple-fill',
-        color: [51, 51, 204, 0],
+        color: [51, 51, 150, 0],
         style: 'solid',
         outline: {
           color: 'blue',

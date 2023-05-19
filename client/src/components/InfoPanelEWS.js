@@ -234,7 +234,7 @@ export default function InfoPanelEWS() {
                           {formatEWS(
                             result.layerId,
                             result.layerName,
-                            result.feature.attributes['Stretch.Pixel Value']
+                            result.feature.attributes['Classify.Pixel Value']
                           )}
                         </TableData>
                       </TableRow>
@@ -250,7 +250,7 @@ export default function InfoPanelEWS() {
                           {formatEWS(
                             result.layerId,
                             result.layerName,
-                            result.feature.attributes['Stretch.Pixel Value']
+                            result.feature.attributes['Classify.Pixel Value']
                           )}
                         </TableData>
                       </TableRow>
@@ -364,7 +364,7 @@ export default function InfoPanelEWS() {
                       <TableRow>
                         <TableData>
                           Wärmeleitfähigkeit:{' '}
-                          {parseFloat(resources[2].feature.attributes['Stretch.Pixel Value']).toFixed(1)} W/m/K
+                          {parseFloat(resources[2].feature.attributes['Classify.Pixel Value']).toFixed(1)} W/m/K
                         </TableData>
                       </TableRow>
                       <TableRow>
