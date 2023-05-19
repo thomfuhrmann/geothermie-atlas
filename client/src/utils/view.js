@@ -91,6 +91,7 @@ export function initialize(container, theme, isMobile) {
     },
   });
 
+  // graphic layers
   let viennaGraphicsLayer = new GraphicsLayer({ title: 'Wien', listMode: 'hide' });
   viennaGraphicsLayer.add(viennaGraphic);
 
