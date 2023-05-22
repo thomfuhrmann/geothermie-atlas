@@ -264,11 +264,6 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
   // reset state
   useEffect(() => {
     setGridSpacing(10);
-    // setBoreDepth(100);
-    // setBS_HZ(0);
-    // setBS_KL(0);
-    // setP_HZ(0);
-    // setP_KL(0);
   }, [polygon]);
 
   const handleGridSpacing = (event) => {
