@@ -6,6 +6,7 @@ import { FaBars, FaTimes } from 'react-icons/fa';
 
 import Header from '../components/Header';
 import logo from '../assets/icons/logo.png';
+import logoStadtWien from '../assets/icons/logo_stadt_wien.png';
 
 const Nav = styled.nav`
   position: absolute;
@@ -23,12 +24,12 @@ const NavMenu = styled.div`
 
 const Title = styled.span`
   position: absolute;
-  left: 200px;
+  left: 300px;
   top: 50%;
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
   font-size: ${(props) => (props.isMobile ? 'medium' : 'x-large')};
-  color: #052e37;
+  color: #4c4c4c;
 `;
 
 const PageContent = styled.div`
@@ -96,7 +97,7 @@ const LogoImage = styled.img`
 `;
 
 const MenuItem = styled.span`
-  color: #052e37;
+  color: #4c4c4c;
   font-size: medium;
 `;
 
@@ -133,6 +134,7 @@ const Layout = () => {
     <PageContent>
       <Header>
         <LogoImage src={logo} alt="Logo"></LogoImage>
+        <LogoImage src={logoStadtWien} alt="Logo der Stadt Wien"></LogoImage>
         <Title isMobile={isMobile}>Geothermie Atlas 1.0</Title>
         {!isMobile && (
           <Nav>

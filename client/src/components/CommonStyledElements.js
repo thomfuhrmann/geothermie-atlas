@@ -12,9 +12,9 @@ export const Main = styled.div`
 
 export const Content = styled.div`
   position: absolute;
-  top: 5%;
-  left: 10%;
-  width: 80%;
+  top: 15px;
+  left: 15%;
+  width: 70%;
   height: 93%;
 `;
 
@@ -60,13 +60,18 @@ export const Clearance = styled.p`
 
 export const Heading = styled.h1`
   margin: 0px;
-  color: #808080;
+  color: #7f7f7f;
+`;
+
+export const MediumHeading = styled.h3`
+  color: #7f7f7f;
 `;
 
 export const Paragraph = styled.p`
   width: 100%;
   white-space: normal;
   word-break: normal;
+  color: #4c4c4c;
 `;
 
 export const InfoPanelContainer = styled.div`

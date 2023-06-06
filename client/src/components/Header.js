@@ -8,6 +8,7 @@ const StyledHeader = styled.div`
   height: 70px;
   width: 100%;
   align-items: center;
+  border-bottom: 1px solid #eeeeee;
 `;
 
 export default function Header({ children }) {

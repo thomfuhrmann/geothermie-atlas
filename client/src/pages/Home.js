@@ -3,6 +3,8 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import { useMediaQuery } from 'react-responsive';
 
+import { Heading, Paragraph } from '../components/CommonStyledElements';
+
 import graphicEWS from '../assets/images/EWS.jpg';
 import graphicGWWP from '../assets/images/GWWP.jpg';
 
@@ -16,10 +18,12 @@ const Content = styled.div`
 `;
 
 const ImageContainer = styled.div`
+  position: absolute;
+  bottom: 0;
   display: flex;
   justify-content: center;
   align-items: ${(props) => props.isMobile && 'stretch'};
-  height: 100%;
+  height: 85%;
   width: 100%;
   flex-direction: ${(props) => (props.isMobile ? 'column' : 'row')};
 `;
@@ -49,9 +53,17 @@ const Card = styled.div`
   height: 6%;
   width: 100%;
   padding: 0 10%;
+  margin: 0 0 15px 0;
   color: #89e9ff;
   font-size: ${(props) => (props.isMobile ? 'small' : 'x-large')};
   text-align: ${(props) => props.textAlign};
+`;
+
+const TextBlock = styled.div`
+  position: absolute;
+  top: 0;
+  height: 15%;
+  margin: 15px 20% 0;
 `;
 
 const OverlayComponent = React.forwardRef(({ className, children }, ref) => {
@@ -113,6 +125,17 @@ const Home = () => {
 
   return (
     <Content>
+      <TextBlock>
+        <Heading>Willkommen beim Geothermie-Atlas!</Heading>
+        <Paragraph>
+          Hier erhalten Sie maßgeschneiderte Informationen, um fundierte Entscheidungen über Oberflächennahe Geothermie
+          Systeme an gewählten Standorten treffen zu können. Ob Sie HausbesitzerIn, ProjektentwicklerIn, InvestorIn
+          sind, oder sich allgemein für erneuerbare Energiequellen interessieren, unsere Karten und die
+          Grundstücksabfrage bieten Ihnen wertvolle Einblicke in das Energiepotential Ihres Grundstücks. Momentan ist
+          der Geothermie-Atlas für Wien verfügbar, an einer österreichweiten Ergänzung wird gearbeitet. Nutzen Sie die
+          Kraft der Geothermie! Klicken Sie unten, um zu den Karten und der Grundstücksabfrage zu gelangen.
+        </Paragraph>
+      </TextBlock>
       <ImageContainer isMobile={isMobile}>
         <ImageFrame borderRight={!isMobile ? '1px' : '0px'}>
           <NavLink to="/ews">
@@ -125,7 +148,7 @@ const Home = () => {
             ></Image>
             {!isMobile && (
               <Overlay right width={imgWidth}>
-                <Card textAlign="right">Erfahren Sie mehr über Erdwärmesonden</Card>
+                <Card textAlign="right">Zum Geothermie-Atlas für Erdwärmesonden</Card>
               </Overlay>
             )}
           </NavLink>
@@ -142,7 +165,7 @@ const Home = () => {
             {!isMobile && (
               <Overlay left width={imgWidth}>
                 <Card textAlign="left" isMobile={isMobile}>
-                  Erfahren Sie mehr über thermische Grundwassernutzung
+                  Zum Geothermie-Atlas für thermische Grundwassernutzung (Grundwasserwärmepumpen)
                 </Card>
               </Overlay>
             )}

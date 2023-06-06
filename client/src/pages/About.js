@@ -1,34 +1,29 @@
 import React from 'react';
-import styled from 'styled-components';
 
-import { Content, Heading, Main } from '../components/CommonStyledElements';
-
-const MediumHeading = styled.h3`
-  color: #808080;
-`;
+import { Content, Heading, Main, MediumHeading, Paragraph } from '../components/CommonStyledElements';
 
 const About = () => {
   return (
     <Main>
       <Content>
         <Heading>Informationen über diese Applikation</Heading>
-        <p>
+        <Paragraph>
           Diese Applikation unterstützt die Planung oberflächennaher geothermischer Anlagen. Es können geothermisch
           relevante Parameter, und mögliche rechtliche Einschränkungen und Hinweise abgefragt werden. Außerdem können
           standortspezifisch Berechnungen in Bezug auf die gewünschte Dimensionierung der geothermischen Anlage
           durchgeführt werden.
-        </p>
-        <p>
+        </Paragraph>
+        <Paragraph>
           Die der Applikation zugrunde liegenden Daten wurden im Rahmen des Green Energy Lab - Spatial Energy Planning
           Projekts erstellt. Nähere Informationen über dieses Projekt finden Sie unter{' '}
           <a href="http://www.waermeplanung.at">http://www.waermeplanung.at</a>.
-        </p>
-        <p>
+        </Paragraph>
+        <Paragraph>
           Die Untersuchungsgebiete des Projekts umfassen Wien, den Dauersiedlungsraum Salzburg und ausgewählte Gebiete
           in der Steiermark. Diese Applikation beschränkt sich ausschließlich auf Wien.
-        </p>
+        </Paragraph>
         <Heading>Zusatzinfo über interaktive Sondenfeldberechnung </Heading>
-        <p>
+        <Paragraph>
           Das Programm berechnet die mögliche Leistung und Energie, die aus dem vorgegebenen Sondenfeld gewonnen werden
           kann. Dabei wird die Geometrie des Sondenfeldes (Lage, Tiefe, Sondenabstand) vom Benutzer interaktiv
           vorgegeben. Für dieses Sondenfeld wird zuerst die g-Funktion berechnet und danach das maximale Potenzial
@@ -36,9 +31,9 @@ const About = () => {
           unten) und ist auf die Grenzwerte der mittleren Fluidtemperturen ausgelegt. Im Heizbetrieb werden -1.5 °C
           nicht unterschritten und im Kühlbetrieb werden 28 °C nicht überschritten. Die Betriebsweise wird vereinfacht
           in vier Phasen pro Jahr unterteilt: Heizbetrieb – Stillstand – Kühlbetrieb - Stillstand.
-        </p>
+        </Paragraph>
         <MediumHeading>Betriebsweise</MediumHeading>
-        <p>
+        <Paragraph>
           Die Betriebsfunktion kann durch Angabe der gebäudeseitigen Heiz- und Kühlleistung sowie der
           Jahresbetriebsstunden für Heizen und Kühlen vorgegeben werden. In diesem Fall wird die erzielbare
           Sondenleistung für das benutzerdefinierte Sondenfeld so ermittelt, dass das Leistungsverhältnis zwischen
@@ -61,9 +56,9 @@ const About = () => {
           Untergrundtemperatur mit einem Gradienten von 0.03 °C pro Meter mit der Tiefe erhöht. Zusätzlich wird eine
           Grafik mit der Entwicklung der mittleren Fluidtemperatur in Zusammenhang mit der berechneten Betriebsfunktion
           ausgegeben.
-        </p>
+        </Paragraph>
         <MediumHeading>Zusätzliche Parameter für die Berechnung</MediumHeading>
-        <p>
+        <Paragraph>
           Die folgenden Parameter werden für alle Simulationen verwendet und können nicht durch eine Eingabe verändert
           werden. <br></br>
           <br></br>
@@ -75,17 +70,17 @@ const About = () => {
           Wärmeträgermedium: Ethanol 12 % <br></br>
           Massenstrom pro Sonde: 0.4 kg/s<br></br>
           Wärmeleitfähigkeit der Verpressung: 2 W/m/K
-        </p>
+        </Paragraph>
         <MediumHeading>Grenztemperaturen</MediumHeading>
-        <p>
+        <Paragraph>
           Minimale mittlere Fluidtemperatur am Ende der Heizsaison: -1.5 °C <br></br>
           Maximale mittlere Fluidtemperatur am Ende der Kühlsaison: 28 °C <br></br>
           <br></br>
           Das Sondenfeld wird im Heizbetrieb auf die minimale Grenztemperatur ausgelegt, im Kühlbetrieb auf die maximale
           Grenztemperatur.
-        </p>
+        </Paragraph>
         <MediumHeading>Leistungszahlen</MediumHeading>
-        <p>Folgende Leistungszahlen der Wärmepumpe im Heiz- und Kühlbetrieb werden berücksichtigt:</p>
+        <Paragraph>Folgende Leistungszahlen der Wärmepumpe im Heiz- und Kühlbetrieb werden berücksichtigt:</Paragraph>
 
         <dl>
           <dt>COP</dt>
@@ -125,12 +120,12 @@ const About = () => {
         </dl>
 
         <Heading>Verwendete 3rd-Party Software</Heading>
-        <p>
+        <Paragraph>
           Die Berechnungen für Erdwärmesonden werden mit dem Python-Modul <code>pygfunction</code> durchgeführt (siehe{' '}
           <a href="https://pypi.org/project/pygfunction/">https://pypi.org/project/pygfunction/</a>
           ).
-        </p>
-        <p>
+        </Paragraph>
+        <Paragraph>
           THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
           WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
           PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
@@ -139,25 +134,25 @@ const About = () => {
           CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
           OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
           DAMAGE.
-        </p>
-        <p>Copyright (c) 2017-2022, Massimo Cimmino All rights reserved.</p>
+        </Paragraph>
+        <Paragraph>Copyright (c) 2017-2022, Massimo Cimmino All rights reserved.</Paragraph>
 
         <Heading>Hinweise und Haftungsausschluss</Heading>
-        <p>
+        <Paragraph>
           Die thematischen Inhalte auf unserem Webportal dienen dazu, einen Überblick über Potentiale und Konflikte in
           Zusammenhang mit geothermischen Anlagen zu geben. Sie ersetzen keine detaillierten Planungen. Aus unseren
           Karten ergibt sich keinerlei Genehmigungsanspruch einer geplanten Nutzung gegenüber den zuständigen Behörden.
           Der Anbieter dieses Webportals und der damit verbundenen Dienstleistungen übernimmt keine Haftung für Schäden,
           die durch den ungeeigneten Gebrauch des Webportals entstehen.
-        </p>
+        </Paragraph>
         <Heading>Kontakt</Heading>
-        <p>
+        <Paragraph>
           GeoSphere Austria <br></br>
           Hohe Warte 38, 1190 Wien <br></br>
           <a href="mailto:geothermie@geosphere.at">geothermie@geosphere.at</a>
           <br></br>
           <a href="https://geosphere.at">https://www.geosphere.at</a>
-        </p>
+        </Paragraph>
       </Content>
     </Main>
   );
