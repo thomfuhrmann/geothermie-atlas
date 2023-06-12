@@ -94,8 +94,7 @@ export const InfoPanelContent = styled.div`
 
 export const PDFButtonDiv = styled.div`
   display: flex;
-  align-self: end;
-  margin: 5px 0;
+  justify-content: center;
 `;
 
 export const PDFButton = styled.button`
@@ -103,12 +102,15 @@ export const PDFButton = styled.button`
   background-color: #9c4b4b;
   padding: 10px;
   border: none;
+  outline: none;
   border-radius: 5px;
   cursor: pointer;
   &:hover {
     background-color: #9c0d0d;
     transition: 0.7s;
   }
+  margin-bottom: 10px;
+  width: 60%;
 `;
 
 export const Image = styled.img`

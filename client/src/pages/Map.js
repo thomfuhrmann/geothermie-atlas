@@ -80,7 +80,7 @@ const Map = ({ theme }) => {
   }, [theme, isMobile]);
 
   useEffect(() => {
-    if (Object.keys(cadastralData).length > 0) {
+    if (Object.keys(cadastralData).length > 0 && theme === 'EWS') {
       // add calculations menu to map if cadastral data was queried
       if (isMobile) {
         mapViewRef.current.ui.add(calcMenuContainerRef.current, 'bottom-right');
@@ -91,7 +91,7 @@ const Map = ({ theme }) => {
       // remove calculations menu from map if cadastral data was not queried
       mapViewRef.current.ui.remove(calcMenuContainerRef.current);
     }
-  }, [cadastralData, isMobile]);
+  }, [cadastralData, isMobile, theme]);
 
   switch (theme) {
     case 'EWS':

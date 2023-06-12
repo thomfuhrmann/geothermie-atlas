@@ -10,8 +10,6 @@ import { takeScreenshot } from '../utils/screenshot';
 import { Button, ButtonContainer, Warning } from './CommonStyledElements';
 import CollapsibleSection from './CollapsibleSection';
 
-import * as geoprocessor from '@arcgis/core/rest/geoprocessor.js';
-
 const InputSection = styled.div`
   padding-bottom: 10px;
 `;
@@ -73,7 +71,7 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         resources.find((result) => result.layerId === 8)?.feature?.attributes['Classify.Pixel Value']
       );
 
-      let url = 'https://gis.geosphere.at/maps/rest/services/tools/geothermie/GPServer/GrobdimensionierungErdwaerme';
+      let url = '/api';
 
       const data = {
         BT,
@@ -98,288 +96,132 @@ const CalculationsMenuEWS = React.forwardRef(({ isLoading, sketch }, ref) => {
         BS_HZ_Norm !== 'NoData' &&
         BS_KL_Norm !== 'NoData'
       ) {
-        // BT, GT, lamda, BS_HZ_Norm, BS_KL_Norm, BS_HZ, BS_KL, P_HZ, P_KL, H, T_radiator, bore_positions_as_text
-        const params = {
-          BT: BT,
-          GT: GT,
-          lamda: WLF,
-          BS_HZ_Norm: BS_HZ_Norm,
-          BS_KL_Norm: BS_KL_Norm,
-          BS_HZ: BS_HZ === '' ? 0 : BS_HZ,
-          BS_KL: BS_KL === '' ? 0 : BS_KL,
-          P_HZ: P_HZ === '' ? 0 : P_HZ,
-          P_KL: P_KL === '' ? 0 : P_KL,
-          H: boreDepth,
-          T_radiator: heating,
-          bore_positions_as_text: pointsText,
-        };
-
-        const requestOptions = {
-          responseType: 'json',
-        };
-
-        geoprocessor
-          .submitJob(url, params, requestOptions)
-          .then((jobInfo) => {
-            jobInfo.waitForJobCompletion().then((jobInfo2) => {
-              const fetchURL = `https://gis.geosphere.at/maps/rest/services/tools/geothermie/GPServer/GrobdimensionierungErdwaerme/jobs/${jobInfo2.jobId}/results/output?f=pjson`;
-              fetch(fetchURL, { headers: { Accept: 'application/json' } })
-                .then((res) => {
-                  return res.text();
-                })
-                .then((result) => {
-                  const valueText = result.substring(54, result.length - 1);
-                  const data = valueText
-                    .replace(/[[\]]/g, '')
-                    .split(',')
-                    .map((entry) => entry.trim().replaceAll("'", ''));
-
-                  // user defined input
-                  const calculationMode = data[0];
-                  const P_HZ_user = parseFloat(data[1]);
-                  const P_KL_user = -parseFloat(data[2]);
-                  const E_HZ_user = parseFloat(data[3]) / 1000;
-                  const E_KL_user = -(parseFloat(data[4]) / 1000);
-                  const cover = parseInt(data[5]);
-                  const Pel_heatpump_user = parseFloat(data[6]);
-                  const Pel_chiller_user = -parseFloat(data[7]);
-                  const Eel_heatpump_user = parseFloat(data[8]) / 1000;
-                  const Eel_chiller_user = -parseFloat(data[9]) / 1000;
-                  const COP = parseFloat(data[15]);
-                  const EER = parseFloat(data[16]);
-                  const SCOP = parseFloat(data[17]);
-                  const SEER = parseFloat(data[18]);
-                  const Efactor_user = parseFloat(data[19]);
-                  const imagehash = 'data:image/png;base64,' + data[20];
-                  const imagehashSondenfeld = 'data:image/png;base64,' + data[21];
-                  const GTcalc = parseFloat(data[22]);
-                  const heizleistung = P_HZ_user + Pel_heatpump_user;
-                  const heizarbeit = E_HZ_user + Eel_heatpump_user;
-                  const kuehlleistung = P_KL_user - Pel_chiller_user;
-                  const kuehlarbeit = E_KL_user - Eel_chiller_user;
-                  // automatically balanced
-                  const balanced = parseInt(data[23]);
-                  const P_HZ_bal = parseFloat(data[24]);
-                  const P_KL_bal = -parseFloat(data[25]);
-                  const E_HZ_bal = parseFloat(data[26]) / 1000;
-                  const E_KL_bal = -parseFloat(data[27]) / 1000;
-                  const cover_bal = parseInt(data[28]);
-                  const Pel_heatpump_bal = parseFloat(data[29]);
-                  const Pel_chiller_bal = -parseFloat(data[30]);
-                  const Eel_heatpump_bal = parseFloat(data[31]) / 1000;
-                  const Eel_chiller_bal = -parseFloat(data[32]) / 1000;
-                  const meanBoreholeSpacing = parseFloat(data[36]);
-                  const cover_rise = parseFloat(data[37]);
-                  const COP_bal = parseFloat(data[38]);
-                  const EER_bal = parseFloat(data[39]);
-                  const SCOP_bal = parseFloat(data[40]);
-                  const SEER_bal = parseFloat(data[41]);
-                  const Efactor_bal = parseFloat(data[42]);
-                  const imagehashBal = 'data:image/png;base64,' + data[43];
-                  const BS_HZ_bal = parseFloat(data[44]);
-                  const BS_KL_bal = parseFloat(data[45]);
-                  const T_radiator = parseInt(data[46]);
-                  const heizleistungBal = P_HZ_bal + Pel_heatpump_bal;
-                  const heizarbeitBal = Eel_heatpump_bal + E_HZ_bal;
-                  const kuehlleistungBal = P_KL_bal - Pel_chiller_bal;
-                  const kuehlarbeitBal = E_KL_bal - Eel_chiller_bal;
-                  dispatch(
-                    updateEWSComputationResult({
-                      calculationMode,
-                      points: points.length,
-                      meanBoreholeSpacing,
-                      boreDepth,
-                      P_HZ,
-                      P_KL,
-                      BS_HZ,
-                      BS_KL,
-                      BS_HZ_Norm,
-                      BS_KL_Norm,
-                      P_HZ_user,
-                      P_KL_user,
-                      Pel_heatpump_user,
-                      Pel_chiller_user,
-                      E_HZ_user,
-                      E_KL_user,
-                      Efactor_user,
-                      Eel_heatpump_user,
-                      Eel_chiller_user,
-                      cover,
-                      imagehash,
-                      imagehashSondenfeld,
-                      balanced,
-                      P_HZ_bal,
-                      P_KL_bal,
-                      Pel_heatpump_bal,
-                      Pel_chiller_bal,
-                      Eel_heatpump_bal,
-                      Efactor_bal,
-                      E_HZ_bal,
-                      cover_bal,
-                      imagehashBal,
-                      heizleistung,
-                      heizarbeit,
-                      kuehlleistung,
-                      kuehlarbeit,
-                      heizleistungBal,
-                      heizarbeitBal,
-                      kuehlleistungBal,
-                      GTcalc,
-                      COP,
-                      SCOP,
-                      EER,
-                      SEER,
-                      BS_HZ_bal,
-                      BS_KL_bal,
-                      COP_bal,
-                      EER_bal,
-                      E_KL_bal,
-                      SEER_bal,
-                      SCOP_bal,
-                      Eel_chiller_bal,
-                      kuehlarbeitBal,
-                      cover_rise,
-                      T_radiator,
-                    })
-                  );
-                  isLoading(false);
-                });
-            });
-          })
-          .catch((error) => {
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            // user defined input
+            const calculationMode = data[0];
+            const P_HZ_user = parseFloat(data[1]);
+            const P_KL_user = -parseFloat(data[2]);
+            const E_HZ_user = parseFloat(data[3]) / 1000;
+            const E_KL_user = -(parseFloat(data[4]) / 1000);
+            const cover = parseInt(data[5]);
+            const Pel_heatpump_user = parseFloat(data[6]);
+            const Pel_chiller_user = -parseFloat(data[7]);
+            const Eel_heatpump_user = parseFloat(data[8]) / 1000;
+            const Eel_chiller_user = -parseFloat(data[9]) / 1000;
+            const COP = parseFloat(data[15]);
+            const EER = parseFloat(data[16]);
+            const SCOP = parseFloat(data[17]);
+            const SEER = parseFloat(data[18]);
+            const Efactor_user = parseFloat(data[19]);
+            const imagehash = 'data:image/png;base64,' + data[20];
+            const imagehashSondenfeld = 'data:image/png;base64,' + data[21];
+            const GTcalc = parseFloat(data[22]);
+            const heizleistung = P_HZ_user + Pel_heatpump_user;
+            const heizarbeit = E_HZ_user + Eel_heatpump_user;
+            const kuehlleistung = P_KL_user - Pel_chiller_user;
+            const kuehlarbeit = E_KL_user - Eel_chiller_user;
+            // automatically balanced
+            const balanced = parseInt(data[23]);
+            const P_HZ_bal = parseFloat(data[24]);
+            const P_KL_bal = -parseFloat(data[25]);
+            const E_HZ_bal = parseFloat(data[26]) / 1000;
+            const E_KL_bal = -parseFloat(data[27]) / 1000;
+            const cover_bal = parseInt(data[28]);
+            const Pel_heatpump_bal = parseFloat(data[29]);
+            const Pel_chiller_bal = -parseFloat(data[30]);
+            const Eel_heatpump_bal = parseFloat(data[31]) / 1000;
+            const Eel_chiller_bal = -parseFloat(data[32]) / 1000;
+            const meanBoreholeSpacing = parseFloat(data[36]);
+            const cover_rise = parseFloat(data[37]);
+            const COP_bal = parseFloat(data[38]);
+            const EER_bal = parseFloat(data[39]);
+            const SCOP_bal = parseFloat(data[40]);
+            const SEER_bal = parseFloat(data[41]);
+            const Efactor_bal = parseFloat(data[42]);
+            const imagehashBal = 'data:image/png;base64,' + data[43];
+            const BS_HZ_bal = parseFloat(data[44]);
+            const BS_KL_bal = parseFloat(data[45]);
+            const T_radiator = parseInt(data[46]);
+            const heizleistungBal = P_HZ_bal + Pel_heatpump_bal;
+            const heizarbeitBal = Eel_heatpump_bal + E_HZ_bal;
+            const kuehlleistungBal = P_KL_bal - Pel_chiller_bal;
+            const kuehlarbeitBal = E_KL_bal - Eel_chiller_bal;
             dispatch(
               updateEWSComputationResult({
-                error: JSON.stringify(error),
+                calculationMode,
+                points: points.length,
+                meanBoreholeSpacing,
+                boreDepth,
+                P_HZ,
+                P_KL,
+                BS_HZ,
+                BS_KL,
+                BS_HZ_Norm,
+                BS_KL_Norm,
+                P_HZ_user,
+                P_KL_user,
+                Pel_heatpump_user,
+                Pel_chiller_user,
+                E_HZ_user,
+                E_KL_user,
+                Efactor_user,
+                Eel_heatpump_user,
+                Eel_chiller_user,
+                cover,
+                imagehash,
+                imagehashSondenfeld,
+                balanced,
+                P_HZ_bal,
+                P_KL_bal,
+                Pel_heatpump_bal,
+                Pel_chiller_bal,
+                Eel_heatpump_bal,
+                Efactor_bal,
+                E_HZ_bal,
+                cover_bal,
+                imagehashBal,
+                heizleistung,
+                heizarbeit,
+                kuehlleistung,
+                kuehlarbeit,
+                heizleistungBal,
+                heizarbeitBal,
+                kuehlleistungBal,
+                GTcalc,
+                COP,
+                SCOP,
+                EER,
+                SEER,
+                BS_HZ_bal,
+                BS_KL_bal,
+                COP_bal,
+                EER_bal,
+                E_KL_bal,
+                SEER_bal,
+                SCOP_bal,
+                Eel_chiller_bal,
+                kuehlarbeitBal,
+                cover_rise,
+                T_radiator,
+              })
+            );
+            isLoading(false);
+          })
+          .catch((err) => {
+            dispatch(
+              updateEWSComputationResult({
+                error: JSON.stringify(err),
               })
             );
           });
-
-        // fetch(url, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(data),
-        // })
-        //   .then((res) => res.json())
-        //   .then((data) => {
-        //     // user defined input
-        //     const calculationMode = data[0];
-        //     const P_HZ_user = parseFloat(data[1]);
-        //     const P_KL_user = -parseFloat(data[2]);
-        //     const E_HZ_user = parseFloat(data[3]) / 1000;
-        //     const E_KL_user = -(parseFloat(data[4]) / 1000);
-        //     const cover = parseInt(data[5]);
-        //     const Pel_heatpump_user = parseFloat(data[6]);
-        //     const Pel_chiller_user = -parseFloat(data[7]);
-        //     const Eel_heatpump_user = parseFloat(data[8]) / 1000;
-        //     const Eel_chiller_user = -parseFloat(data[9]) / 1000;
-        //     const COP = parseFloat(data[15]);
-        //     const EER = parseFloat(data[16]);
-        //     const SCOP = parseFloat(data[17]);
-        //     const SEER = parseFloat(data[18]);
-        //     const Efactor_user = parseFloat(data[19]);
-        //     const imagehash = 'data:image/png;base64,' + data[20];
-        //     const imagehashSondenfeld = 'data:image/png;base64,' + data[21];
-        //     const GTcalc = parseFloat(data[22]);
-        //     const heizleistung = P_HZ_user + Pel_heatpump_user;
-        //     const heizarbeit = E_HZ_user + Eel_heatpump_user;
-        //     const kuehlleistung = P_KL_user - Pel_chiller_user;
-        //     const kuehlarbeit = E_KL_user - Eel_chiller_user;
-        //     // automatically balanced
-        //     const balanced = parseInt(data[23]);
-        //     const P_HZ_bal = parseFloat(data[24]);
-        //     const P_KL_bal = -parseFloat(data[25]);
-        //     const E_HZ_bal = parseFloat(data[26]) / 1000;
-        //     const E_KL_bal = -parseFloat(data[27]) / 1000;
-        //     const cover_bal = parseInt(data[28]);
-        //     const Pel_heatpump_bal = parseFloat(data[29]);
-        //     const Pel_chiller_bal = -parseFloat(data[30]);
-        //     const Eel_heatpump_bal = parseFloat(data[31]) / 1000;
-        //     const Eel_chiller_bal = -parseFloat(data[32]) / 1000;
-        //     const meanBoreholeSpacing = parseFloat(data[36]);
-        //     const cover_rise = parseFloat(data[37]);
-        //     const COP_bal = parseFloat(data[38]);
-        //     const EER_bal = parseFloat(data[39]);
-        //     const SCOP_bal = parseFloat(data[40]);
-        //     const SEER_bal = parseFloat(data[41]);
-        //     const Efactor_bal = parseFloat(data[42]);
-        //     const imagehashBal = 'data:image/png;base64,' + data[43];
-        //     const BS_HZ_bal = parseFloat(data[44]);
-        //     const BS_KL_bal = parseFloat(data[45]);
-        //     const T_radiator = parseInt(data[46]);
-        //     const heizleistungBal = P_HZ_bal + Pel_heatpump_bal;
-        //     const heizarbeitBal = Eel_heatpump_bal + E_HZ_bal;
-        //     const kuehlleistungBal = P_KL_bal - Pel_chiller_bal;
-        //     const kuehlarbeitBal = E_KL_bal - Eel_chiller_bal;
-        //     dispatch(
-        //       updateEWSComputationResult({
-        //         calculationMode,
-        //         points: points.length,
-        //         meanBoreholeSpacing,
-        //         boreDepth,
-        //         P_HZ,
-        //         P_KL,
-        //         BS_HZ,
-        //         BS_KL,
-        //         BS_HZ_Norm,
-        //         BS_KL_Norm,
-        //         P_HZ_user,
-        //         P_KL_user,
-        //         Pel_heatpump_user,
-        //         Pel_chiller_user,
-        //         E_HZ_user,
-        //         E_KL_user,
-        //         Efactor_user,
-        //         Eel_heatpump_user,
-        //         Eel_chiller_user,
-        //         cover,
-        //         imagehash,
-        //         imagehashSondenfeld,
-        //         balanced,
-        //         P_HZ_bal,
-        //         P_KL_bal,
-        //         Pel_heatpump_bal,
-        //         Pel_chiller_bal,
-        //         Eel_heatpump_bal,
-        //         Efactor_bal,
-        //         E_HZ_bal,
-        //         cover_bal,
-        //         imagehashBal,
-        //         heizleistung,
-        //         heizarbeit,
-        //         kuehlleistung,
-        //         kuehlarbeit,
-        //         heizleistungBal,
-        //         heizarbeitBal,
-        //         kuehlleistungBal,
-        //         GTcalc,
-        //         COP,
-        //         SCOP,
-        //         EER,
-        //         SEER,
-        //         BS_HZ_bal,
-        //         BS_KL_bal,
-        //         COP_bal,
-        //         EER_bal,
-        //         E_KL_bal,
-        //         SEER_bal,
-        //         SCOP_bal,
-        //         Eel_chiller_bal,
-        //         kuehlarbeitBal,
-        //         cover_rise,
-        //         T_radiator,
-        //       })
-        //     );
-        //     isLoading(false);
-        //   })
-        //   .catch((err) => {
-        //     dispatch(
-        //       updateEWSComputationResult({
-        //         error: JSON.stringify(err),
-        //       })
-        //     );
-        //   });
       } else {
         dispatch(
           updateEWSComputationResult({

@@ -185,13 +185,16 @@ export default function InfoPanelGWWP() {
               <span>Grundstücksgrenze</span>
             </GridContainer>
           )}
-          {scaleWarning && (
+          {/* {scaleWarning && (
             <Warning id="scale-warning">
               Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und Berechnungen des geothermischen
               Potentials zu ermöglichen. Mit Klick auf ein Grundstück starten Sie die Abfrage.
             </Warning>
           )}
-          {!scaleWarning && !address && <Clearance>Sie können jetzt ein Grundstück auswählen.</Clearance>}
+          {!scaleWarning && !address && <Clearance>Sie können jetzt ein Grundstück auswählen.</Clearance>} */}
+          {resources && resources.length === 0 && (
+            <Clearance>Durch einen Klick auf die Karte starten Sie die Abfrage.</Clearance>
+          )}
           {outsideWarning && (
             <Table id="warnings-table">
               <tbody>

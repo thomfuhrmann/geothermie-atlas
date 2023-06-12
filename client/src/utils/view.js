@@ -16,6 +16,7 @@ import * as reactiveUtils from '@arcgis/core/core/reactiveUtils';
 import Point from '@arcgis/core/geometry/Point';
 import Zoom from '@arcgis/core/widgets/Zoom';
 import Legend from '@arcgis/core/widgets/Legend';
+import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 
 import { updateEWSComputationResult } from '../redux/ewsComputationsSlice';
 import { updateGWWPComputationResult } from '../redux/gwwpComputationsSlice';
@@ -115,27 +116,18 @@ export function initialize(container, theme, isMobile) {
     listMode: 'hide',
   });
 
-  // create layers
-  const ampelkarte_ews = new MapImageLayer({
-    url: ampelkarte_ews_url,
-    title: 'Ampelkarte',
+  const ampelkarte_ews = new FeatureLayer({
+    url: ampelkarte_ews_url + '/0',
+    title: 'Mögliche Einschränkungen',
     visible: false,
     listMode: 'show',
-    sublayers: [
-      { id: 0, visible: true, listMode: 'show', title: 'Einschränkungen' },
-      { id: 1, visible: false, listMode: 'hide' },
-    ],
   });
 
-  const ampelkarte_gwwp = new MapImageLayer({
-    url: ampelkarte_gwwp_url,
-    title: 'Ampelkarte',
+  const ampelkarte_gwwp = new FeatureLayer({
+    url: ampelkarte_gwwp_url + '/0',
+    title: 'Mögliche Einschränkungen',
     visible: false,
     listMode: 'show',
-    sublayers: [
-      { id: 0, visible: true, listMode: 'show', title: 'Einschränkungen' },
-      { id: 1, visible: false, listMode: 'hide' },
-    ],
   });
 
   const ews = new MapImageLayer({
@@ -204,7 +196,78 @@ export function initialize(container, theme, isMobile) {
       break;
   }
 
-  const layerList = new LayerList({ view });
+  const layerList = new LayerList({
+    view,
+    listItemCreatedFunction: (event) => {
+      let item = event.item;
+
+      if (theme === 'EWS') {
+        switch (item.layer.id) {
+          case 0:
+            item.panel = {
+              content: 'mittlere jährliche Bodentemperatur laut Satellitendaten (MODIS)',
+              className: 'esri-icon-description',
+            };
+            break;
+          case 1:
+            item.panel = {
+              content: 'mittlere Temperatur des Untergrunds für eine Tiefe von 0 bis 100 m',
+              className: 'esri-icon-description',
+            };
+            break;
+          case 2:
+            item.panel = {
+              content: 'mittlere konduktive Wärmeleitfähigkeit des Untergrunds für eine Tiefe von 0 bis 100 m',
+              className: 'esri-icon-description',
+            };
+            break;
+          case 3:
+            item.panel = {
+              content:
+                'Entzugsleistung einer 100 m tiefen Einzelsonde im standortbezogenen Normbetrieb (Heizen und Kühlen mit Normbetriebsstunden eines typischen Wohngebäudes am Standort)',
+              className: 'esri-icon-description',
+            };
+            break;
+          case 4:
+            item.panel = {
+              content:
+                'Entzugsleistung einer 100 m tiefen Einzelsonde im saisonalem Speicherbetrieb (die im Winter zur Heizung entzogene Wärme wird im Sommer vollständig wieder zurückgegeben)',
+              className: 'esri-icon-description',
+            };
+            break;
+          case 5:
+            item.panel = {
+              content:
+                'flächenspezifische Jahresenergie eines 1156 m² großen und 100 m tiefen Sondenfeldes im standortbezogenen Normbetrieb (4 x 4 Sonden mit je 10 m Abstand - Heizen und Kühlen mit Normbetriebsstunden eines typischen Wohngebäudes am Standort)',
+              className: 'esri-icon-description',
+            };
+            break;
+          case 6:
+            item.panel = {
+              content:
+                'flächenspezifische Jahresenergie eines 1156 m² großen und 100 m tiefen Sondenfeldes im saisonalem Speicherbetrieb (7 x 7 Sonden mit je 5 m Abstand - die im Winter zur Heizung entzogene Wärme wird im Sommer vollständig wieder zurückgegeben)',
+              className: 'esri-icon-description',
+            };
+            break;
+          case 7:
+            item.panel = {
+              content: 'mittlere Jahresbetriebsstunden für Heizen',
+              className: 'esri-icon-description',
+            };
+            break;
+          case 8:
+            item.panel = {
+              content: 'mittlere Jahresbetriebsstunden für Kühlen',
+              className: 'esri-icon-description',
+            };
+            break;
+          default:
+            break;
+        }
+      } else {
+      }
+    },
+  });
 
   const search = new Search({
     view,
@@ -231,7 +294,7 @@ export function initialize(container, theme, isMobile) {
     availableCreateTools: [theme === 'EWS' ? 'point' : undefined],
     visibleElements: {
       selectionTools: {
-        'lasso-selection': false,
+        'lasso-selection': true,
         'rectangle-selection': theme === 'EWS' ? true : false,
       },
       settingsMenu: false,
@@ -363,6 +426,52 @@ export function initialize(container, theme, isMobile) {
     }
   });
 
+  const getPopupContent = (mapPoint) => {
+    view.popup.autoOpenEnabled = false;
+    view.popup.viewModel.includeDefaultActions = false;
+    view.popup.dockOptions = {
+      buttonEnabled: false,
+    };
+    view.popup.collapseEnabled = false;
+    const popupContent = document.createElement('div');
+    popupContent.style = `
+    display: flex;
+    justify-content: center;
+    `;
+    const popupButton = document.createElement('button');
+    popupButton.textContent = 'Ja';
+    popupButton.style = `
+    color: #212529;
+    background-color: #d3d3d3;
+    padding: 10px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 60%;
+    margin: auto;
+    &:hover {
+      background-color: #9c0d0d;
+      transition: 0.7s;
+    }`;
+    popupButton.onmouseover = function () {
+      this.style.backgroundColor = '#052e37';
+      this.style.color = 'white';
+    };
+    popupButton.onmouseout = function () {
+      this.style.backgroundColor = '#d3d3d3';
+      this.style.color = '#212529';
+    };
+    popupContent.append(popupButton);
+
+    popupButton.onclick = () => {
+      startNewQuery(mapPoint);
+      view.popup.close();
+    };
+
+    return popupContent;
+  };
+
   // register event handler for mouse clicks
   view.on('click', ({ mapPoint }) => {
     // at application start if no polygon is drawn yet
@@ -382,7 +491,11 @@ export function initialize(container, theme, isMobile) {
           } else {
             if (!geometryEngine.intersects(mapPoint, polygonGraphicsLayer.graphics.at(0).geometry)) {
               // if click was outside parcel and no point was selected then start new query
-              startNewQuery(mapPoint);
+              view.popup.open({
+                title: 'Wollen Sie ein neues Grundstück auswählen?',
+                location: mapPoint,
+                content: getPopupContent(mapPoint),
+              });
             }
           }
         });
@@ -397,10 +510,26 @@ export function initialize(container, theme, isMobile) {
         include: pointGraphicsLayer,
       })
       .then(({ results }) => {
-        // if users hovers over a point
-        if (results.length > 0 && event.buttons === 0) {
+        // if user hovers over a point
+        if (results.length > 0 && event.buttons === 0 && sketch.updateGraphics.length <= 1) {
+          // let graphics = pointGraphicsLayer.graphics.filter(
+          //   (graphic) =>
+          //     sketch.updateGraphics.find(
+          //       (updateGraphic) =>
+          //         updateGraphic.geometry.x === graphic.geometry.x && updateGraphic.geometry.y === graphic.geometry.y
+          //     ) !== undefined
+          // );
+
           let graphic = results.at(0).graphic;
           sketch.update(graphic);
+
+          // if (graphics.length > 0) {
+          //   graphics.add(graphic);
+          //   sketch.update(graphics.toArray(), { enableRotation: false, enableScaling: false });
+          // } else {
+          //   sketch.update(graphic);
+          // }
+
           let pointGraphic = new Graphic({
             geometry: graphic.geometry,
             symbol: {

@@ -54,51 +54,55 @@ const CalculationsMenuGWWP = React.forwardRef(({ isLoading }, ref) => {
 
     const point1 = points[0];
     const point2 = points[1];
-    // const brunnenabstand = distance([point1.x, point1.y], [point2.x, point2.y]);
+
     const brunnenabstand = distance(point1, point2);
 
-    const flurabstand = resources[2].feature.attributes['Classify.Pixel Value'];
-    const gw_macht = resources[3].feature.attributes['Classify.Pixel Value'];
-    const kf = resources[4].feature.attributes['Classify.Pixel Value'];
-    const gwt_max = resources[5].feature.attributes['Classify.Pixel Value'];
-    const gwt_min = resources[7].feature.attributes['Classify.Pixel Value'];
+    if (resources.length > 0) {
+      const flurabstand = resources[2].feature.attributes['Classify.Pixel Value'];
+      const gw_macht = resources[3].feature.attributes['Classify.Pixel Value'];
+      const kf = resources[4].feature.attributes['Classify.Pixel Value'];
+      const gwt_max = resources[5].feature.attributes['Classify.Pixel Value'];
+      const gwt_min = resources[7].feature.attributes['Classify.Pixel Value'];
 
-    const gst_flaeche = cadastralData.FF;
+      const gst_flaeche = cadastralData.FF;
 
-    const LST =
-      bodentemperatur && bodentemperatur.length > 0 && bodentemperatur[0].feature?.attributes?.['Classify.Pixel Value'];
+      const LST =
+        bodentemperatur &&
+        bodentemperatur.length > 0 &&
+        bodentemperatur[0].feature?.attributes?.['Classify.Pixel Value'];
 
-    if (
-      flurabstand === 'NoData' ||
-      gw_macht === 'NoData' ||
-      kf === 'NoData' ||
-      gwt_max === 'NoData' ||
-      gwt_min === 'NoData' ||
-      LST === 'NoData'
-    ) {
-      dispatch(
-        updateGWWPComputationResult({
-          error: 'Aufgrund fehlender Daten ist für dieses Grundstück keine Berechnung möglich.',
-        })
-      );
-    } else {
-      const result = compute({
-        brunnenabstand,
-        flurabstand,
-        gw_macht,
-        gwt_min,
-        gwt_max,
-        kf,
-        gst_flaeche,
-        E_HZ: eHZ,
-        E_KL: eKL,
-        P_HZ: pHZ,
-        P_KL: pKL,
-        COP_WP: copWP,
-        LST,
-      });
+      if (
+        flurabstand === 'NoData' ||
+        gw_macht === 'NoData' ||
+        kf === 'NoData' ||
+        gwt_max === 'NoData' ||
+        gwt_min === 'NoData' ||
+        LST === 'NoData'
+      ) {
+        dispatch(
+          updateGWWPComputationResult({
+            error: 'Aufgrund fehlender Daten ist für dieses Grundstück keine Berechnung möglich.',
+          })
+        );
+      } else {
+        const result = compute({
+          brunnenabstand,
+          flurabstand,
+          gw_macht,
+          gwt_min,
+          gwt_max,
+          kf,
+          gst_flaeche,
+          E_HZ: eHZ,
+          E_KL: eKL,
+          P_HZ: pHZ,
+          P_KL: pKL,
+          COP_WP: copWP,
+          LST,
+        });
 
-      dispatch(updateGWWPComputationResult({ eHZ, eKL, pHZ, pKL, copWP, result }));
+        dispatch(updateGWWPComputationResult({ eHZ, eKL, pHZ, pKL, copWP, result }));
+      }
     }
 
     isLoading(false);

@@ -77,7 +77,7 @@ export const queryCadastre = (
       if (theme === 'EWS') {
         calculateGrid(polygon, gridSpacing, setPoints);
       } else if (theme === 'GWWP') {
-        calculateWells(polygon, setPoints);
+        // calculateWells(polygon, setPoints);
       }
 
       setPolygon(polygon);

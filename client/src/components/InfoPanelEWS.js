@@ -120,7 +120,7 @@ export default function InfoPanelEWS() {
   // format values
   const formatEWS = (layerId, layerName, value) => {
     if (value !== 'NoData') {
-      if ([4, 5, 6].includes(layerId)) {
+      if ([0, 1, 2, 4, 5, 6].includes(layerId)) {
         value = parseFloat(value).toFixed(1);
       } else {
         value = parseFloat(value).toFixed(0);
@@ -138,7 +138,16 @@ export default function InfoPanelEWS() {
 
   return (
     <InfoPanelContainer>
-      <CollapsibleSection title="Grundstücksabfrage" open={!isMobile ? true : false} marginBottom="0px" flex={true}>
+      <CollapsibleSection
+        title={
+          <>
+            <span>Abfrageergebnis</span>
+          </>
+        }
+        open={!isMobile ? true : false}
+        marginBottom="0px"
+        flex={true}
+      >
         <InfoPanelContent>
           {address && (
             <>
@@ -189,10 +198,12 @@ export default function InfoPanelEWS() {
           {scaleWarning && (
             <Warning id="scale-warning">
               Bitte zoomen Sie hinein um die grundstücksbezogenen Abfragen und Berechnungen des geothermischen
-              Potentials zu ermöglichen. Mit Klick auf ein Grundstück starten Sie die Abfrage.
+              Potentials zu ermöglichen.
             </Warning>
           )}
-          {!scaleWarning && !address && <Clearance>Sie können jetzt ein Grundstück auswählen.</Clearance>}
+          {!scaleWarning && !address && (
+            <Clearance>Sie können jetzt durch einen Klick ein Grundstück auswählen.</Clearance>
+          )}
           {(closenessWarning || outsideWarning) && (
             <Table id="warnings-table">
               <tbody>
@@ -214,55 +225,6 @@ export default function InfoPanelEWS() {
                 </tr>
               </tbody>
             </Table>
-          )}
-          {resources && resources.length > 0 && (
-            <CollapsibleSection title="Ressourcen">
-              <Table id="resources-table">
-                <thead>
-                  <tr>
-                    <td></td>
-                  </tr>
-                </thead>
-                <tbody>
-                  <TableRow>
-                    <TableHeader textAlign="center">Ressourcen für vordefinierte Erdwärmesondenanlage</TableHeader>
-                  </TableRow>
-                  {resources.slice(3, 7).map((result) => {
-                    return (
-                      <TableRow key={result.layerId}>
-                        <TableData>
-                          {formatEWS(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes['Classify.Pixel Value']
-                          )}
-                        </TableData>
-                      </TableRow>
-                    );
-                  })}
-                  <TableRow>
-                    <TableHeader textAlign="center">Standortabhängige Parameter</TableHeader>
-                  </TableRow>
-                  {resources.slice(0, 3).map((result) => {
-                    return (
-                      <TableRow key={result.layerId}>
-                        <TableData>
-                          {formatEWS(
-                            result.layerId,
-                            result.layerName,
-                            result.feature.attributes['Classify.Pixel Value']
-                          )}
-                        </TableData>
-                      </TableRow>
-                    );
-                  })}
-                </tbody>
-              </Table>
-              <Placeholder></Placeholder>
-            </CollapsibleSection>
-          )}
-          {ampelkarte && ampelkarte.length > 0 && (
-            <AmpelkarteTableEWS results={ampelkarte} setTables={setTables}></AmpelkarteTableEWS>
           )}
           {Object.keys(computationResult).includes('error') && (
             <CollapsibleSection title="Berechnungsergebnisse" open={true}>
@@ -638,6 +600,55 @@ export default function InfoPanelEWS() {
               ></Image>
               <Placeholder></Placeholder>
             </CollapsibleSection>
+          )}
+          {resources && resources.length > 0 && (
+            <CollapsibleSection title="Ressourcen">
+              <Table id="resources-table">
+                <thead>
+                  <tr>
+                    <td></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRow>
+                    <TableHeader textAlign="center">Ressourcen für vordefinierte Erdwärmesondenanlage</TableHeader>
+                  </TableRow>
+                  {resources.slice(3, 7).map((result) => {
+                    return (
+                      <TableRow key={result.layerId}>
+                        <TableData>
+                          {formatEWS(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes['Classify.Pixel Value']
+                          )}
+                        </TableData>
+                      </TableRow>
+                    );
+                  })}
+                  <TableRow>
+                    <TableHeader textAlign="center">Standortabhängige Parameter</TableHeader>
+                  </TableRow>
+                  {resources.slice(0, 3).map((result) => {
+                    return (
+                      <TableRow key={result.layerId}>
+                        <TableData>
+                          {formatEWS(
+                            result.layerId,
+                            result.layerName,
+                            result.feature.attributes['Classify.Pixel Value']
+                          )}
+                        </TableData>
+                      </TableRow>
+                    );
+                  })}
+                </tbody>
+              </Table>
+              <Placeholder></Placeholder>
+            </CollapsibleSection>
+          )}
+          {ampelkarte && ampelkarte.length > 0 && (
+            <AmpelkarteTableEWS results={ampelkarte} setTables={setTables}></AmpelkarteTableEWS>
           )}
           {address && <Footer></Footer>}
         </InfoPanelContent>

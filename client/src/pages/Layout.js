@@ -14,21 +14,22 @@ const Nav = styled.nav`
   top: 50%;
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  padding-right: 5%;
+  width: 60%;
+  margin-right: 5%;
 `;
 
 const NavMenu = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
 `;
 
 const Title = styled.span`
   position: absolute;
-  left: 300px;
+  left: 220px;
   top: 50%;
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  font-size: ${(props) => (props.isMobile ? 'medium' : 'x-large')};
+  font-size: ${(props) => (props.isMobile ? 'small' : 'large')};
   color: #4c4c4c;
 `;
 
@@ -89,7 +90,7 @@ const CloseToggle = styled.button`
 `;
 
 const LogoImage = styled.img`
-  width: 128px;
+  width: 80px;
   height: 40px;
   object-fit: contain;
   padding-left: 20px;

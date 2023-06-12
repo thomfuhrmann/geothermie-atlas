@@ -3,26 +3,29 @@ import styled from 'styled-components';
 // import Tippy from "@tippyjs/react";
 import 'tippy.js/dist/tippy.css';
 
-const Button = styled.button`
+const CollapsibleHeader = styled.div`
+  display: flex;
   box-sizing: border-box;
-  background-color: ${(props) => (props.isOpened ? '#555' : '#777')};
-  color: white;
+  background-color: #d3d3d3;
+  color: #212529;
   cursor: pointer;
   margin-bottom: ${(props) => props.marginBottom};
-  padding: 18px;
+  padding: 15px 20px;
   width: 100%;
   border: none;
   text-align: left;
-  outline: none;
-  font-size: 15px;
+  font-size: 16px;
   &:hover {
-    background-color: #555;
+    background-color: #052e37;
+    color: white;
   }
+  min-height: 50px;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const Span = styled.span`
   font-size: 13px;
-  color: white;
   float: right;
 `;
 
@@ -31,7 +34,7 @@ const CollapsibleContainer = styled.div`
   flex-flow: column;
   margin-bottom: ${(props) => props.marginBottom};
   box-sizing: border-box;
-  min-height: 54px;
+  min-height: 50px;
   max-height: ${(props) => (!props.isMobile ? '100%' : '35%')};
   height: fit-content;
   width: ${(props) => props.width || '100%'};
@@ -68,9 +71,9 @@ const CollapsibleSection = React.forwardRef(
         isOpened={opened}
         display={display}
       >
-        <Button type="button" onClick={handleClick}>
+        <CollapsibleHeader onClick={handleClick}>
           {title} <Span>{opened ? '-' : '+'}</Span>
-        </Button>
+        </CollapsibleHeader>
         <CollapsibleContent isOpened={opened}>{children}</CollapsibleContent>
       </CollapsibleContainer>
     );

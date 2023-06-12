@@ -49,14 +49,14 @@ const Image = styled.img`
 const Card = styled.div`
   position: absolute;
   box-sizing: border-box;
-  bottom: 0;
-  height: 6%;
+  bottom: 15px;
+  height: 8%;
   width: 100%;
   padding: 0 10%;
   margin: 0 0 15px 0;
-  color: #89e9ff;
-  font-size: ${(props) => (props.isMobile ? 'small' : 'x-large')};
-  text-align: ${(props) => props.textAlign};
+  color: #e9e6ff;
+  font-size: 'small';
+  text-align: 'left';
 `;
 
 const TextBlock = styled.div`
@@ -115,7 +115,7 @@ const Home = () => {
 
   useEffect(() => {
     if (imgRef.current) {
-      setTimeout(() => setImgWidth(imgRef.current.offsetWidth), 10);
+      setTimeout(() => setImgWidth(imgRef.current.offsetWidth), 50);
     }
   }, [imgRef, windowSize]);
 
@@ -148,7 +148,11 @@ const Home = () => {
             ></Image>
             {!isMobile && (
               <Overlay right width={imgWidth}>
-                <Card textAlign="right">Zum Geothermie-Atlas für Erdwärmesonden</Card>
+                <Card textAlign="right">
+                  Nutzen Sie die Wärme des Untergrunds mit Erdwärmesonden. Dieses System nutzt vertikale Bohrungen, in
+                  denen eine Wärmeträgerflüssigkeit zirkuliert und über die der Wärmeaustausch stattfindet. Weiter zum
+                  Geothermie-Atlas für Erdwärmesonden.
+                </Card>
               </Overlay>
             )}
           </NavLink>
@@ -165,7 +169,10 @@ const Home = () => {
             {!isMobile && (
               <Overlay left width={imgWidth}>
                 <Card textAlign="left" isMobile={isMobile}>
-                  Zum Geothermie-Atlas für thermische Grundwassernutzung (Grundwasserwärmepumpen)
+                  Ein weiteres effizientes System ist die thermische Grundwassernutzung. Hier wird nach der Entnahme von
+                  einem Brunnen die Wärme des Grundwassers an das Gebäude übertragen und anschließend das Wasser über
+                  einen Schluckbrunnen dem Grundwasserkörper zurückgegeben. Weiter zum Geothermie-Atlas für thermische
+                  Grundwassernutzung.
                 </Card>
               </Overlay>
             )}

@@ -133,7 +133,6 @@ const computeGridLines = (point1, point2, points, gridSpacing) => {
 
 export const calculateGrid = (polygon, gridSpacing = 10, setPoints) => {
   boundaryGraphicsLayer.removeAll();
-  pointGraphicsLayer.removeAll();
 
   let offsetPolygon = geometryEngine.offset(polygon, distanceToBoundary, 'meters');
 
@@ -253,6 +252,7 @@ const filterPointsByPixelAndDraw = (points, setPoints, offsetPolygon) => {
       }
 
       // draw points
+      pointGraphicsLayer.removeAll();
       selectedGridPoints.map((point) => drawPoint(point));
 
       // set grid points for the UI

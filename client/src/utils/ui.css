@@ -4,10 +4,12 @@
 
 .esri-ui-corner .esri-component.esri-layer-list.esri-widget.esri-widget--panel {
   max-height: 25%;
+  min-height: 45px;
 }
 
 .esri-component.esri-legend.esri-widget.esri-widget--panel {
   max-height: 25%;
+  min-height: 45px;
 }
 
 .esri-ui-top-left.esri-ui-corner {
